@@ -36,14 +36,15 @@ When making technical choices, always explain:
 #### Project Tracking Workflow:
 1. **Before Starting**: Check PROJECT_PLAN.md to understand current phase and priorities
 2. **During Development**: Use TODO lists to track immediate tasks
-3. **After Completion**: 
+3. **During Problem-Solving**: Document any errors or issues in LESSONS_LEARNED.md
+4. **After Completion**: 
    - **TEST IMMEDIATELY**: Follow the 7-step testing workflow to verify the feature
    - Mark items complete `[x]` in PROJECT_PLAN.md
    - Update phase completion percentages
    - Add accomplishments to "What's Been Built" section
    - Update "Next Steps" if priorities change
    - **COMMIT IMMEDIATELY**: Always commit and push changes after completing a feature
-4. **Regular Reviews**: Assess overall project health and adjust timeline as needed
+5. **Regular Reviews**: Assess overall project health and adjust timeline as needed
 
 #### Progress Reporting Format:
 - **Phase Status**: "Phase X: Y% Complete - [Brief Description]"
@@ -305,16 +306,53 @@ Project Status:
 
 ## 📚 Learning Guidelines
 
-### 1. For First-Time Developers
+### 1. Error Learning & Knowledge Management (MANDATORY)
+- **Document Every Error**: Keep a running log of errors, bugs, and issues encountered
+- **Root Cause Analysis**: For each error, identify the root cause and prevention strategy
+- **Learning Notes**: Maintain a LESSONS_LEARNED.md file in the project
+- **Error Categories**: Categorize errors (syntax, logic, integration, deployment, etc.)
+- **Prevention Strategies**: Document specific steps to prevent recurring errors
+- **Knowledge Sharing**: Share learnings in commit messages and documentation
+
+#### Error Documentation Format:
+```markdown
+## Error: [Brief Description]
+**Date**: [Date encountered]
+**Context**: [What you were trying to do]
+**Error**: [Exact error message or issue]
+**Root Cause**: [Why it happened]
+**Solution**: [How you fixed it]
+**Prevention**: [How to avoid this in the future]
+**Related**: [Links to documentation, Stack Overflow, etc.]
+```
+
+#### Learning Workflow:
+1. **Encounter Error**: Don't just fix it - understand it
+2. **Document Immediately**: Add to LESSONS_LEARNED.md while fresh
+3. **Research Thoroughly**: Understand the underlying concepts
+4. **Test Prevention**: Verify your prevention strategy works
+5. **Share Knowledge**: Include learnings in commit messages
+6. **Review Regularly**: Periodically review past errors to reinforce learning
+
+### 2. Continuous Improvement
+- **Weekly Reviews**: Review errors and learnings from the past week
+- **Pattern Recognition**: Identify recurring types of errors
+- **Skill Gap Analysis**: Note areas where more learning is needed
+- **Best Practices Updates**: Update development rules based on learnings
+- **Tool Improvements**: Adopt new tools or practices that prevent common errors
+
+### 3. For First-Time Developers
 - **Start Small**: Begin with simple features
 - **Read Documentation**: Always read official documentation
 - **Ask Questions**: Don't hesitate to ask for help
 - **Practice**: Build small side projects to practice
+- **Learn from Mistakes**: Every error is a learning opportunity
 
-### 2. Code Review Learning
+### 4. Code Review Learning
 - **Review Others' Code**: Learn from code reviews
 - **Accept Feedback**: Be open to constructive criticism
 - **Document Learnings**: Keep notes of new concepts learned
+- **Error Prevention**: Look for patterns that could cause future errors
 
 ## 🎯 Success Metrics
 
