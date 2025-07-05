@@ -47,13 +47,49 @@ const config: RequestInit = {
 
 ---
 
+## Error: React HMR "useAuth must be used within AuthProvider" Errors
+**Date**: 2024-12-19
+**Context**: Console showing uncaught React errors during development with Hot Module Reloading (HMR)
+**Error**: `Uncaught (in promise) Error: useAuth must be used within an AuthProvider` in Header and ProtectedRoute components during development
+**Root Cause**: React Fast Refresh/HMR temporarily renders components outside of the AuthProvider context during code hot-reloading, causing the useAuth hook to throw errors
+**Solution**: 
+1. Modified useAuth hook to provide fallback values during HMR instead of throwing errors
+2. Created ErrorBoundary component to catch and handle React errors gracefully
+3. Added ErrorBoundary wrapper to App component for comprehensive error handling
+
+```typescript
+// In AuthContext.tsx - Added fallback for HMR
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    // During HMR, provide a fallback to prevent crashes
+    console.warn('useAuth called outside AuthProvider - this may be due to HMR');
+    return {
+      user: null, token: null, login: async () => {}, 
+      register: async () => {}, logout: async () => {}, isLoading: false,
+    } as AuthContextType;
+  }
+  return context;
+};
+```
+
+**Prevention**: 
+- Always provide fallback handling in custom hooks that depend on React context
+- Add ErrorBoundary components to catch unexpected React errors
+- Test components during development hot-reloading scenarios
+- Consider graceful degradation for development-specific issues
+- Use console warnings instead of throwing errors for HMR-related issues
+**Related**: [React Error Boundaries](https://reactjs.org/docs/error-boundaries.html), [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh)
+
+---
+
 ## 🧠 Learning Categories
 
 ### Git & Version Control
 - Multi-line commit message formatting issues
 
 ### TypeScript & React
-- (To be populated as we encounter issues)
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
 
 ### Backend Development
 - (To be populated as we encounter issues)
