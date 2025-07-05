@@ -25,7 +25,102 @@ When making technical choices, always explain:
 
 ## 🎯 Project Rules
 
-### 1. Project Tracking & Progress Management
+### 1. Risk Management & Change Impact Assessment (MANDATORY)
+
+#### Risk Assessment Framework
+Before making any code changes, evaluate and communicate:
+- **Impact Scope**: What parts of the system will be affected?
+- **Breaking Change Risk**: Could this break existing functionality?
+- **Security Risk**: Does this introduce vulnerabilities?
+- **Data Risk**: Could this affect data integrity or cause data loss?
+- **Performance Risk**: Will this impact application performance?
+- **Confidence Level**: How certain are you this change will work?
+
+#### Risk Levels & Communication
+**🟢 LOW RISK** - Minor changes with minimal impact
+- Examples: UI text changes, styling updates, adding new optional fields
+- Impact: Single component or isolated feature
+- Confidence: 95%+ certain it will work
+- Communication: Brief description in commit message
+
+**🟡 MEDIUM RISK** - Moderate changes requiring attention
+- Examples: New API endpoints, database schema additions, new features
+- Impact: Multiple components or new integrations
+- Confidence: 80-95% certain, some unknowns
+- Communication: Detailed commit message + testing plan
+
+**🔴 HIGH RISK** - Significant changes requiring careful review
+- Examples: Authentication changes, database migrations, major refactoring
+- Impact: Core system functionality or security
+- Confidence: <80% certain, significant unknowns
+- Communication: Detailed documentation + rollback plan + extensive testing
+
+#### Risk Communication Template
+```markdown
+## Change Risk Assessment
+
+**Risk Level**: 🟢/🟡/🔴 [LOW/MEDIUM/HIGH]
+**Confidence**: [X%] - [Brief explanation]
+
+**Impact Analysis**:
+- **Scope**: [What will be affected]
+- **Breaking Changes**: [Yes/No - explanation]
+- **Security Impact**: [None/Minor/Significant]
+- **Data Impact**: [None/Additions/Modifications]
+- **Performance Impact**: [None/Minimal/Noticeable]
+
+**Mitigation Strategies**:
+- [Strategy 1]
+- [Strategy 2]
+
+**Rollback Plan**:
+- [How to undo this change if needed]
+
+**Testing Strategy**:
+- [Specific tests to verify safety]
+```
+
+#### Risk Management Workflow
+1. **Before Changes**: Assess risk level and document
+2. **During Development**: Monitor for unexpected issues
+3. **Before Commit**: Re-evaluate risk based on actual implementation
+4. **After Deployment**: Monitor for issues and document outcomes
+
+#### High-Risk Change Requirements
+For 🔴 HIGH RISK changes:
+- **Backup First**: Ensure database/code backups exist
+- **Feature Flags**: Use feature flags when possible
+- **Gradual Rollout**: Deploy to staging first, then production
+- **Monitoring Plan**: Define what to monitor post-deployment
+- **Rollback Plan**: Clear steps to revert if needed
+- **Extended Testing**: More comprehensive testing required
+
+#### Project-Specific Risk Examples
+
+**🟢 LOW RISK Examples for Our Recipe Finder:**
+- Adding new UI components (buttons, forms)
+- Updating text content or styling
+- Adding new optional preference fields
+- Creating new React pages
+- Adding validation messages
+
+**🟡 MEDIUM RISK Examples for Our Recipe Finder:**
+- New API endpoints for preferences or recipes
+- Adding new database tables or columns
+- Integrating with external APIs (OpenAI)
+- Authentication middleware changes
+- New user features (recipe saving, ratings)
+
+**🔴 HIGH RISK Examples for Our Recipe Finder:**
+- Modifying existing authentication system
+- Database schema migrations affecting existing data
+- Major refactoring of core components
+- Changes to JWT token handling
+- Modifying existing API endpoints with breaking changes
+- Integration with payment systems (future)
+- Production deployment configurations
+
+### 2. Project Tracking & Progress Management
 - **PROJECT_PLAN.md Updates**: ALWAYS update PROJECT_PLAN.md when completing features
 - **Real-Time Progress**: Mark items as complete `[x]` immediately after implementation
 - **Phase Tracking**: Update phase completion percentages as we progress
@@ -34,11 +129,16 @@ When making technical choices, always explain:
 - **Documentation Updates**: Update "What's Been Built" section with new accomplishments
 
 #### Project Tracking Workflow:
-1. **Before Starting**: Check PROJECT_PLAN.md to understand current phase and priorities
-2. **During Development**: Use TODO lists to track immediate tasks
+1. **Before Starting**: 
+   - Check PROJECT_PLAN.md to understand current phase and priorities
+   - **ASSESS RISK**: Evaluate and document the risk level of planned changes
+2. **During Development**: 
+   - Use TODO lists to track immediate tasks
+   - Monitor for unexpected issues that could increase risk level
 3. **During Problem-Solving**: Document any errors or issues in LESSONS_LEARNED.md
 4. **After Completion**: 
    - **TEST IMMEDIATELY**: Follow the 7-step testing workflow to verify the feature
+   - **RE-ASSESS RISK**: Confirm final risk level based on actual implementation
    - Mark items complete `[x]` in PROJECT_PLAN.md
    - Update phase completion percentages
    - Add accomplishments to "What's Been Built" section
@@ -79,11 +179,18 @@ When making technical choices, always explain:
 feat: [Feature Name] - [Business Value]
 
 ✅ COMPLETED: [What was built]
+🎯 RISK LEVEL: 🟢/🟡/🔴 [LOW/MEDIUM/HIGH] - [Confidence %]
 
 Implementation Details:
 - [Technical detail 1]
 - [Technical detail 2]
 - [Technical detail 3]
+
+Impact Assessment:
+- Scope: [What parts affected]
+- Breaking Changes: [Yes/No]
+- Security: [Impact level]
+- Performance: [Impact level]
 
 Project Status:
 - [Phase X]: [Y%] Complete
