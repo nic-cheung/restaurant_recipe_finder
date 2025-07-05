@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String           @id @default(cuid())
+  email                 String           @unique
+  passwordHash          String
+  name                  String
+  location              String?
+  timezone              String?          @default("UTC")
+  dinnerTimePreference  String?          @default("19:00") // HH:MM format
+  spiceTolerance        SpiceTolerance   @default(MEDIUM)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  // Relations
+  preferences           UserPreferences?
+  userRecipes           UserRecipe[]
+  favoriteRecipes       FavoriteRecipe[]
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  dietaryRestrictions   String[] // Array of dietary restrictions
+  allergies             String[] // Array of allergies
+  favoriteIngredients   String[] // Array of favorite ingredients
+  dislikedFoods         String[] // Array of disliked foods
+  favoriteCuisines      String[] // Array of favorite cuisines
+  cookingSkillLevel     SkillLevel @default(BEGINNER)
+  preferredCookingTime  Int?     // Maximum cooking time in minutes
+  servingSize           Int?     @default(2) // Number of servings
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model Recipe {
+  id                String        @id @default(cuid())
+  title             String
+  description       String?
+  ingredients       Json          // Array of ingredients with amounts
+  instructions      String[]      // Array of cooking steps
+  cookingTime       Int           // Cooking time in minutes
+  difficulty        Difficulty    @default(MEDIUM)
+  cuisineType       String?
+  inspirationSource String?       // Restaurant, chef, or city name
+  servings          Int           @default(2)
+  nutritionInfo     Json?         // Nutritional information
+  tags              String[]      // Array of tags
+  isPublic          Boolean       @default(true)
+  createdBy         String?       // User ID who created the recipe
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  userRecipes       UserRecipe[]
+  favoriteRecipes   FavoriteRecipe[]
+
+  @@map("recipes")
+}
+
+model UserRecipe {
+  id          String   @id @default(cuid())
+  userId      String
+  recipeId    String
+  rating      Int?     // 1-5 rating
+  notes       String?
+  cookedDate  DateTime?
+  isFavorite  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
+  @@map("user_recipes")
+}
+
+model FavoriteRecipe {
+  id        String   @id @default(cuid())
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
+  @@map("favorite_recipes")
+}
+
+// Enums
+enum SpiceTolerance {
+  MILD
+  MEDIUM
+  HOT
+  EXTREME
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+} 
