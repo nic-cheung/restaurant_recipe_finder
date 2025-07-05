@@ -479,38 +479,81 @@ For 🔴 HIGH RISK changes:
 - **Push Regularly**: Push to remote repository at least once per session
 - **Documentation Updates**: Include PROJECT_PLAN.md updates in the same commit as the feature
 
-#### Commit Message Template:
-```
-feat: [Feature Name] - [Business Value]
-
-✅ COMPLETED: [What was built]
-🎯 RISK LEVEL: 🟢/🟡/🔴 [LOW/MEDIUM/HIGH] - [Confidence %]
-
-Implementation Details:
-- [Technical detail 1]
-- [Technical detail 2]
-- [Technical detail 3]
-
-Impact Assessment:
-- Scope: [What parts affected]
-- Breaking Changes: [Yes/No]
-- Security: [Impact level]
-- Performance: [Impact level]
-
-Project Status:
-- [Phase X]: [Y%] Complete
-- [Next priority or blocker]
-
-[Optional: Screenshots, performance notes, or testing results]
-```
-
 #### When to Commit:
 - ✅ **After completing a full feature** (e.g., user preferences page)
-- ✅ **After fixing a significant bug**
+- ✅ **After fixing a significant bug** (including authentication, API, database issues)
 - ✅ **After adding new API endpoints**
 - ✅ **After updating documentation or project plans**
 - ✅ **Before switching to a different feature**
 - ✅ **At the end of each development session**
+- ✅ **IMMEDIATELY after fixing any bug or error** (no exceptions)
+- ✅ **IMMEDIATELY after adding/changing development rules** (DEVELOPMENT_RULES.md)
+- ✅ **IMMEDIATELY after documenting errors** (LESSONS_LEARNED.md updates)
+- ✅ **After any configuration changes** (package.json, tsconfig, etc.)
+- ✅ **After any security fixes** (authentication, authorization, validation)
+
+#### MANDATORY IMMEDIATE COMMITS (🚨 CRITICAL)
+**These require IMMEDIATE commits without delay:**
+
+1. **Bug Fixes**: Any bug resolution must be committed immediately
+   - Authentication/authorization fixes
+   - API integration fixes
+   - Database query fixes
+   - Build/compilation fixes
+   - Logic error corrections
+
+2. **Rule Changes**: Any modification to development rules or processes
+   - DEVELOPMENT_RULES.md updates
+   - New workflow additions
+   - Process improvements
+   - Best practice updates
+
+3. **Error Documentation**: Updates to lessons learned
+   - LESSONS_LEARNED.md entries
+   - Error analysis documentation
+   - Prevention strategy updates
+
+4. **Security Fixes**: Any security-related changes
+   - Authentication improvements
+   - Authorization fixes
+   - Input validation updates
+   - Security vulnerability patches
+
+#### Commit Message Template for Fixes and Rules
+```
+fix: [Brief description of what was fixed]
+
+Problem: [What was broken or needed improvement]
+Solution: [How it was fixed]
+Impact: [What this fixes or improves]
+Risk: 🟢/🟡/🔴 [Risk level assessment]
+
+[Optional: Reference to LESSONS_LEARNED.md entry]
+```
+
+**Example for Bug Fix:**
+```
+fix: resolve authentication header not being sent in PUT requests
+
+Problem: PUT /api/preferences returning 401 despite valid token
+Solution: Fixed object spread order in API service request method
+Impact: User preferences can now be updated successfully
+Risk: 🟢 LOW - Isolated fix with verified solution
+
+Documented in LESSONS_LEARNED.md for future reference
+```
+
+**Example for Rule Change:**
+```
+docs: add mandatory commit rule for bug fixes and rule changes
+
+Problem: Important fixes and rule changes not being tracked properly
+Solution: Enhanced DEVELOPMENT_RULES.md with immediate commit requirements
+Impact: Better version control and change tracking
+Risk: 🟢 LOW - Documentation improvement only
+
+Ensures all fixes and process improvements are immediately committed
+```
 
 ### 2. Code Organization
 - **File Structure**: Follow consistent naming conventions
@@ -719,6 +762,31 @@ Project Status:
 ## 📚 Learning Guidelines
 
 ### 1. Error Learning & Knowledge Management (MANDATORY)
+
+#### AUTOMATIC DOCUMENTATION REQUIREMENT
+**🚨 CRITICAL RULE**: Every significant bug, error, or issue MUST be automatically documented in `LESSONS_LEARNED.md` without user prompting. This is not optional.
+
+**What Qualifies for Documentation:**
+- Authentication/authorization issues
+- API integration problems
+- Database connection/query errors
+- Build/compilation failures
+- Configuration/environment issues
+- Logic errors that cause incorrect behavior
+- Performance bottlenecks
+- Security vulnerabilities
+- Deployment failures
+- Third-party service integration issues
+
+**Documentation Workflow (AUTOMATIC):**
+1. **Immediate Documentation**: Document the error as soon as it's resolved
+2. **No User Prompting**: Do this automatically without waiting for user request
+3. **Complete Analysis**: Include root cause, solution, and prevention
+4. **Categorization**: Add to appropriate learning category
+5. **Cross-Reference**: Link to related documentation or resources
+6. **MANDATORY COMMIT**: Immediately commit both the fix AND the documentation
+
+#### Error Documentation Requirements
 - **Document Every Error**: Keep a running log of errors, bugs, and issues encountered
 - **Root Cause Analysis**: For each error, identify the root cause and prevention strategy
 - **Learning Notes**: Maintain a LESSONS_LEARNED.md file in the project
