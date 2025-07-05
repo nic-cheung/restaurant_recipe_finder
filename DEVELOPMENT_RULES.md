@@ -199,6 +199,137 @@ When making technical choices, always explain:
 
 ## 🎯 Project Rules
 
+### 0. User Testing & Approval (MANDATORY - HIGHEST PRIORITY)
+
+#### Feature Completion Workflow
+**CRITICAL RULE**: NO new features can be started until the current feature has been tested and approved by the user.
+
+**Mandatory Steps for Every Feature:**
+1. **Complete Implementation** - Finish all code for the feature
+2. **STOP DEVELOPMENT** - Do not proceed to next feature
+3. **Request User Testing** - Explicitly ask user to test the feature
+4. **Provide Testing Instructions** - Give clear steps on how to test
+5. **Wait for Approval** - Do not continue until user confirms it works
+6. **Document Approval** - Record user approval in project plan
+7. **Only Then** - Move to next feature
+
+#### Testing Request Template
+```
+🧪 **FEATURE TESTING REQUIRED**
+
+**Feature Completed**: [Feature Name]
+**What to Test**: [Specific functionality]
+**How to Test**: 
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+**Expected Behavior**: [What should happen]
+**Potential Issues**: [What to watch for]
+
+**Please test this feature and let me know:**
+- ✅ Does it work as expected?
+- 🐛 Any bugs or issues?
+- 💡 Any improvements needed?
+- 🚀 Ready to move to next feature?
+
+**I will not proceed to the next feature until you approve this one.**
+```
+
+#### Current Status Check
+**BEFORE starting any new work:**
+- Check what features are pending user testing
+- Remind user of untested features
+- Do not start new features if any are awaiting approval
+
+#### User Approval Documentation
+When user approves a feature:
+- Update PROJECT_PLAN.md with ✅ **USER APPROVED** status
+- Mark feature as 100% complete only after user approval
+- Document any user feedback or requested changes
+- Record approval date and time
+
+#### Violation Consequences
+**If this rule is violated:**
+- Immediately stop all development
+- Return to the pending feature
+- Request user testing before proceeding
+- Update documentation to reflect the correct status
+
+#### Examples of Proper Testing Requests
+
+**Example 1**: User Preferences Feature
+```
+🧪 **USER PREFERENCES TESTING REQUIRED**
+
+**Feature Completed**: User Preferences Management System
+**What to Test**: Complete preferences management functionality
+
+**How to Test**:
+1. Log into the application
+2. Navigate to the Preferences page
+3. Try updating dietary restrictions
+4. Add/remove favorite ingredients
+5. Change cooking skill level and time preferences
+6. Save changes and verify they persist
+
+**Expected Behavior**: All preferences should save and load correctly
+**Potential Issues**: Form validation, data persistence, UI responsiveness
+
+**Please test this feature and confirm it works before I move to Phase 3 (AI Integration).**
+```
+
+**Example 2**: Recipe Generation Feature
+```
+🧪 **RECIPE GENERATION TESTING REQUIRED**
+
+**Feature Completed**: AI Recipe Generation System
+**What to Test**: Generate personalized recipes with AI
+
+**How to Test**:
+1. Navigate to Recipe Generator
+2. Enter inspiration (restaurant, chef, cuisine, or city)
+3. Add any additional requests
+4. Generate recipe
+5. Try saving the recipe
+6. Check if preferences are reflected in the recipe
+
+**Expected Behavior**: AI generates relevant, personalized recipes
+**Potential Issues**: API errors, long generation times, recipe quality
+
+**Please test this feature thoroughly before I continue with recipe management features.**
+```
+
+#### Feature Handoff Checklist
+Before requesting user testing:
+- [ ] Feature is fully implemented
+- [ ] No known bugs or issues
+- [ ] Basic functionality tested by developer
+- [ ] Clear testing instructions prepared
+- [ ] Expected behavior documented
+- [ ] Potential issues identified
+- [ ] Ready for user feedback
+
+#### User Testing Priorities
+**High Priority Testing** (must be approved before next feature):
+- Core functionality changes
+- New user-facing features
+- Database schema changes
+- Authentication/security updates
+- API endpoint changes
+
+**Medium Priority Testing** (can be tested in batches):
+- UI/UX improvements
+- Performance optimizations
+- Bug fixes
+- Documentation updates
+
+**Testing Batching**
+- Related small features can be tested together
+- Maximum 3 features per testing batch
+- Each feature must still be individually approved
+- Major features always tested individually
+
 ### 1. Risk Management & Change Impact Assessment (MANDATORY)
 
 #### Risk Assessment Framework
