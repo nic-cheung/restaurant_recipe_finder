@@ -1,4 +1,11 @@
 import { AuthResponse, LoginCredentials, RegisterCredentials, User } from '../types/auth';
+import { 
+  UserPreferences, 
+  UpdateUserPreferences, 
+  PreferencesResponse, 
+  PreferencesSummaryResponse, 
+  PreferencesOptionsResponse 
+} from '../types/preferences';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -76,6 +83,50 @@ class ApiService {
     }
     
     return response;
+  }
+
+  // Preferences methods
+  async getPreferences(): Promise<UserPreferences> {
+    const response = await this.request<PreferencesResponse>('/preferences');
+    return response.data.preferences;
+  }
+
+  async updatePreferences(preferences: UpdateUserPreferences): Promise<UserPreferences> {
+    const response = await this.request<PreferencesResponse>('/preferences', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(preferences),
+    });
+    return response.data.preferences;
+  }
+
+  async patchPreferences(preferences: Partial<UpdateUserPreferences>): Promise<UserPreferences> {
+    const response = await this.request<PreferencesResponse>('/preferences', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(preferences),
+    });
+    return response.data.preferences;
+  }
+
+  async deletePreferences(): Promise<void> {
+    await this.request<void>('/preferences', {
+      method: 'DELETE',
+    });
+  }
+
+  async getPreferencesSummary(): Promise<any> {
+    const response = await this.request<PreferencesSummaryResponse>('/preferences/summary');
+    return response.data.summary;
+  }
+
+  async getPreferencesOptions(): Promise<any> {
+    const response = await this.request<PreferencesOptionsResponse>('/preferences/options');
+    return response.data;
   }
 
   // Utility methods

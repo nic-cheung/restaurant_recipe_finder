@@ -25,7 +25,44 @@ When making technical choices, always explain:
 
 ## 🎯 Project Rules
 
-### 1. Code Organization
+### 1. Project Tracking & Progress Management
+- **PROJECT_PLAN.md Updates**: ALWAYS update PROJECT_PLAN.md when completing features
+- **Real-Time Progress**: Mark items as complete `[x]` immediately after implementation
+- **Phase Tracking**: Update phase completion percentages as we progress
+- **Status Reviews**: Check project plan before starting new work to ensure alignment
+- **Completion Criteria**: Define clear completion criteria for each feature
+- **Documentation Updates**: Update "What's Been Built" section with new accomplishments
+
+#### Project Tracking Workflow:
+1. **Before Starting**: Check PROJECT_PLAN.md to understand current phase and priorities
+2. **During Development**: Use TODO lists to track immediate tasks
+3. **After Completion**: 
+   - Mark items complete `[x]` in PROJECT_PLAN.md
+   - Update phase completion percentages
+   - Add accomplishments to "What's Been Built" section
+   - Update "Next Steps" if priorities change
+4. **Regular Reviews**: Assess overall project health and adjust timeline as needed
+
+#### Progress Reporting Format:
+- **Phase Status**: "Phase X: Y% Complete - [Brief Description]"
+- **Recent Accomplishments**: List of completed features with business value
+- **Current Focus**: What we're working on now
+- **Next Priorities**: What comes next according to the plan
+- **Blockers/Risks**: Any issues that could impact timeline
+
+#### Milestone Management:
+- **Phase Completion**: Celebrate when completing each phase (update README, commit progress)
+- **Feature Demos**: Test major features immediately after implementation
+- **Progress Commits**: Commit PROJECT_PLAN.md updates with meaningful commit messages
+- **Momentum Tracking**: Keep track of development velocity and adjust expectations
+- **Success Metrics**: Measure progress against original timeline and scope
+
+#### Project Health Indicators:
+- ✅ **Green**: On track, features working as expected, no major blockers
+- ⚠️ **Yellow**: Minor delays or issues, but manageable with current resources
+- 🔴 **Red**: Major blockers, significant delays, or scope changes needed
+
+### 2. Code Organization
 - **File Structure**: Follow consistent naming conventions
   - Components: PascalCase (e.g., `RecipeCard.tsx`)
   - Files: kebab-case (e.g., `user-profile.ts`)

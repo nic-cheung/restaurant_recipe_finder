@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import RecipeGenerator from './pages/RecipeGenerator'
 import Profile from './pages/Profile'
+import Preferences from './pages/Preferences'
 
 function App() {
   return (
