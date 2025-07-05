@@ -37,6 +37,7 @@ When making technical choices, always explain:
 1. **Before Starting**: Check PROJECT_PLAN.md to understand current phase and priorities
 2. **During Development**: Use TODO lists to track immediate tasks
 3. **After Completion**: 
+   - **TEST IMMEDIATELY**: Follow the 7-step testing workflow to verify the feature
    - Mark items complete `[x]` in PROJECT_PLAN.md
    - Update phase completion percentages
    - Add accomplishments to "What's Been Built" section
@@ -54,9 +55,11 @@ When making technical choices, always explain:
 #### Milestone Management:
 - **Phase Completion**: Celebrate when completing each phase (update README, commit progress)
 - **Feature Demos**: Test major features immediately after implementation
+- **Quality Gates**: Never commit untested features - testing is mandatory
 - **Progress Commits**: Commit PROJECT_PLAN.md updates with meaningful commit messages
 - **Momentum Tracking**: Keep track of development velocity and adjust expectations
 - **Success Metrics**: Measure progress against original timeline and scope
+- **Testing Documentation**: Include testing results in commit messages and documentation
 
 #### Project Health Indicators:
 - ✅ **Green**: On track, features working as expected, no major blockers
@@ -150,11 +153,39 @@ Project Status:
 - **API Keys**: Rotate API keys regularly
 
 ### 6. Testing Rules
+
+#### Immediate Feature Testing (MANDATORY)
+- **Test After Every Feature**: ALWAYS manually test the feature immediately after implementation
+- **Happy Path Testing**: Verify the main user flow works as expected
+- **Error Scenarios**: Test edge cases and error conditions
+- **Browser Testing**: Test in multiple browsers (Chrome, Firefox, Safari)
+- **Mobile Responsiveness**: Test on mobile devices and different screen sizes
+- **API Endpoint Testing**: Use Postman/Thunder Client to test new API endpoints
+- **Database Verification**: Check that data is correctly saved/retrieved
+- **Authentication Testing**: Verify protected routes work correctly
+- **Performance Check**: Ensure feature doesn't cause performance issues
+
+#### Testing Workflow (After Each Feature):
+1. **Functionality Test**: Does the feature work as designed?
+2. **UI/UX Test**: Is the interface intuitive and responsive?
+3. **Error Handling Test**: Do errors display properly?
+4. **Integration Test**: Does it work with existing features?
+5. **Data Persistence Test**: Is data saved and retrieved correctly?
+6. **Security Test**: Are protected routes still secure?
+7. **Performance Test**: No significant slowdowns introduced?
+
+#### Automated Testing
 - **Unit Tests**: Write tests for all utility functions
-- **Component Tests**: Test React components
-- **API Tests**: Test all API endpoints
+- **Component Tests**: Test React components with React Testing Library
+- **API Tests**: Test all API endpoints with Jest/Supertest
 - **Integration Tests**: Test complete user flows
 - **Test Coverage**: Aim for 80%+ test coverage
+
+#### Testing Documentation
+- **Test Results**: Document any issues found during testing
+- **Screenshots**: Include screenshots of working features in commits
+- **Performance Notes**: Record any performance observations
+- **Browser Compatibility**: Note any browser-specific issues
 
 ### 7. Performance Rules
 - **Lazy Loading**: Implement lazy loading for routes
