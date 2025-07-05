@@ -41,6 +41,7 @@ When making technical choices, always explain:
    - Update phase completion percentages
    - Add accomplishments to "What's Been Built" section
    - Update "Next Steps" if priorities change
+   - **COMMIT IMMEDIATELY**: Always commit and push changes after completing a feature
 4. **Regular Reviews**: Assess overall project health and adjust timeline as needed
 
 #### Progress Reporting Format:
@@ -61,6 +62,39 @@ When making technical choices, always explain:
 - ✅ **Green**: On track, features working as expected, no major blockers
 - ⚠️ **Yellow**: Minor delays or issues, but manageable with current resources
 - 🔴 **Red**: Major blockers, significant delays, or scope changes needed
+
+#### Commit & Version Control Rules:
+- **Feature Completion Commits**: ALWAYS commit immediately after completing any feature
+- **Commit Message Format**: Use descriptive commit messages that explain the business value
+- **Commit Frequency**: Commit working code frequently, don't wait for perfect completion
+- **Push Regularly**: Push to remote repository at least once per session
+- **Documentation Updates**: Include PROJECT_PLAN.md updates in the same commit as the feature
+
+#### Commit Message Template:
+```
+feat: [Feature Name] - [Business Value]
+
+✅ COMPLETED: [What was built]
+
+Implementation Details:
+- [Technical detail 1]
+- [Technical detail 2]
+- [Technical detail 3]
+
+Project Status:
+- [Phase X]: [Y%] Complete
+- [Next priority or blocker]
+
+[Optional: Screenshots, performance notes, or testing results]
+```
+
+#### When to Commit:
+- ✅ **After completing a full feature** (e.g., user preferences page)
+- ✅ **After fixing a significant bug**
+- ✅ **After adding new API endpoints**
+- ✅ **After updating documentation or project plans**
+- ✅ **Before switching to a different feature**
+- ✅ **At the end of each development session**
 
 ### 2. Code Organization
 - **File Structure**: Follow consistent naming conventions
@@ -140,9 +174,12 @@ When making technical choices, always explain:
 
 ### 1. Git Workflow
 - **Branch Naming**: `feature/feature-name` or `fix/bug-description`
-- **Commit Messages**: Use conventional commit format
-- **Pull Requests**: Require code review before merging
+- **Commit Messages**: Use conventional commit format with business value explanation
+- **Immediate Commits**: Commit and push after every completed feature
+- **Pull Requests**: Require code review before merging (for team environments)
 - **Main Branch**: Keep main branch always deployable
+- **Commit Frequency**: Multiple commits per session, never lose work
+- **Documentation Sync**: Always commit PROJECT_PLAN.md updates with related features
 
 ### 2. Code Review Process
 - **Self Review**: Review your own code before submitting
