@@ -6,6 +6,20 @@ import {
   PreferencesSummaryResponse, 
   PreferencesOptionsResponse 
 } from '../types/preferences';
+import {
+  GenerateRecipeRequest,
+  RecipeResponse,
+  SaveRecipeRequest,
+  SavedRecipeResponse,
+  UserRecipesResponse,
+  RecipeDetailsResponse,
+  UpdateRecipeRatingRequest,
+  RecipeVariationRequest,
+  IngredientSubstitutionRequest,
+  SubstitutionsResponse,
+  FavoriteResponse,
+  RecipeQueryOptions
+} from '../types/recipe';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -20,20 +34,33 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
+    const authHeaders = this.getAuthHeaders();
+    
     const config: RequestInit = {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...this.getAuthHeaders(),
+        ...authHeaders,
         ...options.headers,
       },
-      ...options,
     };
 
     const response = await fetch(url, config);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      console.error('API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+        url,
+        config
+      });
+      
+      // Create error with more details
+      const error = new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
+      (error as any).response = { status: response.status, data: errorData };
+      throw error;
     }
 
     return response.json();
@@ -85,6 +112,20 @@ class ApiService {
     return response;
   }
 
+  async checkEmailAvailability(email: string): Promise<{ available: boolean; email: string }> {
+    const response = await this.request<any>('/auth/check-email', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    
+    // Handle backend response format
+    if (response.success && response.data) {
+      return response.data;
+    }
+    
+    return response;
+  }
+
   // Preferences methods
   async getPreferences(): Promise<UserPreferences> {
     const response = await this.request<PreferencesResponse>('/preferences');
@@ -127,6 +168,65 @@ class ApiService {
   async getPreferencesOptions(): Promise<any> {
     const response = await this.request<PreferencesOptionsResponse>('/preferences/options');
     return response.data;
+  }
+
+  // Recipe methods
+  async generateRecipe(request: GenerateRecipeRequest): Promise<RecipeResponse> {
+    return this.request<RecipeResponse>('/recipes/generate', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async saveRecipe(request: SaveRecipeRequest): Promise<SavedRecipeResponse> {
+    return this.request<SavedRecipeResponse>('/recipes/save', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async getUserRecipes(options: RecipeQueryOptions = {}): Promise<UserRecipesResponse> {
+    const params = new URLSearchParams();
+    if (options.page) params.append('page', options.page.toString());
+    if (options.limit) params.append('limit', options.limit.toString());
+    if (options.sortBy) params.append('sortBy', options.sortBy);
+    if (options.sortOrder) params.append('sortOrder', options.sortOrder);
+
+    const queryString = params.toString();
+    const endpoint = queryString ? `/recipes/user?${queryString}` : '/recipes/user';
+    
+    return this.request<UserRecipesResponse>(endpoint);
+  }
+
+  async getRecipeDetails(recipeId: string): Promise<RecipeDetailsResponse> {
+    return this.request<RecipeDetailsResponse>(`/recipes/${recipeId}`);
+  }
+
+  async updateRecipeRating(recipeId: string, request: UpdateRecipeRatingRequest): Promise<any> {
+    return this.request<any>(`/recipes/${recipeId}/rating`, {
+      method: 'PUT',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async generateRecipeVariation(recipeId: string, request: RecipeVariationRequest): Promise<RecipeResponse> {
+    return this.request<RecipeResponse>(`/recipes/${recipeId}/variation`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async getIngredientSubstitutions(request: IngredientSubstitutionRequest): Promise<SubstitutionsResponse> {
+    return this.request<SubstitutionsResponse>('/recipes/substitutions', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async toggleFavoriteRecipe(recipeId: string): Promise<FavoriteResponse> {
+    return this.request<FavoriteResponse>(`/recipes/${recipeId}/favorite`, {
+      method: 'POST',
+    });
   }
 
   // Utility methods

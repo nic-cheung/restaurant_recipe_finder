@@ -11,7 +11,6 @@ import {
   COMMON_CUISINES,
 } from '../utils/validation';
 import {
-  getUserPreferences,
   getUserPreferencesWithDefaults,
   upsertUserPreferences,
   updateUserPreferences,

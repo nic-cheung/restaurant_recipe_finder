@@ -32,6 +32,9 @@ const Header = () => {
                 <Link to="/profile" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Profile
                 </Link>
+                <Link to="/preferences" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  Preferences
+                </Link>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-gray-600">
                     Welcome, {user.name}

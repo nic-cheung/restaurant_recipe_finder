@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
@@ -25,9 +26,9 @@ const Dashboard: React.FC = () => {
             <p className="text-gray-600 mb-4">
               Create personalized recipes based on your preferences and available ingredients
             </p>
-            <button className="btn-primary w-full">
+            <Link to="/generate" className="btn-primary w-full">
               Start Cooking
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -55,9 +56,9 @@ const Dashboard: React.FC = () => {
             <p className="text-gray-600 mb-4">
               Update your dietary preferences and cooking style
             </p>
-            <button className="btn-secondary w-full">
+            <Link to="/preferences" className="btn-secondary w-full">
               Manage Settings
-            </button>
+            </Link>
           </div>
         </div>
       </div>

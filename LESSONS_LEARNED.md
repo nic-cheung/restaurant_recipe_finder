@@ -19,14 +19,31 @@ This file documents errors, issues, and learnings encountered during development
 
 ---
 
-## Error: [Template for Future Entries]
-**Date**: [Date encountered]
-**Context**: [What you were trying to do]
-**Error**: [Exact error message or issue]
-**Root Cause**: [Why it happened]
-**Solution**: [How you fixed it]
-**Prevention**: [How to avoid this in the future]
-**Related**: [Links to documentation, Stack Overflow, etc.]
+## Error: API Authentication Headers Not Being Sent (401 Unauthorized)
+**Date**: 2024-12-19
+**Context**: User preferences PUT request failing with 401 "Access token required" error, while GET requests worked fine
+**Error**: `PUT http://localhost:8000/api/preferences 401 (Unauthorized)` - Authorization header not being sent despite token being present in localStorage
+**Root Cause**: In the API service's `request` method, the `...options` spread was placed after the headers object, potentially overriding the Authorization header when request options included headers
+**Solution**: Moved the `...options` spread before the headers object in the request configuration:
+```typescript
+// BEFORE (problematic):
+const config: RequestInit = {
+  headers: { 'Content-Type': 'application/json', ...authHeaders, ...options.headers },
+  ...options,  // This could override headers
+};
+
+// AFTER (fixed):
+const config: RequestInit = {
+  ...options,  // Spread options first
+  headers: { 'Content-Type': 'application/json', ...authHeaders, ...options.headers },
+};
+```
+**Prevention**: 
+- Always be careful with object spread order when merging configurations
+- Test authenticated API calls thoroughly, especially PUT/POST requests
+- Use debugging logs to verify header contents during development
+- Consider using a more explicit header merging approach for critical headers
+**Related**: [MDN RequestInit documentation](https://developer.mozilla.org/en-US/docs/Web/API/RequestInit)
 
 ---
 
@@ -45,7 +62,7 @@ This file documents errors, issues, and learnings encountered during development
 - (To be populated as we encounter issues)
 
 ### API Integration
-- (To be populated as we encounter issues)
+- Authentication header ordering in request configuration (object spread precedence)
 
 ### Deployment & DevOps
 - (To be populated as we encounter issues)
@@ -80,3 +97,16 @@ This file documents errors, issues, and learnings encountered during development
 ---
 
 *Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: [Template for Future Entries]
+**Date**: [Date encountered]
+**Context**: [What you were trying to do]
+**Error**: [Exact error message or issue]
+**Root Cause**: [Why it happened]
+**Solution**: [How you fixed it]
+**Prevention**: [How to avoid this in the future]
+**Related**: [Links to documentation, Stack Overflow, etc.]
+
+--- 

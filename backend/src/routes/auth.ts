@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, logout, getCurrentUser } from '../controllers/authController';
+import { register, login, logout, getCurrentUser, checkEmailAvailability } from '../controllers/authController';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
@@ -8,6 +8,11 @@ const router = Router();
 // @desc    Register a new user
 // @access  Public
 router.post('/register', register);
+
+// @route   POST /api/auth/check-email
+// @desc    Check if email is available for registration
+// @access  Public
+router.post('/check-email', checkEmailAvailability);
 
 // @route   POST /api/auth/login
 // @desc    Login user

@@ -45,8 +45,8 @@ export const upsertUserPreferences = async (
       dislikedFoods: preferencesData.dislikedFoods || [],
       favoriteCuisines: preferencesData.favoriteCuisines || [],
       cookingSkillLevel: preferencesData.cookingSkillLevel || 'BEGINNER',
-      preferredCookingTime: preferencesData.preferredCookingTime || null,
-      servingSize: preferencesData.servingSize || 2,
+      preferredCookingTime: preferencesData.preferredCookingTime ?? null,
+      servingSize: preferencesData.servingSize ?? 2,
     },
     create: {
       userId,
@@ -56,8 +56,8 @@ export const upsertUserPreferences = async (
       dislikedFoods: preferencesData.dislikedFoods || [],
       favoriteCuisines: preferencesData.favoriteCuisines || [],
       cookingSkillLevel: preferencesData.cookingSkillLevel || 'BEGINNER',
-      preferredCookingTime: preferencesData.preferredCookingTime || null,
-      servingSize: preferencesData.servingSize || 2,
+      preferredCookingTime: preferencesData.preferredCookingTime ?? null,
+      servingSize: preferencesData.servingSize ?? 2,
     },
   });
 

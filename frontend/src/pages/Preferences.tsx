@@ -1,19 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { apiService } from '../services/api';
 import { 
-  UserPreferences, 
-  PreferencesFormData, 
-  SKILL_LEVELS, 
-  DEFAULT_PREFERENCES 
+  PreferencesFormData,
+  SKILL_LEVELS
 } from '../types/preferences';
+import TagSelector from '../components/TagSelector';
+import IngredientInput from '../components/IngredientInput';
+
+// Define popular options for each category
+const POPULAR_DIETARY_RESTRICTIONS = [
+  'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Paleo'
+];
+
+const POPULAR_ALLERGIES = [
+  'Nuts', 'Peanuts', 'Shellfish', 'Dairy', 'Eggs', 'Soy'
+];
+
+const POPULAR_CUISINES = [
+  'Italian', 'Mexican', 'Chinese', 'Japanese', 'Thai', 'Indian', 'French', 'Mediterranean'
+];
+
+// Common ingredient suggestions
+const COMMON_INGREDIENTS = [
+  'Garlic', 'Onion', 'Tomato', 'Basil', 'Oregano', 'Thyme', 'Rosemary', 'Parsley',
+  'Olive Oil', 'Butter', 'Lemon', 'Lime', 'Ginger', 'Cilantro', 'Paprika', 'Cumin',
+  'Black Pepper', 'Salt', 'Cheese', 'Chicken', 'Beef', 'Fish', 'Pasta', 'Rice',
+  'Potatoes', 'Carrots', 'Bell Peppers', 'Mushrooms', 'Spinach', 'Broccoli'
+];
+
+const COMMON_DISLIKED_FOODS = [
+  'Mushrooms', 'Onions', 'Cilantro', 'Olives', 'Anchovies', 'Blue Cheese', 'Liver',
+  'Oysters', 'Brussel Sprouts', 'Cauliflower', 'Eggplant', 'Beets', 'Asparagus',
+  'Coconut', 'Avocado', 'Tofu', 'Quinoa', 'Kale', 'Spinach', 'Fish', 'Seafood'
+];
 
 const Preferences: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [options, setOptions] = useState<any>(null);
   const [formData, setFormData] = useState<PreferencesFormData>({
     dietaryRestrictions: [],
@@ -23,7 +49,7 @@ const Preferences: React.FC = () => {
     favoriteCuisines: [],
     cookingSkillLevel: 'BEGINNER',
     preferredCookingTime: '',
-    servingSize: '2',
+    servingSize: '',
   });
 
   // Load preferences and options on mount
@@ -35,7 +61,6 @@ const Preferences: React.FC = () => {
           apiService.getPreferencesOptions(),
         ]);
 
-        setPreferences(preferencesData);
         setOptions(optionsData);
 
         // Populate form with existing preferences
@@ -76,28 +101,34 @@ const Preferences: React.FC = () => {
         servingSize: formData.servingSize ? parseInt(formData.servingSize) : null,
       };
 
+      console.log('Updating preferences with data:', preferencesData);
+      console.log('Current token:', apiService.getToken());
+
       await apiService.updatePreferences(preferencesData);
       toast.success('Preferences updated successfully!');
       navigate('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating preferences:', error);
-      toast.error('Failed to update preferences');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response,
+        stack: error.stack
+      });
+      
+      // Show more specific error message
+      let errorMessage = 'Failed to update preferences';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleArrayFieldChange = (field: keyof PreferencesFormData, value: string) => {
-    if (typeof formData[field] === 'object' && Array.isArray(formData[field])) {
-      const currentArray = formData[field] as string[];
-      const newArray = currentArray.includes(value)
-        ? currentArray.filter(item => item !== value)
-        : [...currentArray, value];
-      
-      setFormData(prev => ({
-        ...prev,
-        [field]: newArray,
-      }));
     }
   };
 
@@ -108,26 +139,11 @@ const Preferences: React.FC = () => {
     }));
   };
 
-  const addCustomItem = (field: keyof PreferencesFormData, value: string) => {
-    if (value.trim() && typeof formData[field] === 'object' && Array.isArray(formData[field])) {
-      const currentArray = formData[field] as string[];
-      if (!currentArray.includes(value.trim())) {
-        setFormData(prev => ({
-          ...prev,
-          [field]: [...currentArray, value.trim()],
-        }));
-      }
-    }
-  };
-
-  const removeItem = (field: keyof PreferencesFormData, value: string) => {
-    if (typeof formData[field] === 'object' && Array.isArray(formData[field])) {
-      const currentArray = formData[field] as string[];
-      setFormData(prev => ({
-        ...prev,
-        [field]: currentArray.filter(item => item !== value),
-      }));
-    }
+  const handleTagSelectionChange = (field: keyof PreferencesFormData, items: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: items,
+    }));
   };
 
   if (isLoading) {
@@ -155,62 +171,41 @@ const Preferences: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Dietary Restrictions */}
         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Dietary Restrictions
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {options?.dietaryRestrictions?.map((restriction: string) => (
-              <label key={restriction} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.dietaryRestrictions.includes(restriction)}
-                  onChange={() => handleArrayFieldChange('dietaryRestrictions', restriction)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">{restriction}</span>
-              </label>
-            ))}
-          </div>
+          <TagSelector
+            label="Dietary Restrictions"
+            popularOptions={POPULAR_DIETARY_RESTRICTIONS}
+            allOptions={options?.dietaryRestrictions || []}
+            selectedItems={formData.dietaryRestrictions}
+            onSelectionChange={(items) => handleTagSelectionChange('dietaryRestrictions', items)}
+            placeholder="Search for dietary restrictions..."
+            maxPopularTags={6}
+          />
         </div>
 
         {/* Allergies */}
         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Allergies & Intolerances
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {options?.allergies?.map((allergy: string) => (
-              <label key={allergy} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.allergies.includes(allergy)}
-                  onChange={() => handleArrayFieldChange('allergies', allergy)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">{allergy}</span>
-              </label>
-            ))}
-          </div>
+          <TagSelector
+            label="Allergies & Intolerances"
+            popularOptions={POPULAR_ALLERGIES}
+            allOptions={options?.allergies || []}
+            selectedItems={formData.allergies}
+            onSelectionChange={(items) => handleTagSelectionChange('allergies', items)}
+            placeholder="Search for allergies..."
+            maxPopularTags={6}
+          />
         </div>
 
         {/* Favorite Cuisines */}
         <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Favorite Cuisines
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {options?.cuisines?.map((cuisine: string) => (
-              <label key={cuisine} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.favoriteCuisines.includes(cuisine)}
-                  onChange={() => handleArrayFieldChange('favoriteCuisines', cuisine)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">{cuisine}</span>
-              </label>
-            ))}
-          </div>
+          <TagSelector
+            label="Favorite Cuisines"
+            popularOptions={POPULAR_CUISINES}
+            allOptions={options?.cuisines || []}
+            selectedItems={formData.favoriteCuisines}
+            onSelectionChange={(items) => handleTagSelectionChange('favoriteCuisines', items)}
+            placeholder="Search for cuisines..."
+            maxPopularTags={8}
+          />
         </div>
 
         {/* Cooking Preferences */}
@@ -277,81 +272,25 @@ const Preferences: React.FC = () => {
         {/* Custom Ingredients */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Favorite Ingredients
-            </h2>
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {formData.favoriteIngredients.map((ingredient) => (
-                  <span
-                    key={ingredient}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                  >
-                    {ingredient}
-                    <button
-                      type="button"
-                      onClick={() => removeItem('favoriteIngredients', ingredient)}
-                      className="ml-2 text-green-600 hover:text-green-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex">
-                <input
-                  type="text"
-                  placeholder="Add favorite ingredient..."
-                  className="input-field flex-1"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addCustomItem('favoriteIngredients', e.currentTarget.value);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-              </div>
-            </div>
+            <IngredientInput
+              label="Favorite Ingredients"
+              selectedItems={formData.favoriteIngredients}
+              onSelectionChange={(items) => handleTagSelectionChange('favoriteIngredients', items)}
+              placeholder="Type to search or add ingredients..."
+              suggestions={COMMON_INGREDIENTS}
+              tagColor="green"
+            />
           </div>
 
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Disliked Foods
-            </h2>
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {formData.dislikedFoods.map((food) => (
-                  <span
-                    key={food}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800"
-                  >
-                    {food}
-                    <button
-                      type="button"
-                      onClick={() => removeItem('dislikedFoods', food)}
-                      className="ml-2 text-red-600 hover:text-red-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex">
-                <input
-                  type="text"
-                  placeholder="Add disliked food..."
-                  className="input-field flex-1"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addCustomItem('dislikedFoods', e.currentTarget.value);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                />
-              </div>
-            </div>
+            <IngredientInput
+              label="Disliked Foods"
+              selectedItems={formData.dislikedFoods}
+              onSelectionChange={(items) => handleTagSelectionChange('dislikedFoods', items)}
+              placeholder="Type to search or add foods..."
+              suggestions={COMMON_DISLIKED_FOODS}
+              tagColor="red"
+            />
           </div>
         </div>
 

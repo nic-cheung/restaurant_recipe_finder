@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { generateToken } from '../utils/jwt';
-import { createUser, authenticateUser, getUserById } from '../services/userService';
+import { createUser, authenticateUser, getUserById, isEmailAvailable } from '../services/userService';
 import { registerSchema, loginSchema, RegisterInput, LoginInput } from '../utils/validation';
 import { AuthenticatedRequest } from '../utils/jwt';
 
@@ -131,6 +131,49 @@ export const logout = async (_req: Request, res: Response): Promise<void> => {
     success: true,
     message: 'Logout successful',
   });
+};
+
+/**
+ * Check email availability
+ */
+export const checkEmailAvailability = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        error: 'Email is required',
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid email format',
+      });
+      return;
+    }
+
+    const available = await isEmailAvailable(email);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        available,
+        email,
+      },
+    });
+  } catch (error) {
+    console.error('Check email availability error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+    });
+  }
 };
 
 /**

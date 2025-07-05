@@ -125,6 +125,17 @@ export const getUserByEmail = async (email: string): Promise<UserWithoutPassword
 };
 
 /**
+ * Check if email is available for registration
+ */
+export const isEmailAvailable = async (email: string): Promise<boolean> => {
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  return !existingUser;
+};
+
+/**
  * Update user profile
  */
 export const updateUser = async (

@@ -82,12 +82,14 @@ export const userPreferencesSchema = z.object({
     .int('Cooking time must be an integer')
     .min(5, 'Cooking time must be at least 5 minutes')
     .max(480, 'Cooking time cannot exceed 8 hours')
+    .nullable()
     .optional(),
   servingSize: z
     .number()
     .int('Serving size must be an integer')
     .min(1, 'Serving size must be at least 1')
     .max(20, 'Serving size cannot exceed 20')
+    .nullable()
     .optional()
     .default(2),
 });

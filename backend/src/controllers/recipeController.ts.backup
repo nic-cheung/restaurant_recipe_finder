@@ -1,0 +1,571 @@
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { openaiService } from '../services/openaiService';
+import { preferencesService } from '../services/preferencesService';
+import {
+  GenerateRecipeRequest,
+  SaveRecipeRequest,
+  UpdateRecipeRatingRequest,
+  RecipeVariationRequest,
+  IngredientSubstitutionRequest,
+  RecipeQueryOptions,
+  RecipeFilters,
+  RecipeWithUserData,
+  UserWithPreferences
+} from '../types/recipe';
+import { z } from 'zod';
+
+const prisma = new PrismaClient();
+
+// Validation schemas
+const generateRecipeSchema = z.object({
+  inspiration: z.string().min(1, 'Inspiration is required'),
+  inspirationType: z.enum(['restaurant', 'chef', 'cuisine', 'city']),
+  additionalRequests: z.string().optional(),
+});
+
+const saveRecipeSchema = z.object({
+  recipeData: z.object({
+    title: z.string().min(1),
+    description: z.string(),
+    ingredients: z.array(z.string()),
+    instructions: z.array(z.string()),
+    cookingTime: z.number().positive(),
+    difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']),
+    servings: z.number().positive(),
+    cuisineType: z.string(),
+    inspirationSource: z.string(),
+    nutritionalInfo: z.object({
+      calories: z.number().optional(),
+      protein: z.string().optional(),
+      carbs: z.string().optional(),
+      fat: z.string().optional(),
+    }).optional(),
+    tips: z.array(z.string()).optional(),
+    substitutions: z.array(z.string()).optional(),
+  }),
+  rating: z.number().min(1).max(5).optional(),
+  notes: z.string().optional(),
+});
+
+const updateRatingSchema = z.object({
+  rating: z.number().min(1).max(5),
+  notes: z.string().optional(),
+});
+
+const variationSchema = z.object({
+  variationRequest: z.string().min(1, 'Variation request is required'),
+});
+
+const substitutionSchema = z.object({
+  ingredient: z.string().min(1, 'Ingredient is required'),
+  dietaryRestrictions: z.array(z.string()).optional(),
+});
+
+class RecipeController {
+  // Generate AI recipe
+  async generateRecipe(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const validatedData = generateRecipeSchema.parse(req.body);
+      
+      // Get user preferences and user data
+      const userPreferences = await preferencesService.getUserPreferences(userId);
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { spiceTolerance: true }
+      });
+
+      // Generate recipe with AI
+      const generatedRecipe = await openaiService.generateRecipe({
+        inspiration: validatedData.inspiration,
+        inspirationType: validatedData.inspirationType,
+        userPreferences: userPreferences || undefined,
+        user: user || undefined,
+        additionalRequests: validatedData.additionalRequests,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          recipe: generatedRecipe,
+        },
+        message: 'Recipe generated successfully',
+      });
+    } catch (error) {
+      console.error('Generate recipe error:', error);
+      
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        });
+        return;
+      }
+
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to generate recipe',
+      });
+    }
+  }
+
+  // Save generated recipe to database
+  async saveRecipe(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const validatedData = saveRecipeSchema.parse(req.body);
+      const { recipeData, rating, notes } = validatedData;
+
+      // Save recipe to database
+      const savedRecipe = await prisma.recipe.create({
+        data: {
+          title: recipeData.title,
+          description: recipeData.description,
+          ingredients: recipeData.ingredients,
+          instructions: recipeData.instructions,
+          cookingTime: recipeData.cookingTime,
+          difficulty: recipeData.difficulty,
+          cuisineType: recipeData.cuisineType,
+          inspirationSource: recipeData.inspirationSource,
+          servings: recipeData.servings,
+          nutritionInfo: recipeData.nutritionalInfo || {},
+          tags: recipeData.tips || [],
+          createdBy: userId,
+        },
+      });
+
+      // Create user recipe relationship
+      const userRecipe = await prisma.userRecipe.create({
+        data: {
+          userId,
+          recipeId: savedRecipe.id,
+          rating: rating || null,
+          notes: notes || null,
+        },
+      });
+
+      res.status(201).json({
+        success: true,
+        data: {
+          recipe: savedRecipe,
+          userRecipe,
+        },
+        message: 'Recipe saved successfully',
+      });
+    } catch (error) {
+      console.error('Save recipe error:', error);
+      
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        });
+        return;
+      }
+
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to save recipe',
+      });
+    }
+  }
+
+  // Get user's recipes
+  async getUserRecipes(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortBy = (req.query.sortBy as string) || 'createdAt';
+      const sortOrder = (req.query.sortOrder as string) || 'desc';
+      
+      const skip = (page - 1) * limit;
+
+      const [recipes, total] = await Promise.all([
+        prisma.userRecipe.findMany({
+          where: { userId },
+          include: {
+            recipe: true,
+          },
+          orderBy: { [sortBy]: sortOrder },
+          skip,
+          take: limit,
+        }),
+        prisma.userRecipe.count({
+          where: { userId },
+        }),
+      ]);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          recipes: recipes.map(ur => ({
+            ...ur.recipe,
+            userRecipe: {
+              id: ur.id,
+              rating: ur.rating,
+              notes: ur.notes,
+              cookedDate: ur.cookedDate,
+              isFavorite: ur.isFavorite,
+              createdAt: ur.createdAt,
+              updatedAt: ur.updatedAt,
+            },
+          })),
+          pagination: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Get user recipes error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch recipes',
+      });
+    }
+  }
+
+  // Get recipe details
+  async getRecipeDetails(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const recipeId = req.params.id;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const recipe = await prisma.recipe.findUnique({
+        where: { id: recipeId },
+      });
+
+      if (!recipe) {
+        res.status(404).json({
+          success: false,
+          error: 'Recipe not found',
+        });
+        return;
+      }
+
+      const userRecipe = await prisma.userRecipe.findUnique({
+        where: {
+          userId_recipeId: {
+            userId,
+            recipeId,
+          },
+        },
+      });
+
+      const favoriteRecipe = await prisma.favoriteRecipe.findUnique({
+        where: {
+          userId_recipeId: {
+            userId,
+            recipeId,
+          },
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          recipe,
+          userRecipe,
+          isFavorite: !!favoriteRecipe,
+        },
+      });
+    } catch (error) {
+      console.error('Get recipe details error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch recipe details',
+      });
+    }
+  }
+
+  // Update recipe rating
+  async updateRecipeRating(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const recipeId = req.params.id;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const validatedData = updateRatingSchema.parse(req.body);
+
+      const userRecipe = await prisma.userRecipe.upsert({
+        where: {
+          userId_recipeId: {
+            userId,
+            recipeId,
+          },
+        },
+        update: {
+          rating: validatedData.rating,
+          notes: validatedData.notes,
+        },
+        create: {
+          userId,
+          recipeId,
+          rating: validatedData.rating,
+          notes: validatedData.notes,
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        data: { userRecipe },
+        message: 'Rating updated successfully',
+      });
+    } catch (error) {
+      console.error('Update rating error:', error);
+      
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        });
+        return;
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update rating',
+      });
+    }
+  }
+
+  // Generate recipe variation
+  async generateRecipeVariation(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const recipeId = req.params.id;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const validatedData = variationSchema.parse(req.body);
+
+      // Get original recipe
+      const originalRecipe = await prisma.recipe.findUnique({
+        where: { id: recipeId },
+      });
+
+      if (!originalRecipe) {
+        res.status(404).json({
+          success: false,
+          error: 'Original recipe not found',
+        });
+        return;
+      }
+
+      // Convert database recipe to GeneratedRecipe format
+      const generatedRecipeFormat = {
+        title: originalRecipe.title,
+        description: originalRecipe.description || '',
+        ingredients: originalRecipe.ingredients as string[],
+        instructions: originalRecipe.instructions,
+        cookingTime: originalRecipe.cookingTime,
+        difficulty: originalRecipe.difficulty as 'EASY' | 'MEDIUM' | 'HARD',
+        servings: originalRecipe.servings,
+        cuisineType: originalRecipe.cuisineType || '',
+        inspirationSource: originalRecipe.inspirationSource || '',
+        nutritionalInfo: originalRecipe.nutritionInfo as any,
+        tips: originalRecipe.tags || [],
+        substitutions: [],
+      };
+
+      // Generate variation
+      const variation = await openaiService.generateRecipeVariation(
+        generatedRecipeFormat,
+        validatedData.variationRequest
+      );
+
+      res.status(200).json({
+        success: true,
+        data: {
+          recipe: variation,
+        },
+        message: 'Recipe variation generated successfully',
+      });
+    } catch (error) {
+      console.error('Generate variation error:', error);
+      
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        });
+        return;
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate recipe variation',
+      });
+    }
+  }
+
+  // Get ingredient substitutions
+  async getIngredientSubstitutions(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const validatedData = substitutionSchema.parse(req.body);
+
+      // Get user's dietary restrictions if not provided
+      let dietaryRestrictions = validatedData.dietaryRestrictions;
+      if (!dietaryRestrictions) {
+        const userPreferences = await preferencesService.getUserPreferences(userId);
+        dietaryRestrictions = userPreferences?.dietaryRestrictions || [];
+      }
+
+      const substitutions = await openaiService.suggestIngredientSubstitutions(
+        validatedData.ingredient,
+        dietaryRestrictions
+      );
+
+      res.status(200).json({
+        success: true,
+        data: {
+          substitutions,
+        },
+      });
+    } catch (error) {
+      console.error('Get substitutions error:', error);
+      
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          error: 'Validation error',
+          details: error.errors,
+        });
+        return;
+      }
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get ingredient substitutions',
+      });
+    }
+  }
+
+  // Toggle favorite recipe
+  async toggleFavoriteRecipe(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const recipeId = req.params.id;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
+
+      const existingFavorite = await prisma.favoriteRecipe.findUnique({
+        where: {
+          userId_recipeId: {
+            userId,
+            recipeId,
+          },
+        },
+      });
+
+      if (existingFavorite) {
+        // Remove from favorites
+        await prisma.favoriteRecipe.delete({
+          where: {
+            userId_recipeId: {
+              userId,
+              recipeId,
+            },
+          },
+        });
+
+        res.status(200).json({
+          success: true,
+          data: { isFavorite: false },
+          message: 'Recipe removed from favorites',
+        });
+      } else {
+        // Add to favorites
+        await prisma.favoriteRecipe.create({
+          data: {
+            userId,
+            recipeId,
+          },
+        });
+
+        res.status(200).json({
+          success: true,
+          data: { isFavorite: true },
+          message: 'Recipe added to favorites',
+        });
+      }
+    } catch (error) {
+      console.error('Toggle favorite error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to toggle favorite status',
+      });
+    }
+  }
+}
+
+export const recipeController = new RecipeController(); 
