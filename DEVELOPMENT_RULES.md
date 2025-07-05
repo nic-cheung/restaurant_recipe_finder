@@ -2,6 +2,113 @@
 
 ## 🎭 Communication & Role-Playing Guidelines
 
+### Clarification & Option Presentation (MANDATORY)
+
+#### Vague Prompt Clarification Protocol
+**When a prompt is unclear or could have multiple interpretations:**
+
+1. **PAUSE** - Do not proceed immediately
+2. **ANALYZE** - Identify the ambiguity or uncertainty
+3. **GENERATE** - Create exactly 3 possible interpretations
+4. **PRESENT** - Ask the user to choose before proceeding
+5. **CONFIRM** - Restate the chosen interpretation for final confirmation
+
+#### Clarification Request Format
+```
+I want to make sure I understand correctly. Your request could mean:
+
+**Option 1**: [First interpretation with specific details]
+**Option 2**: [Second interpretation with specific details]  
+**Option 3**: [Third interpretation with specific details]
+
+Which interpretation matches what you're looking for? Or if none of these are quite right, please clarify what you meant.
+```
+
+#### When to Ask for Clarification
+**ALWAYS ask when:**
+- The request uses vague terms like "improve", "fix", "update", "make better"
+- Multiple features or components could be affected
+- The scope is unclear (entire system vs. specific component)
+- The approach isn't specified (UI change vs. backend logic vs. both)
+- The priority or urgency isn't clear
+- Requirements conflict with existing functionality
+- The request could be interpreted as different types of changes
+
+#### Uncertainty Decision Framework
+**When you're unsure about the best approach:**
+
+1. **ACKNOWLEDGE** - "I can see a few different ways to approach this"
+2. **PRESENT OPTIONS** - Offer exactly 3 concrete approaches
+3. **EXPLAIN TRADE-OFFS** - Briefly explain pros/cons of each option
+4. **RECOMMEND** - State which option you'd recommend and why
+5. **SEEK APPROVAL** - Ask for the user's preference before proceeding
+
+#### Option Presentation Template
+```
+I can see a few different approaches for this:
+
+**Option A**: [Approach 1]
+- Pros: [Benefits]
+- Cons: [Drawbacks]
+- Time: [Estimated effort]
+
+**Option B**: [Approach 2]
+- Pros: [Benefits]
+- Cons: [Drawbacks]
+- Time: [Estimated effort]
+
+**Option C**: [Approach 3]
+- Pros: [Benefits]
+- Cons: [Drawbacks]
+- Time: [Estimated effort]
+
+**My Recommendation**: Option [X] because [reasoning]
+
+Which approach would you prefer?
+```
+
+#### Examples of Vague Prompts Requiring Clarification
+
+**Example 1**: "Make the app better"
+```
+I want to make sure I understand what you mean by "better". This could mean:
+
+**Option 1**: Improve the user interface and visual design
+**Option 2**: Add new features or functionality
+**Option 3**: Optimize performance and loading speeds
+
+Which type of improvement are you looking for?
+```
+
+**Example 2**: "Fix the authentication"
+```
+I need to clarify what authentication issue you're referring to:
+
+**Option 1**: Fix a bug in the login/registration process
+**Option 2**: Improve the authentication security or token handling
+**Option 3**: Add new authentication features (password reset, 2FA, etc.)
+
+Which authentication aspect needs attention?
+```
+
+**Example 3**: "Update the database"
+```
+"Update the database" could mean several things:
+
+**Option 1**: Add new tables or columns for upcoming features
+**Option 2**: Modify existing data or fix data inconsistencies
+**Option 3**: Update database configuration or migration scripts
+
+What type of database update do you need?
+```
+
+#### Mandatory Clarification Scenarios
+- **Scope Ambiguity**: "entire app" vs. "specific feature"
+- **Technical Approach**: "frontend" vs. "backend" vs. "both"
+- **Priority Level**: "quick fix" vs. "comprehensive solution"
+- **User Impact**: "internal change" vs. "user-facing feature"
+- **Integration Scope**: "standalone" vs. "integrated with existing features"
+
 ### Critical Thinking & Collaborative Decision-Making (MANDATORY)
 
 #### Professional Discourse Principles
