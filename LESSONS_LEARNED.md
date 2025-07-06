@@ -191,6 +191,117 @@ echo "=== Frontend Status ===" && curl -I http://localhost:3000
 
 ---
 
+## Error: Favorites Functionality - Backend Data Structure Mismatch
+**Date**: 2025-07-06
+**Context**: Favorites button working for API calls but UI not updating correctly, stats not reflecting changes
+**Error**: Multiple interconnected issues:
+1. Backend `getUserRecipes` method returning basic recipe data without `userRecipe` relationship
+2. Frontend expecting `userRecipe` object with `isFavorite` field but not receiving it
+3. Recipe stats not updating when toggling favorites from "All Recipes" tab
+4. API calls succeeding (200 OK) but UI showing stale state
+
+**Root Cause**: Backend-Frontend data structure mismatch:
+- **Backend**: `getUserRecipes` only returned recipe data: `recipes.map(ur => ur.recipe)`
+- **Frontend**: Expected `RecipeWithUserData` structure with `userRecipe` field containing `isFavorite`
+- **Stats Issue**: Frontend only refreshed `favoriteRecipes` when on "Favorites" tab, not when toggling from "All Recipes"
+- **TypeScript Types**: Frontend types didn't match actual backend response structure
+
+**Solution**: Comprehensive backend and frontend alignment:
+
+1. **Backend - Return Complete Data Structure**:
+```typescript
+// BEFORE (problematic):
+async getUserRecipes(userId: string, limit = 20, offset = 0): Promise<Recipe[]> {
+  const userRecipes = await prisma.userRecipe.findMany({
+    where: { userId },
+    include: { recipe: true },
+    // ...
+  });
+  return userRecipes.map(ur => ur.recipe); // Missing userRecipe data
+}
+
+// AFTER (fixed):
+async getUserRecipes(userId: string, limit = 20, offset = 0): Promise<(Recipe & { userRecipe: any })[]> {
+  const userRecipes = await prisma.userRecipe.findMany({
+    where: { userId },
+    include: { recipe: true },
+    // ...
+  });
+  return userRecipes.map(ur => ({
+    ...ur.recipe,
+    userRecipe: {
+      id: ur.id,
+      userId: ur.userId,
+      recipeId: ur.recipeId,
+      rating: ur.rating,
+      notes: ur.notes,
+      cookedDate: ur.cookedDate,
+      isFavorite: ur.isFavorite, // Critical field for UI
+      createdAt: ur.createdAt,
+      updatedAt: ur.updatedAt,
+    },
+  }));
+}
+```
+
+2. **Frontend - Always Refresh Favorites for Stats**:
+```typescript
+// BEFORE (problematic):
+const handleToggleFavorite = async (recipeId: string, isFavorite: boolean) => {
+  // ... API call
+  loadRecipes();
+  if (activeTab === 'favorites') {
+    loadFavorites(); // Only refresh if on favorites tab
+  }
+};
+
+// AFTER (fixed):
+const handleToggleFavorite = async (recipeId: string, isFavorite: boolean) => {
+  // ... API call
+  loadRecipes();
+  loadFavorites(); // Always refresh for stats accuracy
+};
+```
+
+3. **TypeScript Type Alignment**:
+```typescript
+// Updated response types to match backend
+export interface UserRecipesResponse {
+  success: boolean;
+  recipes: RecipeWithUserData[]; // Was: SavedRecipe[]
+  pagination: PaginationInfo;
+}
+
+export interface FavoriteRecipesResponse {
+  success: boolean;
+  recipes: RecipeWithUserData[]; // Was: SavedRecipe[]
+}
+```
+
+**Key Insights**:
+- **Data Structure Contracts**: Backend and frontend must have exact agreement on response structure
+- **State Management**: UI stats depend on multiple state variables that must all be kept in sync
+- **API Call Success ≠ UI Update**: API calls can succeed while UI remains stale due to missing data
+- **TypeScript Type Safety**: Type definitions must match actual runtime data structure
+- **Conditional Logic Pitfalls**: Conditional state updates can cause partial UI updates
+
+**Prevention**: 
+- **Document API Response Structure** with exact field names and nested objects
+- **Test Both API and UI** - verify data flows from backend to frontend UI
+- **Use Type Guards** to validate runtime data matches TypeScript types
+- **Implement Comprehensive State Updates** - update all dependent state variables
+- **Add Integration Tests** that verify full data flow from API to UI
+- **Use TypeScript Strict Mode** to catch type mismatches early
+- **Review State Dependencies** when implementing toggle/update functionality
+- **Test Edge Cases** like toggling from different tabs/contexts
+
+**Related**: 
+- [TypeScript Strict Mode](https://www.typescriptlang.org/tsconfig#strict)
+- [React State Management Best Practices](https://reactjs.org/docs/state-and-lifecycle.html)
+- [API Design Patterns](https://restfulapi.net/)
+
+---
+
 ## Error: TagSelector Infinite Loop and React Key Duplication
 **Date**: 2025-07-05
 **Context**: Implementing comprehensive user preferences with TagSelector components across multiple fields
