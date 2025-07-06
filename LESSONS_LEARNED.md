@@ -518,6 +518,142 @@ try {
 
 ---
 
+## Error: Registration Preferences Feature Parity Implementation
+**Date**: 2025-07-05
+**Context**: User requested that registration preferences match the full preferences page in terms of features and AI suggestions
+**Challenge**: Registration preferences were significantly lighter than the full preferences page:
+- Registration had only 3 basic sections vs 5 comprehensive tabs
+- Missing AI suggestions (static TagSelector only vs DynamicSuggestionInput)
+- Missing fields: dishes, spice tolerance, chefs, restaurants, nutritional goals, equipment, etc.
+- Different styling (`.card` vs `.preference-card`)
+
+**Solution**: Complete overhaul of registration preferences component:
+1. **Added Missing Sections**:
+   - Spice tolerance selector with visual indicators (Mild/Medium/Hot/Extreme)
+   - Favorite dishes with AI suggestions using DynamicSuggestionInput
+   - Culinary inspirations (chefs and restaurants) with AI suggestions
+
+2. **AI Suggestion Integration**:
+   - Imported and implemented DynamicSuggestionInput component
+   - Added AI-powered suggestions for dishes, chefs, restaurants
+   - Same suggestion system as full preferences page with proper error handling
+
+3. **Styling Consistency**:
+   - Changed from `.card` to `.preference-card` class for consistent styling
+   - Improved section organization with clear headers and grid layouts
+   - Visual spice tolerance indicators matching main preferences
+
+4. **Backend Constants**:
+   - Added `POPULAR_DISHES`, `POPULAR_CHEFS`, `POPULAR_RESTAURANTS` constants
+   - Updated `PreferencesFormData` initialization with all required fields
+   - Ensured all suggestion endpoints work with proper fallbacks
+
+**Learning**: 
+- **Feature parity requires comprehensive analysis** - don't just copy UI, understand functionality
+- **AI integration needs proper fallbacks** - static suggestions when AI fails
+- **Component reusability** - DynamicSuggestionInput worked perfectly across contexts
+- **Styling consistency** - use same CSS classes for similar components
+- **Data initialization** - ensure all form fields have proper default values
+- **User experience continuity** - registration should feel like a preview of the full app
+
+**Prevention**:
+- **Design system documentation** - maintain clear component usage guidelines
+- **Feature comparison matrix** - document what each page/component should include
+- **Reusable component library** - build components that work across contexts
+- **Consistent data models** - ensure same data structures across registration and preferences
+- **User journey mapping** - understand how features connect across the app
+
+---
+
+## Error: Google Gemini API Model Deprecation
+**Date**: 2025-07-05
+**Context**: Switching from OpenAI to Google Gemini for AI suggestions
+**Error**: `404 error` when using `gemini-pro` model name - model was deprecated
+**Root Cause**: Using outdated model name `gemini-pro` instead of current `gemini-1.5-flash`
+
+**Solution**: 
+1. **Updated model name**: Changed from `gemini-pro` to `gemini-1.5-flash`
+2. **API testing**: Verified new model works with test requests
+3. **Documentation check**: Confirmed current model names in Gemini documentation
+
+**Learning**: 
+- **Stay updated with AI model names** - providers frequently update/deprecate models
+- **Test API integration thoroughly** - don't assume model names remain stable
+- **Check official documentation** - model names and capabilities change regularly
+- **Error handling for model changes** - implement fallbacks for deprecated models
+
+**Prevention**:
+- **Regular API documentation review** - check for model updates monthly
+- **Environment-specific model configuration** - use config files for easy updates
+- **API response monitoring** - log and alert on model deprecation warnings
+- **Fallback model configuration** - have backup models ready for quick switching
+
+---
+
+## Error: Comprehensive Database Schema Implementation
+**Date**: 2025-07-05
+**Context**: Implementing comprehensive user preferences with all fields from design
+**Challenge**: Database schema needed extensive updates for new preference fields:
+- Nutritional goals, budget preferences, meal types
+- Available equipment, meal complexity
+- Comprehensive validation and storage
+
+**Solution**: 
+1. **Prisma Schema Updates**: Added all new fields to UserPreferences model
+2. **Database Migration**: Created and ran migrations for new schema
+3. **TypeScript Interface Updates**: Updated all interfaces to match new schema
+4. **Validation Updates**: Added validation for all new preference fields
+5. **API Endpoint Updates**: Updated all CRUD operations to handle new fields
+
+**Learning**: 
+- **Schema evolution planning** - plan for comprehensive features from the start
+- **Migration strategy** - test migrations thoroughly before applying to production
+- **Type safety maintenance** - keep TypeScript interfaces in sync with database schema
+- **Validation consistency** - ensure frontend and backend validation match
+- **API versioning consideration** - major schema changes may need API versioning
+
+**Prevention**:
+- **Comprehensive initial design** - plan for full feature set early
+- **Schema documentation** - maintain clear documentation of all fields and their purposes
+- **Migration testing** - test migrations on copies of production data
+- **Type generation automation** - use tools to auto-generate types from schema
+- **Gradual rollout** - implement complex schema changes incrementally when possible
+
+---
+
+## Error: Complex Component State Management with AI Suggestions
+**Date**: 2025-07-05
+**Context**: DynamicSuggestionInput component managing complex state with AI suggestions, loading states, and fallbacks
+**Challenge**: Managing multiple states simultaneously:
+- User input and debouncing
+- AI suggestion loading states
+- Error handling and fallback suggestions
+- Selected items and dropdown visibility
+- Component reusability across different contexts
+
+**Solution**: 
+1. **State Consolidation**: Used useReducer for complex state management
+2. **Debouncing**: Implemented proper debouncing for AI suggestion requests
+3. **Error Boundaries**: Added comprehensive error handling for AI failures
+4. **Loading States**: Clear visual feedback during AI suggestion loading
+5. **Context Awareness**: Component adapts to different suggestion types (chefs, restaurants, dishes)
+
+**Learning**: 
+- **Complex state needs useReducer** - useState becomes unwieldy with multiple related states
+- **Debouncing is essential** - prevent excessive API calls during typing
+- **Error handling at component level** - handle AI failures gracefully within components
+- **Loading states improve UX** - users need feedback during async operations
+- **Component flexibility** - design components to work in multiple contexts
+
+**Prevention**:
+- **State management planning** - design state structure before implementing complex components
+- **Performance considerations** - implement debouncing and memoization from the start
+- **Error handling strategy** - plan for all failure modes in async components
+- **Component API design** - design props interface for maximum reusability
+- **Testing with real data** - test components with actual API responses and failures
+
+---
+
 ## 🧠 Learning Categories
 
 ### Git & Version Control
@@ -548,3 +684,4433 @@ try {
 - Rate limiting impact on user experience and testing
 - Enum value conversion between backend and frontend
 - External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+- **Rate limit headers**: Include headers to help debug rate limiting issues
+- **User feedback**: Provide clear error messages when rate limits are hit
+- **Testing consideration**: Account for rate limiting when doing comprehensive testing
+**Related**: [Express Rate Limit Documentation](https://github.com/nfriedly/express-rate-limit)
+
+---
+
+## Error: TypeScript Compilation Failures Due to Unused Imports
+**Date**: 2025-07-05
+**Context**: Backend server failing to start due to TypeScript compilation errors
+**Error**: Multiple TypeScript errors:
+1. `'openaiService' is declared but its value is never read` in preferencesController.ts
+2. `'NUTRITIONAL_GOALS', 'BUDGET_PREFERENCES', etc. is declared but its value is never read`
+3. `'req' is declared but its value is never read` in route handlers
+4. `Property 'spiceTolerance' is missing in type` errors
+
+**Root Cause**: 
+- Imported modules/enums but didn't use them in the code
+- Route handlers with unused request parameters
+- TypeScript interface mismatches between database schema and response types
+
+**Solution**: 
+1. **Remove unused imports**: Commented out or removed imports that weren't being used
+2. **Prefix unused parameters**: Changed `req` to `_req` for unused parameters
+3. **Fix type definitions**: Added missing properties to TypeScript interfaces
+4. **Use imported enums**: Actually utilize imported enum values or remove the imports
+
+```typescript
+// Fixed unused parameter
+router.get('/suggestions/equipment', authenticateToken, (_req, res) => {
+  // No longer throws TS6133 error
+});
+
+// Fixed missing interface property
+interface UserPreferencesResponse {
+  // ... other properties
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'; // Added missing property
+}
+```
+
+**Prevention**: 
+- **Enable strict TypeScript checking** in development
+- **Remove unused imports immediately** when refactoring code
+- **Use TypeScript plugins** in IDE to highlight unused imports
+- **Regular code cleanup** to remove dead code
+- **Interface synchronization** - keep TypeScript interfaces in sync with database schema
+**Related**: [TypeScript Compiler Options](https://www.typescriptlang.org/tsconfig)
+
+---
+
+## Error: Port Already in Use (EADDRINUSE) During Development
+**Date**: 2025-07-05
+**Context**: Attempting to restart backend server during development
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000` - Backend server unable to start because port 8000 is already occupied
+**Root Cause**: Previous server process not properly terminated, leaving port 8000 occupied
+
+**Solution**: 
+1. **Kill existing processes**: `pkill -f "ts-node" && pkill -f "nodemon"`
+2. **Wait for cleanup**: `sleep 2` to allow processes to fully terminate
+3. **Restart with environment**: `OPENAI_API_KEY=dummy_key npm run dev`
+
+**Prevention**: 
+- **Proper process management**: Always terminate previous processes before starting new ones
+- **Use process managers**: Consider using PM2 or similar for better process control
+- **Port detection**: Check if port is available before starting server
+- **Graceful shutdown**: Implement proper signal handling for clean shutdowns
+- **Development scripts**: Create helper scripts for common development tasks
+**Related**: [Node.js Process Management](https://nodejs.org/api/process.html)
+
+---
+
+## Error: OpenAI API Authentication Failures in Development
+**Date**: 2025-07-05
+**Context**: Backend making requests to OpenAI API for suggestions with dummy API key
+**Error**: `401 Incorrect API key provided: dummy_key` - All OpenAI API calls failing with authentication errors
+**Root Cause**: Using placeholder "dummy_key" for OpenAI API key in development environment, causing all AI-powered suggestion endpoints to fail
+
+**Solution**: 
+1. **Graceful fallback handling**: Implemented static fallbacks when OpenAI API fails
+2. **Error logging**: Added proper error logging for API failures
+3. **Development environment**: Use dummy key but handle failures gracefully
+
+```typescript
+// Added fallback handling
+try {
+  suggestions = await openaiService.suggestChefs(query, context);
+} catch (error) {
+  console.log('AI suggestions failed, using static fallback:', error.message);
+  suggestions = STATIC_CHEF_SUGGESTIONS.filter(chef => 
+    chef.toLowerCase().includes(query.toLowerCase())
+  );
+}
+```
+
+**Prevention**: 
+- **Environment-specific API keys**: Use real keys in staging/production, dummy in development
+- **Graceful degradation**: Always provide fallbacks for external API dependencies
+- **Clear error messages**: Log API failures clearly for debugging
+- **Mock services**: Consider using mock services for development testing
+- **API key validation**: Validate API keys at startup and warn if using dummy keys
+**Related**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+
+---
+
+## 🧠 Learning Categories
+
+### Git & Version Control
+- Multi-line commit message formatting issues
+
+### TypeScript & React
+- React Hook context errors during Hot Module Reloading (HMR fallback handling)
+- TagSelector infinite loop prevention with useMemo and proper dependency arrays
+- React key uniqueness in reusable components
+- Defensive programming for undefined props
+- TypeScript compilation errors (unused imports, missing properties, unused parameters)
+
+### Backend Development
+- Rate limiting configuration for development vs production environments
+- TypeScript unused import/parameter warnings
+- Backend/frontend data format consistency (enum vs human-readable)
+- Port conflicts and process management (EADDRINUSE errors)
+- OpenAI API key authentication and fallback handling
+- Environment variable configuration
+
+### Database & Prisma
+- Database schema synchronization with application code
+- Prisma migration workflow during development
+- Database state verification with Prisma Studio
+
+### API Integration
+- Authentication header ordering in request configuration (object spread precedence)
+- Rate limiting impact on user experience and testing
+- Enum value conversion between backend and frontend
+- External API failure handling and static fallbacks
+
+### Frontend Development
+- Vite build configuration and deprecation warnings
+- Package.json module type specification
+- Development server port management
+- Build tool performance optimization
+
+### Development Environment
+- Process cleanup and port management
+- Environment variable setup and validation
+- Development workflow optimization
+- Error handling and graceful degradation
+
+### Deployment & DevOps
+- (To be populated as we encounter issues)
+
+---
+
+## 🔄 Review Schedule
+- **Weekly**: Review recent errors and update prevention strategies
+- **Monthly**: Analyze patterns and update development rules
+- **Per Phase**: Document major learnings at phase completion
+
+---
+
+## 💡 Quick Reference - Common Solutions
+
+### Development Environment
+- Always check node version compatibility
+- Clear npm cache if packages fail to install
+- Restart development servers after major changes
+
+### Git Best Practices
+- Use single-line commit messages with `-m` flag
+- Always test features before committing
+- Push regularly to avoid losing work
+
+### Debugging Strategies
+- Check browser console for frontend errors
+- Check terminal/server logs for backend errors
+- Use step-by-step debugging rather than guessing
+- Document the debugging process for future reference
+
+### React Component Best Practices
+- Always provide default values for props that might be undefined
+- Use useMemo for computed arrays to prevent infinite re-renders
+- Implement unique component IDs for reusable components
+- Add comprehensive error boundaries for graceful degradation
+- Test components in isolation and with real API data
+
+---
+
+*Remember: Every error is a learning opportunity. Document it, understand it, prevent it.* 
+
+---
+
+## Error: TypeScript Compilation Errors - Unused Imports and Missing Properties
+**Date**: 2025-07-05
+**Context**: Backend server crashing during development with TypeScript compilation errors
+**Error**: Multiple TypeScript compilation issues:
+1. `error TS6133: 'openaiService' is declared but its value is never read`
+2. `error TS2304: Cannot find name 'openaiService'` 
+3. `error TS2322: Property 'spiceTolerance' is missing in type 'UserPreferencesResponse'`
+4. `error TS6133: 'req' is declared but its value is never read` in route handlers
+
+**Root Cause**: 
+1. **Unused Imports**: Import statements for services that were temporarily removed or commented out
+2. **Missing Properties**: TypeScript interface definitions not matching database schema changes
+3. **Unused Parameters**: Route handlers with unused `req` parameters triggering strict TypeScript warnings
+
+**Solution**: 
+1. **Remove Unused Imports**: Delete or comment out import statements for services not currently used
+2. **Add Missing Properties**: Update TypeScript interfaces to include all required fields from database schema
+3. **Fix Unused Parameters**: Prefix unused parameters with underscore (`_req`) or remove if not needed
+4. **Consistent Schema**: Ensure TypeScript types match Prisma schema definitions exactly
+
+**Learning**: 
+- Keep TypeScript interfaces synchronized with database schema changes
+- Use TypeScript strict mode to catch unused imports/parameters early
+- Prefix unused parameters with underscore to indicate intentional non-use
+- Remove unused imports immediately to avoid compilation errors
+
+---
+
+## Error: Port Already in Use (EADDRINUSE)
+**Date**: 2025-07-05
+**Context**: Backend server repeatedly failing to start on port 8000
+**Error**: `Error: listen EADDRINUSE: address already in use :::8000`
+
+**Root Cause**: 
+1. **Multiple Server Instances**: Previous server instances not properly terminated
+2. **Nodemon Restart Conflicts**: Nodemon restarting while previous instance still running
+3. **Process Management**: Lack of proper process cleanup between development sessions
+
+**Solution**: 
+1. **Kill Existing Processes**: `pkill -f "ts-node"` and `pkill -f "nodemon"`
+2. **Check Port Usage**: `lsof -i :8000` to identify processes using the port
+3. **Proper Shutdown**: Use Ctrl+C to properly terminate servers before restarting
+4. **Process Cleanup**: Add cleanup scripts to kill all related processes
+
+**Learning**: 
+- Always properly terminate development servers before restarting
+- Use process management commands to clean up zombie processes
+- Implement proper signal handling for graceful server shutdown
+- Consider using different ports for different development sessions
+
+---
+
+## Error: OpenAI API Key Authentication Failure
+**Date**: 2025-07-05
+**Context**: Backend server crashing when trying to use OpenAI services
+**Error**: `OpenAIError: The OPENAI_API_KEY environment variable is missing or empty`
+
+**Root Cause**: 
+1. **Missing Environment Variable**: No `.env` file or missing `OPENAI_API_KEY` entry
+2. **Invalid API Key**: Using dummy/placeholder API key values
+3. **Service Initialization**: OpenAI service initializing before environment variables loaded
+
+**Solution**: 
+1. **Environment Setup**: Create `.env` file with valid `OPENAI_API_KEY=your_actual_key`
+2. **Dummy Key Fallback**: Use `OPENAI_API_KEY=dummy_key` for development when API not needed
+3. **Error Handling**: Implement proper error handling for API key failures
+4. **Service Fallbacks**: Provide static fallback responses when API calls fail
+
+**Learning**: 
+- Always provide fallback behavior for external API dependencies
+- Use environment variables for sensitive configuration
+- Implement graceful degradation when external services are unavailable
+- Document required environment variables in README
+
+---
+
+## Error: Frontend Build Warnings - Vite and Module Type Issues
+**Date**: 2025-07-05
+**Context**: Frontend development server showing deprecation warnings and module type issues
+**Error**: 
+1. `The CJS build of Vite's Node API is deprecated`
+2. `Module type of file:///postcss.config.js is not specified`
+3. `Port 3000 is in use, trying another one...`
+
+**Root Cause**: 
+1. **Vite Deprecation**: Using deprecated CommonJS build of Vite
+2. **Module Type Configuration**: Missing `"type": "module"` in package.json
+3. **Port Conflicts**: Multiple frontend instances running simultaneously
+
+**Solution**: 
+1. **Update Vite Configuration**: Migrate to ESM build of Vite
+2. **Package.json Type**: Add `"type": "module"` to package.json
+3. **Port Management**: Use different ports or properly terminate previous instances
+4. **Configuration Updates**: Update PostCSS and other configs for ESM compatibility
+
+**Learning**: 
+- Keep build tools updated to avoid deprecation warnings
+- Properly configure module types for modern JavaScript
+- Manage development server ports to avoid conflicts
+- Address deprecation warnings early to prevent future issues
+
+---
+
+## Error: Database Schema Mismatch - Prisma Migration Issues
+**Date**: 2025-07-05
+**Context**: Database schema not synchronized with application code
+**Error**: Missing fields in database that are required by TypeScript interfaces
+
+**Root Cause**: 
+1. **Schema Drift**: Database schema not updated after code changes
+2. **Migration Conflicts**: Prisma migrations not properly applied
+3. **Type Mismatches**: TypeScript expecting fields that don't exist in database
+
+**Solution**: 
+1. **Run Migrations**: `npx prisma migrate dev` to apply pending migrations
+2. **Reset Database**: `npx prisma migrate reset` for clean state if needed
+3. **Generate Client**: `npx prisma generate` to update Prisma client
+4. **Schema Sync**: Ensure Prisma schema matches TypeScript interfaces
+
+**Learning**: 
+- Always run migrations after schema changes
+- Keep database schema synchronized with application code
+- Use Prisma Studio to verify database state
+- Document migration procedures for team members
+
+---
+
+## Error: 429 "Too Many Requests" When Saving Preferences
+**Date**: 2025-07-05
+**Context**: User attempting to save preferences through the frontend UI
+**Error**: `PUT http://localhost:8000/api/preferences 429 (Too Many Requests)` - Rate limiting preventing users from saving preferences during normal usage
+**Root Cause**: Backend rate limiting configuration was too aggressive for development environment:
+- General API limit: 100 requests per 15 minutes
+- No separate rate limits for different endpoint types
+- Development and production using same restrictive limits
+
+**Solution**: Implemented environment-specific rate limiting:
+```typescript
+// Different limits for development vs production
+const generalLimiter = rateLimit({
+  windowMs: 900000, // 15 minutes
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // 1000 for dev, 100 for prod
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Separate preferences rate limiter (more lenient)
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env.NODE_ENV === 'development' ? 200 : 50, // 200 for dev, 50 for prod
+  message: 'Too many preference requests, please try again later.',
+});
+
+// Apply to specific routes
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+```
+
+**Prevention**: 
+- **Environment-specific configuration**: Use different rate limits for development vs production
+- **Endpoint-specific limits**: Critical user-facing endpoints need more lenient limits
+-
