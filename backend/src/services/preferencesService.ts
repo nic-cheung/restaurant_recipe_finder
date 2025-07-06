@@ -52,8 +52,8 @@ export const getUserPreferences = async (userId: string): Promise<UserPreference
 
   return {
     ...preferences,
-    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
-  };
+    spiceTolerance: (user?.spiceTolerance || 'MEDIUM') as 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME',
+  } as UserPreferencesResponse;
 };
 
 /**
@@ -116,7 +116,7 @@ export const upsertUserPreferences = async (
 
   return {
     ...preferences,
-    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+    spiceTolerance: (user?.spiceTolerance || 'MEDIUM') as 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME',
   };
 };
 
@@ -204,7 +204,7 @@ export const updateUserPreferences = async (
 
   return {
     ...preferences,
-    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+    spiceTolerance: (user?.spiceTolerance || 'MEDIUM') as 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME',
   };
 };
 
@@ -257,7 +257,7 @@ export const getUserPreferencesWithDefaults = async (
       mealComplexity: 'SIMPLE',
       
       // Spice tolerance from User model
-      spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+      spiceTolerance: (user?.spiceTolerance || 'MEDIUM') as 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME',
       
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -266,7 +266,7 @@ export const getUserPreferencesWithDefaults = async (
 
   return {
     ...preferences,
-    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+    spiceTolerance: (user?.spiceTolerance || 'MEDIUM') as 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME',
   };
 };
 

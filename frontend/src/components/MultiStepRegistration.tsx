@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import TagSelector from './TagSelector';
 import IngredientInput from './IngredientInput';
 import { PreferencesFormData, SKILL_LEVELS } from '../types/preferences';
+import DynamicSuggestionInput from './DynamicSuggestionInput';
 
 // Popular options for each category
 const POPULAR_DIETARY_RESTRICTIONS = [
@@ -17,18 +18,27 @@ const POPULAR_ALLERGIES = [
 ];
 
 const POPULAR_CUISINES = [
-  'Italian', 'Mexican', 'Chinese', 'Japanese', 'Thai', 'Indian', 'French', 'Mediterranean'
+  'Italian', 'Mexican', 'Thai', 'Indian', 'Japanese', 'Mediterranean'
 ];
 
 const COMMON_INGREDIENTS = [
-  'Garlic', 'Onion', 'Tomato', 'Basil', 'Oregano', 'Thyme', 'Rosemary', 'Parsley',
-  'Olive Oil', 'Butter', 'Lemon', 'Lime', 'Ginger', 'Cilantro', 'Paprika', 'Cumin',
-  'Black Pepper', 'Salt', 'Cheese', 'Chicken', 'Beef', 'Fish', 'Pasta', 'Rice'
+  'Garlic', 'Ginger', 'Basil', 'Tomatoes', 'Avocado', 'Lemon'
 ];
 
 const COMMON_DISLIKED_FOODS = [
-  'Mushrooms', 'Onions', 'Cilantro', 'Olives', 'Anchovies', 'Blue Cheese', 'Liver',
-  'Oysters', 'Brussel Sprouts', 'Cauliflower', 'Eggplant', 'Beets', 'Asparagus'
+  'Mushrooms', 'Onions', 'Cilantro', 'Olives', 'Anchovies', 'Blue Cheese'
+];
+
+const POPULAR_DISHES = [
+  'Pizza', 'Pasta', 'Tacos', 'Sushi', 'Curry', 'Salad'
+];
+
+const POPULAR_CHEFS = [
+  'Thomas Keller', 'Julia Child', 'Anthony Bourdain', 'Daniel Boulud', 'Alice Waters', 'Wolfgang Puck'
+];
+
+const POPULAR_RESTAURANTS = [
+  'The French Laundry', 'Eleven Madison Park', 'Le Bernardin', 'Alinea', 'Per Se', 'Daniel'
 ];
 
 interface AccountFormData {
@@ -63,8 +73,18 @@ const MultiStepRegistration: React.FC = () => {
     favoriteChefs: [],
     favoriteRestaurants: [],
     cookingSkillLevel: 'BEGINNER',
-    preferredCookingTime: '30',
-    servingSize: '2',
+    preferredCookingTime: '',
+    servingSize: '',
+    
+    // New comprehensive preference fields
+    nutritionalGoals: [],
+    budgetPreference: 'MODERATE',
+    preferredMealTypes: [],
+    availableEquipment: [],
+    mealComplexity: 'SIMPLE',
+    
+    // Spice tolerance
+    spiceTolerance: 'MEDIUM',
   });
 
   const handleAccountInputChange = (field: keyof AccountFormData, value: string) => {
@@ -387,43 +407,85 @@ const MultiStepRegistration: React.FC = () => {
       </div>
       
       <div className="space-y-6">
-        {/* Dietary Restrictions */}
-        <div className="card">
-          <TagSelector
-            label="Dietary Restrictions"
-            popularOptions={POPULAR_DIETARY_RESTRICTIONS}
-            allOptions={POPULAR_DIETARY_RESTRICTIONS}
-            selectedItems={preferencesData.dietaryRestrictions}
-            onSelectionChange={(items) => handleTagSelectionChange('dietaryRestrictions', items)}
-            placeholder="Search for dietary restrictions..."
-            maxPopularTags={6}
-          />
+        {/* Dietary Requirements */}
+        <div className="preference-card">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Dietary & Health</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <TagSelector
+                label="Dietary Restrictions"
+                popularOptions={POPULAR_DIETARY_RESTRICTIONS}
+                allOptions={POPULAR_DIETARY_RESTRICTIONS}
+                selectedItems={preferencesData.dietaryRestrictions}
+                onSelectionChange={(items) => handleTagSelectionChange('dietaryRestrictions', items)}
+                placeholder="Search for dietary restrictions..."
+                maxPopularTags={6}
+              />
+            </div>
+            <div>
+              <TagSelector
+                label="Allergies & Intolerances"
+                popularOptions={POPULAR_ALLERGIES}
+                allOptions={POPULAR_ALLERGIES}
+                selectedItems={preferencesData.allergies}
+                onSelectionChange={(items) => handleTagSelectionChange('allergies', items)}
+                placeholder="Search for allergies..."
+                maxPopularTags={6}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Allergies */}
-        <div className="card">
-          <TagSelector
-            label="Allergies & Intolerances"
-            popularOptions={POPULAR_ALLERGIES}
-            allOptions={POPULAR_ALLERGIES}
-            selectedItems={preferencesData.allergies}
-            onSelectionChange={(items) => handleTagSelectionChange('allergies', items)}
-            placeholder="Search for allergies..."
-            maxPopularTags={6}
-          />
+        {/* Taste Preferences */}
+        <div className="preference-card">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Taste & Cuisine</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <TagSelector
+                label="Favorite Cuisines"
+                popularOptions={POPULAR_CUISINES}
+                allOptions={POPULAR_CUISINES}
+                selectedItems={preferencesData.favoriteCuisines}
+                onSelectionChange={(items) => handleTagSelectionChange('favoriteCuisines', items)}
+                placeholder="Search for cuisines..."
+                maxPopularTags={8}
+              />
+            </div>
+            <div>
+              <DynamicSuggestionInput
+                label="Favorite Dishes"
+                selectedItems={preferencesData.favoriteDishes || []}
+                onSelectionChange={(items) => handleTagSelectionChange('favoriteDishes', items)}
+                placeholder="Search for dishes..."
+                suggestionType="dishes"
+                staticSuggestions={POPULAR_DISHES}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Favorite Cuisines */}
-        <div className="card">
-          <TagSelector
-            label="Favorite Cuisines"
-            popularOptions={POPULAR_CUISINES}
-            allOptions={POPULAR_CUISINES}
-            selectedItems={preferencesData.favoriteCuisines}
-            onSelectionChange={(items) => handleTagSelectionChange('favoriteCuisines', items)}
-            placeholder="Search for cuisines..."
-            maxPopularTags={8}
-          />
+        {/* Spice Tolerance */}
+        <div className="preference-card">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Spice Preference</h3>
+          <p className="text-sm text-gray-600 mb-4">How much heat do you enjoy in your food?</p>
+          <div className="spice-selector">
+            {['Mild', 'Medium', 'Hot', 'Extreme'].map((tolerance: string) => (
+              <button
+                key={tolerance}
+                type="button"
+                onClick={() => handlePreferencesInputChange('spiceTolerance', tolerance.toUpperCase())}
+                className={`spice-option ${preferencesData.spiceTolerance === tolerance.toUpperCase() ? 'selected' : ''}`}
+              >
+                <div className="spice-indicator">
+                  {tolerance === 'Mild' && <div className="spice-dot mild"></div>}
+                  {tolerance === 'Medium' && <div className="spice-dot medium"></div>}
+                  {tolerance === 'Hot' && <div className="spice-dot hot"></div>}
+                  {tolerance === 'Extreme' && <div className="spice-dot extreme"></div>}
+                </div>
+                <span className="spice-label">{tolerance}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       
@@ -450,38 +512,40 @@ const MultiStepRegistration: React.FC = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Almost Done!</h2>
-        <p className="text-gray-600">Add some ingredients and cooking preferences</p>
+        <p className="text-gray-600">Add ingredients, cooking preferences, and inspirations</p>
       </div>
       
       <div className="space-y-6">
         {/* Ingredients */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="card">
-            <IngredientInput
-              label="Favorite Ingredients"
-              selectedItems={preferencesData.favoriteIngredients}
-              onSelectionChange={(items) => handleTagSelectionChange('favoriteIngredients', items)}
-              placeholder="Type ingredients you love..."
-              suggestions={COMMON_INGREDIENTS}
-              tagColor="green"
-            />
-          </div>
-
-          <div className="card">
-            <IngredientInput
-              label="Disliked Foods"
-              selectedItems={preferencesData.dislikedFoods}
-              onSelectionChange={(items) => handleTagSelectionChange('dislikedFoods', items)}
-              placeholder="Type foods you avoid..."
-              suggestions={COMMON_DISLIKED_FOODS}
-              tagColor="red"
-            />
+        <div className="preference-card">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Ingredients & Foods</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <IngredientInput
+                label="Favorite Ingredients"
+                selectedItems={preferencesData.favoriteIngredients}
+                onSelectionChange={(items) => handleTagSelectionChange('favoriteIngredients', items)}
+                placeholder="Type ingredients you love..."
+                suggestions={COMMON_INGREDIENTS}
+                tagColor="green"
+              />
+            </div>
+            <div>
+              <IngredientInput
+                label="Disliked Foods"
+                selectedItems={preferencesData.dislikedFoods}
+                onSelectionChange={(items) => handleTagSelectionChange('dislikedFoods', items)}
+                placeholder="Type foods you avoid..."
+                suggestions={COMMON_DISLIKED_FOODS}
+                tagColor="red"
+              />
+            </div>
           </div>
         </div>
 
         {/* Cooking Preferences */}
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Cooking Preferences</h3>
+        <div className="preference-card">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Cooking Style</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -527,6 +591,33 @@ const MultiStepRegistration: React.FC = () => {
                 onChange={(e) => handlePreferencesInputChange('servingSize', e.target.value)}
                 className="input-field"
                 placeholder="e.g., 2"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Culinary Inspirations */}
+        <div className="preference-card">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Culinary Inspirations</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <DynamicSuggestionInput
+                label="Favorite Chefs"
+                selectedItems={preferencesData.favoriteChefs || []}
+                onSelectionChange={(items) => handleTagSelectionChange('favoriteChefs', items)}
+                placeholder="Search for chefs..."
+                suggestionType="chefs"
+                staticSuggestions={POPULAR_CHEFS}
+              />
+            </div>
+            <div>
+              <DynamicSuggestionInput
+                label="Favorite Restaurants"
+                selectedItems={preferencesData.favoriteRestaurants || []}
+                onSelectionChange={(items) => handleTagSelectionChange('favoriteRestaurants', items)}
+                placeholder="Search for restaurants..."
+                suggestionType="restaurants"
+                staticSuggestions={POPULAR_RESTAURANTS}
               />
             </div>
           </div>

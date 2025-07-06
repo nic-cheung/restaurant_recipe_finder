@@ -20,6 +20,7 @@ import {
   MEAL_COMPLEXITY,
   SPICE_TOLERANCE,
 } from '../utils/validation';
+import { geminiService } from '../services/geminiService';
 import {
   getUserPreferencesWithDefaults,
   upsertUserPreferences,
@@ -28,7 +29,6 @@ import {
   getPreferencesSummary as getPreferencesSummaryService,
   updateUserSpiceTolerance,
 } from '../services/preferencesService';
-import { openaiService } from '../services/openaiService';
 
 /**
  * Get user preferences
@@ -281,7 +281,7 @@ export const getChefSuggestions = async (req: AuthenticatedRequest, res: Respons
       const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
       
       // Try AI-powered suggestions first
-      suggestions = await openaiService.suggestChefs(query, {
+      suggestions = await geminiService.suggestChefs(query, {
         favoriteCuisines: userPreferences?.favoriteCuisines || []
       });
       
@@ -353,7 +353,7 @@ export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: R
       const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
       
       // Try AI-powered suggestions first
-      suggestions = await openaiService.suggestRestaurants(query, {
+      suggestions = await geminiService.suggestRestaurants(query, {
         favoriteCuisines: userPreferences?.favoriteCuisines || []
       });
       
@@ -425,7 +425,7 @@ export const getIngredientSuggestions = async (req: AuthenticatedRequest, res: R
       const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
       
       // Try AI-powered suggestions first
-      suggestions = await openaiService.suggestIngredients(query, {
+      suggestions = await geminiService.suggestIngredients(query, {
         favoriteCuisines: userPreferences?.favoriteCuisines || [],
         dietaryRestrictions: userPreferences?.dietaryRestrictions || []
       });
@@ -498,7 +498,7 @@ export const getCuisineSuggestions = async (req: AuthenticatedRequest, res: Resp
       const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
       
       // Try AI-powered suggestions first
-      suggestions = await openaiService.suggestCuisines(query, {
+      suggestions = await geminiService.suggestCuisines(query, {
         favoriteIngredients: userPreferences?.favoriteIngredients || []
       });
       
@@ -570,7 +570,7 @@ export const getDishSuggestions = async (req: AuthenticatedRequest, res: Respons
       const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
       
       // Try AI-powered suggestions first
-      suggestions = await openaiService.suggestDishes(query, {
+      suggestions = await geminiService.suggestDishes(query, {
         favoriteCuisines: userPreferences?.favoriteCuisines || [],
         favoriteIngredients: userPreferences?.favoriteIngredients || [],
         dietaryRestrictions: userPreferences?.dietaryRestrictions || []
