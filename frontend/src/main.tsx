@@ -17,7 +17,8 @@ const queryClient = new QueryClient({
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // Temporarily disabled React.StrictMode for development to prevent auth rate limiting
+  // <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter 
         future={{
@@ -38,5 +39,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         />
       </BrowserRouter>
     </QueryClientProvider>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 ) 

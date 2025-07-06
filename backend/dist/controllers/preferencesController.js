@@ -1,6 +1,39 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDishSuggestions = exports.getCuisineSuggestions = exports.getIngredientSuggestions = exports.getRestaurantSuggestions = exports.getChefSuggestions = exports.getPreferencesOptions = exports.getPreferencesSummary = exports.deletePreferences = exports.patchPreferences = exports.updatePreferences = exports.getPreferences = void 0;
+exports.getDishSuggestions = exports.getCuisineSuggestions = exports.getIngredientSuggestions = exports.getChefSuggestions = exports.getRestaurantSuggestions = exports.getPreferencesOptions = exports.getPreferencesSummary = exports.deletePreferences = exports.patchPreferences = exports.updatePreferences = exports.getPreferences = void 0;
 const zod_1 = require("zod");
 const validation_1 = require("../utils/validation");
 const geminiService_1 = require("../services/geminiService");
@@ -197,59 +230,6 @@ const getPreferencesOptions = async (_req, res) => {
     }
 };
 exports.getPreferencesOptions = getPreferencesOptions;
-const getChefSuggestions = async (req, res) => {
-    try {
-        if (!req.user) {
-            res.status(401).json({
-                success: false,
-                error: 'User not authenticated',
-            });
-            return;
-        }
-        const { query = '' } = req.query;
-        let suggestions = [];
-        let source = 'static_fallback';
-        try {
-            const userPreferences = await (0, preferencesService_1.getUserPreferencesWithDefaults)(req.user.userId);
-            suggestions = await geminiService_1.geminiService.suggestChefs(query, {
-                favoriteCuisines: userPreferences?.favoriteCuisines || []
-            });
-            source = 'ai_powered';
-            if (!Array.isArray(suggestions) || suggestions.length === 0) {
-                throw new Error('Invalid AI response');
-            }
-        }
-        catch (aiError) {
-            console.log('AI suggestions failed, using static fallback:', aiError);
-            if (query.trim()) {
-                suggestions = validation_1.COMMON_CHEFS.filter(chef => chef.toLowerCase().includes(query.toLowerCase()));
-                if (suggestions.length === 0) {
-                    suggestions = validation_1.COMMON_CHEFS.slice(0, 10);
-                }
-            }
-            else {
-                suggestions = validation_1.COMMON_CHEFS.slice(0, 15);
-            }
-            source = 'static_fallback';
-        }
-        res.status(200).json({
-            success: true,
-            data: {
-                suggestions: suggestions.slice(0, 10),
-                query: query || 'popular',
-                source,
-            },
-        });
-    }
-    catch (error) {
-        console.error('Get chef suggestions error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to get chef suggestions',
-        });
-    }
-};
-exports.getChefSuggestions = getChefSuggestions;
 const getRestaurantSuggestions = async (req, res) => {
     try {
         if (!req.user) {
@@ -259,21 +239,23 @@ const getRestaurantSuggestions = async (req, res) => {
             });
             return;
         }
-        const { query = '' } = req.query;
+        const { query = '', location = '' } = req.query;
         let suggestions = [];
         let source = 'static_fallback';
-        try {
-            const userPreferences = await (0, preferencesService_1.getUserPreferencesWithDefaults)(req.user.userId);
-            suggestions = await geminiService_1.geminiService.suggestRestaurants(query, {
-                favoriteCuisines: userPreferences?.favoriteCuisines || []
-            });
-            source = 'ai_powered';
-            if (!Array.isArray(suggestions) || suggestions.length === 0) {
-                throw new Error('Invalid AI response');
+        if (process.env['GOOGLE_PLACES_API_KEY'] && location.trim()) {
+            try {
+                const googleResponse = await fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + ' restaurant ' + location)}&type=restaurant&key=${process.env['GOOGLE_PLACES_API_KEY']}`);
+                if (googleResponse.ok) {
+                    const data = await googleResponse.json();
+                    suggestions = data.results?.map((place) => place.name).slice(0, 10) || [];
+                    source = 'google_places';
+                }
+            }
+            catch (googleError) {
+                console.log('Google Places API failed, using static fallback:', googleError);
             }
         }
-        catch (aiError) {
-            console.log('AI suggestions failed, using static fallback:', aiError);
+        if (suggestions.length === 0) {
             if (query.trim()) {
                 suggestions = validation_1.COMMON_RESTAURANTS.filter(restaurant => restaurant.toLowerCase().includes(query.toLowerCase()));
                 if (suggestions.length === 0) {
@@ -290,6 +272,7 @@ const getRestaurantSuggestions = async (req, res) => {
             data: {
                 suggestions: suggestions.slice(0, 10),
                 query: query || 'popular',
+                location: location || 'global',
                 source,
             },
         });
@@ -303,6 +286,75 @@ const getRestaurantSuggestions = async (req, res) => {
     }
 };
 exports.getRestaurantSuggestions = getRestaurantSuggestions;
+const getChefSuggestions = async (req, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({
+                success: false,
+                error: 'User not authenticated',
+            });
+            return;
+        }
+        const { query = '', cuisine = '' } = req.query;
+        let suggestions = [];
+        let source = 'static_fallback';
+        if (query.trim()) {
+            try {
+                const { wikipediaService } = await Promise.resolve().then(() => __importStar(require('../services/wikipediaService')));
+                suggestions = await wikipediaService.searchChefs(query, 8);
+                if (suggestions.length > 0) {
+                    source = 'wikipedia_api';
+                    const staticMatches = validation_1.COMMON_CHEFS.filter(chef => chef.toLowerCase().includes(query.toLowerCase())).slice(0, 3);
+                    const combined = [...new Set([...suggestions, ...staticMatches])];
+                    suggestions = combined.slice(0, 10);
+                }
+            }
+            catch (wikipediaError) {
+                console.log('Wikipedia API failed, using static fallback:', wikipediaError);
+                suggestions = [];
+            }
+        }
+        if (suggestions.length === 0) {
+            if (query.trim()) {
+                suggestions = validation_1.COMMON_CHEFS.filter(chef => chef.toLowerCase().includes(query.toLowerCase()));
+                if (suggestions.length === 0) {
+                    suggestions = validation_1.COMMON_CHEFS.filter(chef => {
+                        const chefWords = chef.toLowerCase().split(' ');
+                        const queryWords = query.toLowerCase().split(' ');
+                        return queryWords.some(queryWord => chefWords.some(chefWord => chefWord.includes(queryWord) || queryWord.includes(chefWord)));
+                    });
+                }
+                if (suggestions.length === 0) {
+                    suggestions = validation_1.COMMON_CHEFS.slice(0, 10);
+                }
+            }
+            else if (cuisine.trim()) {
+                suggestions = validation_1.COMMON_CHEFS.slice(0, 15);
+            }
+            else {
+                suggestions = validation_1.COMMON_CHEFS.slice(0, 15);
+            }
+            source = 'static_fallback';
+        }
+        res.status(200).json({
+            success: true,
+            data: {
+                suggestions: suggestions.slice(0, 10),
+                query: query || 'popular',
+                cuisine: cuisine || 'all',
+                source,
+            },
+        });
+    }
+    catch (error) {
+        console.error('Get chef suggestions error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get chef suggestions',
+        });
+    }
+};
+exports.getChefSuggestions = getChefSuggestions;
 const getIngredientSuggestions = async (req, res) => {
     try {
         if (!req.user) {

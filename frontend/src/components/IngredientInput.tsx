@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 interface IngredientInputProps {
   label: string;
@@ -19,24 +19,19 @@ const IngredientInput: React.FC<IngredientInputProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filter suggestions based on input
-  useEffect(() => {
+  // Calculate filtered suggestions directly in render to avoid dependency issues
+  const filteredSuggestions = useMemo(() => {
     if (inputValue.trim() && suggestions.length > 0) {
-      const filtered = suggestions.filter(suggestion =>
+      return suggestions.filter(suggestion =>
         suggestion.toLowerCase().includes(inputValue.toLowerCase()) &&
         !selectedItems.includes(suggestion)
       ).slice(0, 5); // Limit to 5 suggestions
-      setFilteredSuggestions(filtered);
-      setIsDropdownOpen(filtered.length > 0);
-    } else {
-      setFilteredSuggestions([]);
-      setIsDropdownOpen(false);
     }
-  }, [inputValue, suggestions, selectedItems]);
+    return [];
+  }, [inputValue, suggestions, selectedItems.join(',')]);
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
@@ -60,6 +55,12 @@ const IngredientInput: React.FC<IngredientInputProps> = ({
 
   const removeItem = (item: string) => {
     onSelectionChange(selectedItems.filter(selected => selected !== item));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    setIsDropdownOpen(value.trim().length > 0);
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent) => {
@@ -122,7 +123,7 @@ const IngredientInput: React.FC<IngredientInputProps> = ({
           ref={inputRef}
           type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleInputKeyDown}
           onFocus={() => inputValue && setIsDropdownOpen(filteredSuggestions.length > 0)}
           placeholder={placeholder}

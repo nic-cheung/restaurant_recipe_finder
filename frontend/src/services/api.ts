@@ -7,18 +7,17 @@ import {
   PreferencesOptionsResponse 
 } from '../types/preferences';
 import {
-  GenerateRecipeRequest,
-  RecipeResponse,
-  SaveRecipeRequest,
-  SavedRecipeResponse,
+  RecipeGenerationRequest,
+  RecipeGenerationResponse,
+  RecipeSaveResponse,
   UserRecipesResponse,
   RecipeDetailsResponse,
-  UpdateRecipeRatingRequest,
+  RecipeRatingRequest,
   RecipeVariationRequest,
-  IngredientSubstitutionRequest,
-  SubstitutionsResponse,
-  FavoriteResponse,
-  RecipeQueryOptions
+  RecipeVariationResponse,
+  FavoriteRecipesResponse,
+  GenerateAndSaveResponse,
+  ApiErrorResponse
 } from '../types/recipe';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -36,6 +35,10 @@ class ApiService {
     const url = `${API_BASE_URL}${endpoint}`;
     const authHeaders = this.getAuthHeaders();
     
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout (slightly longer than backend)
+    
     const config: RequestInit = {
       ...options,
       headers: {
@@ -43,27 +46,34 @@ class ApiService {
         ...authHeaders,
         ...options.headers,
       },
+      signal: controller.signal,
     };
 
-    const response = await fetch(url, config);
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('API Error:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData,
-        url,
-        config
-      });
+    try {
+      const response = await fetch(url, config);
+      clearTimeout(timeoutId);
       
-      // Create error with more details
-      const error = new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
-      (error as any).response = { status: response.status, data: errorData };
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          url,
+          config
+        });
+        
+        // Create error with more details
+        const error = new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
+        (error as any).response = { status: response.status, data: errorData };
+        throw error;
+      }
+
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
       throw error;
     }
-
-    return response.json();
   }
 
   // Auth endpoints
@@ -176,9 +186,13 @@ class ApiService {
     return response.data;
   }
 
-  async getRestaurantSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
-    const endpoint = query ? `/preferences/suggestions/restaurants?query=${encodeURIComponent(query)}` : '/preferences/suggestions/restaurants';
-    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+  async getRestaurantSuggestions(query: string = '', location: string = ''): Promise<{ suggestions: string[]; query: string; location: string; source: string }> {
+    const params = new URLSearchParams();
+    if (query) params.append('query', query);
+    if (location) params.append('location', location);
+    
+    const endpoint = `/preferences/suggestions/restaurants${params.toString() ? '?' + params.toString() : ''}`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; location: string; source: string } }>(endpoint);
     return response.data;
   }
 
@@ -201,62 +215,67 @@ class ApiService {
   }
 
   // Recipe methods
-  async generateRecipe(request: GenerateRecipeRequest): Promise<RecipeResponse> {
-    return this.request<RecipeResponse>('/recipes/generate', {
+  async generateRecipe(request: RecipeGenerationRequest): Promise<RecipeGenerationResponse> {
+    return this.request<RecipeGenerationResponse>('/recipes/generate', {
       method: 'POST',
       body: JSON.stringify(request),
     });
   }
 
-  async saveRecipe(request: SaveRecipeRequest): Promise<SavedRecipeResponse> {
-    return this.request<SavedRecipeResponse>('/recipes/save', {
+  async saveRecipe(recipeData: any): Promise<RecipeSaveResponse> {
+    return this.request<RecipeSaveResponse>('/recipes/save', {
+      method: 'POST',
+      body: JSON.stringify({ recipe: recipeData }),
+    });
+  }
+
+  async generateAndSaveRecipe(request: RecipeGenerationRequest): Promise<GenerateAndSaveResponse> {
+    return this.request<GenerateAndSaveResponse>('/recipes/generate-and-save', {
       method: 'POST',
       body: JSON.stringify(request),
     });
   }
 
-  async getUserRecipes(options: RecipeQueryOptions = {}): Promise<UserRecipesResponse> {
-    const params = new URLSearchParams();
-    if (options.page) params.append('page', options.page.toString());
-    if (options.limit) params.append('limit', options.limit.toString());
-    if (options.sortBy) params.append('sortBy', options.sortBy);
-    if (options.sortOrder) params.append('sortOrder', options.sortOrder);
-
-    const queryString = params.toString();
-    const endpoint = queryString ? `/recipes/user?${queryString}` : '/recipes/user';
-    
-    return this.request<UserRecipesResponse>(endpoint);
+  async getUserRecipes(limit: number = 10, offset: number = 0): Promise<UserRecipesResponse> {
+    return this.request<UserRecipesResponse>(`/recipes/my-recipes?limit=${limit}&offset=${offset}`);
   }
 
   async getRecipeDetails(recipeId: string): Promise<RecipeDetailsResponse> {
     return this.request<RecipeDetailsResponse>(`/recipes/${recipeId}`);
   }
 
-  async updateRecipeRating(recipeId: string, request: UpdateRecipeRatingRequest): Promise<any> {
-    return this.request<any>(`/recipes/${recipeId}/rating`, {
-      method: 'PUT',
-      body: JSON.stringify(request),
-    });
-  }
-
-  async generateRecipeVariation(recipeId: string, request: RecipeVariationRequest): Promise<RecipeResponse> {
-    return this.request<RecipeResponse>(`/recipes/${recipeId}/variation`, {
+  async rateRecipe(recipeId: string, request: RecipeRatingRequest): Promise<any> {
+    return this.request<any>(`/recipes/${recipeId}/rate`, {
       method: 'POST',
       body: JSON.stringify(request),
     });
   }
 
-  async getIngredientSubstitutions(request: IngredientSubstitutionRequest): Promise<SubstitutionsResponse> {
-    return this.request<SubstitutionsResponse>('/recipes/substitutions', {
+  async generateRecipeVariation(recipeId: string, request: RecipeVariationRequest): Promise<RecipeVariationResponse> {
+    return this.request<RecipeVariationResponse>(`/recipes/${recipeId}/variation`, {
       method: 'POST',
       body: JSON.stringify(request),
     });
   }
 
-  async toggleFavoriteRecipe(recipeId: string): Promise<FavoriteResponse> {
-    return this.request<FavoriteResponse>(`/recipes/${recipeId}/favorite`, {
+  async addToFavorites(recipeId: string): Promise<any> {
+    return this.request<any>(`/recipes/${recipeId}/favorite`, {
       method: 'POST',
     });
+  }
+
+  async removeFromFavorites(recipeId: string): Promise<any> {
+    return this.request<any>(`/recipes/${recipeId}/favorite`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getFavoriteRecipes(): Promise<FavoriteRecipesResponse> {
+    return this.request<FavoriteRecipesResponse>('/recipes/favorites');
+  }
+
+  async searchRecipes(query: string = ''): Promise<UserRecipesResponse> {
+    return this.request<UserRecipesResponse>(`/recipes/search?query=${encodeURIComponent(query)}`);
   }
 
   // Utility methods
@@ -270,6 +289,23 @@ class ApiService {
 
   getToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  // Generic methods for direct API calls
+  async get<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET' });
+  }
+
+  async post<T>(endpoint: string, data?: any): Promise<T> {
+    const options: RequestInit = {
+      method: 'POST',
+    };
+    
+    if (data !== undefined) {
+      options.body = JSON.stringify(data);
+    }
+    
+    return this.request<T>(endpoint, options);
   }
 }
 

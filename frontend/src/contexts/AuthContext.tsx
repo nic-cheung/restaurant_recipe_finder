@@ -30,10 +30,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Initialize auth state from localStorage
   useEffect(() => {
+    // Prevent duplicate initialization in React Strict Mode
+    if (hasInitialized) return;
+    
     const initializeAuth = async () => {
+      setHasInitialized(true);
       const storedToken = apiService.getToken();
       
       if (storedToken) {
@@ -53,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initializeAuth();
-  }, []);
+  }, [hasInitialized]);
 
   const login = async (credentials: LoginCredentials) => {
     try {

@@ -22,10 +22,12 @@ An intelligent web application that generates personalized recipes inspired by y
 - **Shopping Lists**: Generate shopping lists with local ingredient availability
 
 ### 🏪 Restaurant & Cuisine Inspiration
-- **Restaurant Database**: Recipes inspired by famous restaurants
-- **Chef Collections**: Signature dishes from renowned chefs
+- **Multi-Source Data**: Wikipedia API + Google Places + curated database
+- **Chef Database**: 60+ world-renowned chefs with Wikipedia integration
+- **Restaurant Database**: 140+ fine dining establishments worldwide
+- **Real-time Location Data**: Google Places integration for local restaurants
 - **Regional Cuisines**: Authentic recipes from around the world
-- **Seasonal Suggestions**: Recipes using in-season ingredients
+- **Smart Fallbacks**: Always available suggestions even without internet
 
 ## 🚀 Getting Started
 
@@ -61,6 +63,11 @@ An intelligent web application that generates personalized recipes inspired by y
    # Frontend (.env)
    cp frontend/.env.example frontend/.env
    ```
+   
+   **Optional API Keys** (app works without these):
+   - `GOOGLE_PLACES_API_KEY`: For enhanced restaurant suggestions ([Setup Guide](docs/google-places-api-setup.md))
+   - `OPENAI_API_KEY`: For AI recipe generation
+   - `GEMINI_API_KEY`: Alternative AI service
 
 4. **Set up the database**
    ```bash
@@ -110,6 +117,26 @@ restaurant_recipe_finder/
 └── README.md              # This file
 ```
 
+## 🗄️ Data Sources & Intelligence
+
+### Chef Suggestions
+- **Primary**: Wikipedia API for comprehensive chef database
+- **Fallback**: Curated list of 60+ world-renowned chefs
+- **Features**: Smart name matching, fuzzy search, cuisine filtering
+- **Benefits**: Always available, comprehensive coverage, real-time Wikipedia data
+
+### Restaurant Suggestions  
+- **Primary**: Google Places API for real-time restaurant data
+- **Fallback**: Curated list of 140+ fine dining establishments
+- **Features**: Location-based search, real-time data, cuisine filtering
+- **Benefits**: Local restaurant discovery + world-class establishment database
+
+### Smart Fallback System
+- No internet? ✅ Static database works offline
+- API limit reached? ✅ Automatic fallback to curated data  
+- Invalid API key? ✅ Graceful degradation to static suggestions
+- Rate limiting? ✅ Smart caching and fallback logic
+
 ## 🔧 Technology Stack
 
 ### Frontend
@@ -128,11 +155,13 @@ restaurant_recipe_finder/
 - **JWT** authentication
 - **OpenAI API** for recipe generation
 
-### External APIs
+### External APIs & Data Sources
 - **OpenAI GPT** for AI recipe generation
+- **Wikipedia API** for comprehensive chef suggestions
+- **Google Places API** for real-time restaurant data (optional)
 - **Google Calendar** for schedule integration
 - **Google Maps** for location services
-- **Spoonacular/Edamam** for recipe data
+- **Curated Static Database** for high-quality chef and restaurant fallbacks
 
 ## 📋 Development Phases
 

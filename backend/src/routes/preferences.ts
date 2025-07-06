@@ -12,6 +12,7 @@ import {
   getIngredientSuggestions,
   getCuisineSuggestions,
   getDishSuggestions,
+  getApiUsageStats,
 } from '../controllers/preferencesController';
 
 const router = Router();
@@ -70,6 +71,11 @@ router.get('/suggestions/cuisines', authenticateToken, getCuisineSuggestions);
 // @desc    Get dish suggestions based on query
 // @access  Private
 router.get('/suggestions/dishes', authenticateToken, getDishSuggestions);
+
+// @route   GET /api/preferences/api-usage
+// @desc    Get API usage statistics for monitoring free tier limits
+// @access  Private
+router.get('/api-usage', authenticateToken, getApiUsageStats);
 
 // @route   GET /api/preferences/suggestions/nutritional-goals
 // @desc    Get nutritional goals suggestions (placeholder - returns static options)

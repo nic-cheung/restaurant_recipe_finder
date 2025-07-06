@@ -60,6 +60,16 @@ This document tracks potential features and improvements for future versions of 
   - Import/export preference profiles
   - Shareable preference profiles with friends
 
+- **Guest Profiles & Entertaining**
+  - Create and manage profiles for frequent guests (friends, family, partners)
+  - Store guest dietary restrictions, allergies, and food preferences
+  - Multi-guest recipe generation for dinner parties and gatherings
+  - Automatic preference intersection/union logic for group cooking
+  - Guest preference conflict resolution (e.g., vegan + meat-lover guests)
+  - Special occasion profile templates (date night, family dinner, kids' party)
+  - Guest preference history tracking and learning
+  - Recipe suggestions optimized for multiple dietary needs simultaneously
+
 - **Dynamic Preference Learning**
   - Machine learning-based preference suggestions
   - Preference evolution based on user behavior
@@ -101,6 +111,14 @@ This document tracks potential features and improvements for future versions of 
   - Recipe recommendation from friends
   - Cooking group creation and management
   - Recipe exchange marketplace
+
+- **Guest & Event Management**
+  - Send recipe previews to guests before events
+  - Guest RSVP system with dietary preference updates
+  - Collaborative meal planning with multiple hosts
+  - Event recipe history and guest feedback tracking
+  - Integration with calendar apps for dinner party planning
+  - Guest preference sharing between trusted friends/family
 
 ---
 
@@ -324,6 +342,7 @@ This document tracks potential features and improvements for future versions of 
 
 ### Medium Priority (Next Quarter)
 - Advanced recipe recommendations
+- Guest profiles and entertaining features
 - Social features foundation
 - Mobile app development
 - Third-party integrations

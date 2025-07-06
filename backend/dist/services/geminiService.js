@@ -24,7 +24,9 @@ class GeminiService {
     }
     async suggestChefs(query, context = {}) {
         try {
-            const prompt = `Suggest 5 famous chefs whose names contain "${query}" or who are known for ${query} cuisine. 
+            const prompt = `Suggest 5 famous chefs whose names are similar to or match "${query}". 
+      If the query looks like a chef name, include that chef and similar chefs.
+      If the query is a cuisine type (like Italian, French, etc.), suggest chefs who specialize in that cuisine.
       Return only their names, one per line, no descriptions or extra text.
       
       Context: ${JSON.stringify(context)}`;

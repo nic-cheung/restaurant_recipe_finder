@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard'
 import RecipeGenerator from './pages/RecipeGenerator'
 import Profile from './pages/Profile'
 import Preferences from './pages/Preferences'
+import MyRecipes from './pages/MyRecipes'
 
 function App() {
   return (
@@ -37,6 +38,11 @@ function App() {
               <Route path="generate" element={
                 <ProtectedRoute>
                   <RecipeGenerator />
+                </ProtectedRoute>
+              } />
+              <Route path="my-recipes" element={
+                <ProtectedRoute>
+                  <MyRecipes />
                 </ProtectedRoute>
               } />
               <Route path="profile" element={

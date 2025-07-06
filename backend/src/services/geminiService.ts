@@ -26,7 +26,9 @@ export class GeminiService {
 
   async suggestChefs(query: string, context: any = {}): Promise<string[]> {
     try {
-      const prompt = `Suggest 5 famous chefs whose names contain "${query}" or who are known for ${query} cuisine. 
+      const prompt = `Suggest 5 famous chefs whose names are similar to or match "${query}". 
+      If the query looks like a chef name, include that chef and similar chefs.
+      If the query is a cuisine type (like Italian, French, etc.), suggest chefs who specialize in that cuisine.
       Return only their names, one per line, no descriptions or extra text.
       
       Context: ${JSON.stringify(context)}`;
@@ -188,10 +190,202 @@ Please ensure the recipe is:
 Return ONLY the JSON response, no additional text or explanations.`;
 
       const response = await this.generateText(fullPrompt);
-      return response;
+      return this.addPromptToResponse(response, prompt);
     } catch (error) {
       console.error('Recipe generation failed:', error);
+      
+      // Check if it's a quota exceeded error
+      if (error instanceof Error && error.message.includes('429')) {
+        console.log('🚨 Gemini API quota exceeded, generating AI prompt for user');
+        return this.generateAIPromptForUser(prompt);
+      }
+      
       throw new Error('Failed to generate recipe with AI');
+    }
+  }
+
+    /**
+   * Generate an AI prompt that users can copy-paste into ChatGPT or other AI services
+   */
+  private generateAIPromptForUser(prompt: string): string {
+    console.log('🔄 Generating AI prompt for user to use in ChatGPT/Claude');
+    
+    // Parse the original prompt to extract user preferences and requirements
+    const cleanPrompt = this.formatCleanPrompt(prompt);
+    const technicalPrompt = this.formatTechnicalPrompt(prompt);
+    
+    // Create a special response that includes both clean and technical versions
+    const aiPromptForUser = {
+      "title": "Your Personalized Recipe Prompt",
+      "description": "Choose the version that works best for you:",
+      "aiPrompt": cleanPrompt,
+      "technicalPrompt": technicalPrompt,
+      "instructions": [
+        "📋 CLEAN VERSION: Copy the prompt above - perfect for ChatGPT, Claude, or any AI assistant",
+        "🔧 TECHNICAL VERSION: Available in the AI Prompt section below - includes JSON formatting",
+        "💡 TIP: Most AI assistants work great with the clean version",
+        "🎯 Both will generate the same personalized recipe based on your preferences"
+      ],
+      "cookingTime": 0,
+      "difficulty": "EASY",
+      "cuisineType": "AI-Generated",
+      "servings": 1,
+      "nutritionInfo": {
+        "calories": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      "tags": ["ai-prompt", "copy-paste", "personalized", "clean-format"]
+    };
+    
+    return JSON.stringify(aiPromptForUser);
+  }
+
+  /**
+   * Format a clean, readable version of the prompt
+   */
+  private formatCleanPrompt(originalPrompt: string): string {
+    // Extract sections from the original prompt
+    const userPrefsMatch = originalPrompt.match(/User Preferences:\n(.*?)\n\nRecipe Requirements:/s);
+    const recipeReqsMatch = originalPrompt.match(/Recipe Requirements:\n(.*?)\n\nPlease provide/s);
+    
+    const userPrefs = (userPrefsMatch && userPrefsMatch[1]) ? userPrefsMatch[1] : 'No specific preferences provided';
+    const recipeReqs = (recipeReqsMatch && recipeReqsMatch[1]) ? recipeReqsMatch[1] : 'No specific requirements provided';
+    
+    return `🍽️ CREATE A PERSONALIZED RECIPE
+
+👤 MY PREFERENCES:
+${this.formatPreferences(userPrefs || '')}
+
+🎯 RECIPE REQUEST:
+${this.formatRequirements(recipeReqs || '')}
+
+👨‍🍳 INSTRUCTIONS:
+Create a detailed, authentic recipe that perfectly matches my preferences above. 
+
+Please include:
+• Complete ingredient list with measurements
+• Step-by-step cooking instructions
+• Cooking times and temperatures
+• Tips for best results
+• Wine pairing suggestions (if appropriate)
+
+Make it restaurant-quality but achievable at home with accessible ingredients.`;
+  }
+
+  /**
+   * Format user preferences in a clean, readable way
+   */
+  private formatPreferences(prefs: string): string {
+    const lines = prefs.split('\n').map(line => line.trim()).filter(line => line);
+    return lines.map(line => `• ${line}`).join('\n');
+  }
+
+  /**
+   * Format recipe requirements in a clean, readable way
+   */
+  private formatRequirements(reqs: string): string {
+    const lines = reqs.split('\n').map(line => line.trim()).filter(line => line);
+    return lines.map(line => {
+      // Clean up the formatting
+      const cleanLine = line.replace(/^- /, '');
+      return `• ${cleanLine}`;
+    }).join('\n');
+  }
+
+  /**
+   * Format the technical version with JSON formatting instructions
+   */
+  private formatTechnicalPrompt(originalPrompt: string): string {
+    return `${originalPrompt}
+
+IMPORTANT INSTRUCTIONS FOR THE AI:
+You are a world-class chef and recipe developer. Create an authentic, detailed recipe that is perfectly tailored to the preferences mentioned above.
+
+Please ensure the recipe is:
+- Authentic and well-balanced with quality ingredients
+- Uses proper cooking techniques and realistic timing
+- Includes accurate cooking times and temperatures  
+- Provides clear, step-by-step instructions that anyone can follow
+- Considers all dietary restrictions and preferences mentioned
+- Includes realistic nutritional estimates
+- Suggests appropriate wine pairings or side dishes if relevant
+
+Return the recipe in this exact JSON format:
+
+{
+  "title": "Recipe Name",
+  "description": "Brief, appetizing description of the dish",
+  "ingredients": [
+    {
+      "name": "ingredient name",
+      "amount": "quantity", 
+      "unit": "unit of measurement",
+      "category": "protein/vegetable/spice/etc"
+    }
+  ],
+  "instructions": [
+    "Step 1: Clear, detailed instruction",
+    "Step 2: Next step with timing and technique",
+    "Continue with all steps..."
+  ],
+  "cookingTime": minutes_as_number,
+  "difficulty": "EASY/MEDIUM/HARD/EXPERT",
+  "cuisineType": "cuisine type",
+  "servings": number_of_servings,
+  "nutritionInfo": {
+    "calories": estimated_calories_per_serving,
+    "protein": grams_of_protein,
+    "carbs": grams_of_carbs,
+    "fat": grams_of_fat
+  },
+  "tags": ["relevant", "tags", "for", "the", "recipe"]
+}
+
+Make sure the recipe is restaurant-quality but achievable at home, with ingredients that are reasonably accessible.`;
+  }
+
+  /**
+   * Add the underlying prompt to any recipe response for transparency
+   */
+  private addPromptToResponse(response: string, originalPrompt: string): string {
+    try {
+      // Clean the response to extract JSON
+      let cleanedResponse = response.trim();
+      
+      // Remove markdown code blocks if present
+      if (cleanedResponse.startsWith('```json')) {
+        cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedResponse.startsWith('```')) {
+        cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      // Try to find JSON within the response if it contains other text
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedResponse = jsonMatch[0];
+      }
+      
+      // Parse the cleaned response
+      const recipeData = JSON.parse(cleanedResponse);
+      
+      // Add the prompt information to the recipe
+      recipeData.aiPromptUsed = {
+        prompt: originalPrompt,
+        instructions: [
+          "This is the exact prompt that was used to generate your recipe.",
+          "You can copy this prompt and use it with ChatGPT, Claude, or any AI assistant.",
+          "Modify the prompt to customize the recipe further to your preferences."
+        ]
+      };
+      
+      return JSON.stringify(recipeData);
+    } catch (error) {
+      console.error('Error adding prompt to response:', error);
+      console.error('Original response:', response);
+      // If JSON parsing fails, return original response
+      return response;
     }
   }
 }

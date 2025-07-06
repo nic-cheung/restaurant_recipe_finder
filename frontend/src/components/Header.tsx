@@ -26,6 +26,9 @@ const Header = () => {
                 <Link to="/generate" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Generate Recipe
                 </Link>
+                <Link to="/my-recipes" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  My Recipes
+                </Link>
                 <Link to="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Dashboard
                 </Link>

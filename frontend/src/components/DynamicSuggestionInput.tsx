@@ -23,16 +23,16 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
   maxDisplayedSuggestions = 8,
 }) => {
   const [inputValue, setInputValue] = useState('');
+  const [locationValue, setLocationValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestionSource, setSuggestionSource] = useState<'static' | 'dynamic'>('static');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [suggestionSource, setSuggestionSource] = useState<'static' | 'dynamic'>('static');
+  const debounceRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<number | null>(null);
 
-  // Fetch suggestions function
-  const fetchSuggestions = async (query: string) => {
+  const fetchSuggestions = async (query: string, location?: string) => {
     if (!query.trim()) {
       setSuggestions([]);
       setIsDropdownOpen(false);
@@ -48,7 +48,8 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
           response = await apiService.getChefSuggestions(query);
           break;
         case 'restaurants':
-          response = await apiService.getRestaurantSuggestions(query);
+          // Use location for restaurants to trigger Google Places API
+          response = await apiService.getRestaurantSuggestions(query, location || '');
           break;
         case 'ingredients':
           response = await apiService.getIngredientSuggestions(query);
@@ -73,7 +74,7 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
       );
       
       setSuggestions(filteredSuggestions);
-      setSuggestionSource(response.source === 'ai_powered' ? 'dynamic' : 'static');
+      setSuggestionSource(response.source === 'ai_powered' || response.source === 'google_places' ? 'dynamic' : 'static');
       setIsDropdownOpen(filteredSuggestions.length > 0);
     } catch (error) {
       console.error('API call failed, using static fallback:', error);
@@ -104,8 +105,27 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
     
     // Debounce the API call
     debounceRef.current = window.setTimeout(() => {
-      fetchSuggestions(value);
+      fetchSuggestions(value, locationValue);
     }, 300);
+  };
+
+  // Handle location changes for restaurants
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocationValue(value);
+    
+    // If we have a query, refetch with new location
+    if (inputValue.trim() && suggestionType === 'restaurants') {
+      // Clear existing debounce
+      if (debounceRef.current) {
+        window.clearTimeout(debounceRef.current);
+      }
+      
+      // Debounce the API call
+      debounceRef.current = window.setTimeout(() => {
+        fetchSuggestions(inputValue, value);
+      }, 300);
+    }
   };
 
   // Cleanup debounce on unmount
@@ -178,7 +198,7 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
         {label}
         {suggestionSource === 'dynamic' && (
           <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            AI-Powered
+            {suggestionType === 'restaurants' ? 'Google Places' : 'AI-Powered'}
           </span>
         )}
       </label>
@@ -217,6 +237,22 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
               </button>
             </span>
           ))}
+        </div>
+      )}
+
+      {/* Location input for restaurants */}
+      {suggestionType === 'restaurants' && (
+        <div className="relative">
+          <input
+            type="text"
+            value={locationValue}
+            onChange={handleLocationChange}
+            placeholder="Enter location (e.g., New York, London) - required for Google Places API"
+            className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+          />
+          <div className="text-xs text-blue-600 mt-1">
+            💡 Add a location to use Google Places API for real restaurant suggestions
+          </div>
         </div>
       )}
 

@@ -1,151 +1,154 @@
-// Frontend recipe types matching backend API
+// Frontend recipe types matching backend API exactly
 
-export interface GenerateRecipeRequest {
-  inspiration: string;
-  inspirationType: 'restaurant' | 'chef' | 'cuisine' | 'city';
-  additionalRequests?: string;
+export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
+
+export interface RecipeIngredient {
+  name: string;
+  amount: string;
+  unit: string;
+  category?: string; // protein, vegetable, spice, etc.
+}
+
+export interface NutritionInfo {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber?: number;
+  sodium?: number;
+}
+
+export interface RecipeGenerationRequest {
+  inspiration?: string; // Restaurant, chef, cuisine, or city
+  occasion?: string; // Special occasion or context
+  currentCravings?: string; // Current taste preferences
+  difficulty?: Difficulty; // Recipe difficulty level
+  mealType?: string; // breakfast, lunch, dinner, etc.
+  additionalRequests?: string; // Free-form additional requirements
 }
 
 export interface GeneratedRecipe {
   title: string;
   description: string;
-  ingredients: string[];
+  ingredients: RecipeIngredient[];
   instructions: string[];
-  cookingTime: number; // in minutes
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
-  servings: number;
+  cookingTime: number;
+  difficulty: Difficulty;
   cuisineType: string;
-  inspirationSource: string;
-  nutritionalInfo?: {
-    calories?: number;
-    protein?: string;
-    carbs?: string;
-    fat?: string;
+  inspirationSource?: string;
+  servings: number;
+  nutritionInfo?: NutritionInfo;
+  tags: string[];
+  aiPromptUsed?: {
+    prompt: string;
+    technicalPrompt?: string;
+    instructions: string[];
   };
-  tips?: string[];
-  substitutions?: string[];
-}
-
-export interface SaveRecipeRequest {
-  recipeData: GeneratedRecipe;
-  rating?: number;
-  notes?: string;
-}
-
-export interface UpdateRecipeRatingRequest {
-  rating: number;
-  notes?: string;
-}
-
-export interface RecipeVariationRequest {
-  variationRequest: string;
-}
-
-export interface IngredientSubstitutionRequest {
-  ingredient: string;
-  dietaryRestrictions?: string[];
-}
-
-// API Response types
-export interface RecipeResponse {
-  success: boolean;
-  data: {
-    recipe: GeneratedRecipe;
-  };
-  message?: string;
 }
 
 export interface SavedRecipe {
   id: string;
   title: string;
-  description?: string;
-  ingredients: string[];
+  description: string | null;
+  ingredients: RecipeIngredient[]; // JSON field from backend
   instructions: string[];
   cookingTime: number;
-  difficulty: 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
-  cuisineType?: string;
-  inspirationSource?: string;
+  difficulty: Difficulty;
+  cuisineType: string | null;
+  inspirationSource: string | null;
   servings: number;
-  nutritionInfo?: any;
+  nutritionInfo: NutritionInfo | null; // JSON field from backend
   tags: string[];
   isPublic: boolean;
-  createdBy?: string;
+  createdBy: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface UserRecipe {
   id: string;
-  rating?: number;
-  notes?: string;
-  cookedDate?: string;
+  userId: string;
+  recipeId: string;
+  rating: number | null;
+  notes: string | null;
+  cookedDate: string | null;
   isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface SavedRecipeResponse {
-  success: boolean;
-  data: {
-    recipe: SavedRecipe;
-    userRecipe: UserRecipe;
-  };
-  message?: string;
+export interface RecipeWithUserData extends SavedRecipe {
+  userRecipe?: UserRecipe;
 }
 
-export interface RecipeWithUserData extends SavedRecipe {
-  userRecipe: UserRecipe;
+// API Response types
+export interface RecipeGenerationResponse {
+  success: boolean;
+  recipe: GeneratedRecipe;
+  message: string;
+}
+
+export interface RecipeSaveResponse {
+  success: boolean;
+  recipe: SavedRecipe;
+  message: string;
 }
 
 export interface UserRecipesResponse {
   success: boolean;
-  data: {
-    recipes: RecipeWithUserData[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+  recipes: RecipeWithUserData[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
   };
 }
 
 export interface RecipeDetailsResponse {
   success: boolean;
-  data: {
-    recipe: SavedRecipe;
-    userRecipe?: UserRecipe;
-    isFavorite: boolean;
-  };
+  recipe: SavedRecipe;
 }
 
-export interface SubstitutionsResponse {
+export interface FavoriteRecipesResponse {
   success: boolean;
-  data: {
-    substitutions: string[];
-  };
+  recipes: RecipeWithUserData[];
 }
 
-export interface FavoriteResponse {
+export interface RecipeRatingRequest {
+  rating: number;
+  notes?: string | undefined;
+}
+
+export interface RecipeVariationRequest {
+  variationType: 'healthier' | 'faster' | 'budget' | 'different_cuisine';
+}
+
+export interface RecipeVariationResponse {
   success: boolean;
-  data: {
-    isFavorite: boolean;
-  };
-  message?: string;
+  recipe: GeneratedRecipe;
+  message: string;
 }
 
-// Query options for fetching recipes
-export interface RecipeQueryOptions {
-  page?: number;
-  limit?: number;
-  sortBy?: 'createdAt' | 'rating' | 'cookingTime' | 'title';
-  sortOrder?: 'asc' | 'desc';
+export interface GenerateAndSaveResponse {
+  success: boolean;
+  recipe: SavedRecipe;
+  message: string;
+}
+
+export interface ApiErrorResponse {
+  error: string;
+  message: string;
+  details?: string[];
 }
 
 // Form data types for UI components
 export interface RecipeGeneratorFormData {
   inspiration: string;
-  inspirationType: 'restaurant' | 'chef' | 'cuisine' | 'city';
+  ingredients: string[];
+  cookingTime: number | null;
+  servings: number;
+  difficulty: Difficulty | null;
+  mealType: string;
   additionalRequests: string;
 }
 
@@ -154,32 +157,24 @@ export interface RecipeRatingFormData {
   notes: string;
 }
 
-export interface RecipeVariationFormData {
-  variationRequest: string;
-}
-
-export interface IngredientSubstitutionFormData {
-  ingredient: string;
-  dietaryRestrictions: string[];
-}
-
 // UI state types
 export interface RecipeGeneratorState {
   isGenerating: boolean;
+  isSaving: boolean;
   generatedRecipe: GeneratedRecipe | null;
+  savedRecipe: SavedRecipe | null;
   error: string | null;
-  isLoading: boolean;
+  formData: RecipeGeneratorFormData;
 }
 
 export interface RecipeListState {
-  recipes: RecipeWithUserData[];
+  recipes: SavedRecipe[];
   isLoading: boolean;
   error: string | null;
   pagination: {
-    total: number;
-    page: number;
     limit: number;
-    totalPages: number;
+    offset: number;
+    total: number;
   };
 }
 
@@ -188,70 +183,69 @@ export interface RecipeDetailsState {
   userRecipe: UserRecipe | null;
   isFavorite: boolean;
   isLoading: boolean;
+  isRating: boolean;
+  isToggleFavorite: boolean;
   error: string | null;
 }
 
 // Filter and search types
 export interface RecipeFilters {
   cuisineType?: string;
-  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
+  difficulty?: Difficulty;
   maxCookingTime?: number;
   minRating?: number;
-  inspirationType?: 'restaurant' | 'chef' | 'cuisine' | 'city';
-  isFavorite?: boolean;
+  tags?: string[];
 }
 
 export interface RecipeSearchState {
   query: string;
   filters: RecipeFilters;
-  results: RecipeWithUserData[];
+  results: SavedRecipe[];
   isSearching: boolean;
   error: string | null;
 }
 
-// Inspiration suggestions for the UI
-export interface InspirationSuggestion {
-  type: 'restaurant' | 'chef' | 'cuisine' | 'city';
-  name: string;
-  description: string;
-  popular?: boolean;
-}
+// Constants for dropdowns and validation
+export const DIFFICULTY_OPTIONS: { value: Difficulty; label: string }[] = [
+  { value: 'EASY', label: 'Easy' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HARD', label: 'Hard' },
+  { value: 'EXPERT', label: 'Expert' },
+];
 
-export const INSPIRATION_SUGGESTIONS: InspirationSuggestion[] = [
-  // Restaurants
-  { type: 'restaurant', name: 'Noma', description: 'Nordic cuisine pioneer', popular: true },
-  { type: 'restaurant', name: 'The French Laundry', description: 'Fine dining excellence', popular: true },
-  { type: 'restaurant', name: 'Osteria Francescana', description: 'Italian culinary artistry' },
-  { type: 'restaurant', name: 'Eleven Madison Park', description: 'Plant-based fine dining' },
-  { type: 'restaurant', name: 'Disfrutar', description: 'Creative Mediterranean' },
-  
-  // Chefs
-  { type: 'chef', name: 'Gordon Ramsay', description: 'British culinary icon', popular: true },
-  { type: 'chef', name: 'Julia Child', description: 'French cooking legend', popular: true },
-  { type: 'chef', name: 'Massimo Bottura', description: 'Italian innovation master' },
-  { type: 'chef', name: 'René Redzepi', description: 'Nordic cuisine pioneer' },
-  { type: 'chef', name: 'Yotam Ottolenghi', description: 'Middle Eastern flavors' },
-  
-  // Cuisines
-  { type: 'cuisine', name: 'Italian', description: 'Pasta, pizza, and more', popular: true },
-  { type: 'cuisine', name: 'Japanese', description: 'Sushi, ramen, and tradition', popular: true },
-  { type: 'cuisine', name: 'French', description: 'Classic techniques and flavors', popular: true },
-  { type: 'cuisine', name: 'Thai', description: 'Spicy and aromatic dishes' },
-  { type: 'cuisine', name: 'Mexican', description: 'Bold flavors and spices' },
-  { type: 'cuisine', name: 'Indian', description: 'Complex spices and curries' },
-  { type: 'cuisine', name: 'Mediterranean', description: 'Fresh and healthy ingredients' },
-  
-  // Cities
-  { type: 'city', name: 'Paris', description: 'City of culinary excellence', popular: true },
-  { type: 'city', name: 'Tokyo', description: 'Culinary innovation hub', popular: true },
-  { type: 'city', name: 'New York', description: 'Diverse food scene' },
-  { type: 'city', name: 'Bangkok', description: 'Street food paradise' },
-  { type: 'city', name: 'Istanbul', description: 'East meets West cuisine' },
-  { type: 'city', name: 'Lima', description: 'South American fusion' },
+export const MEAL_TYPE_OPTIONS = [
+  'Breakfast',
+  'Lunch', 
+  'Dinner',
+  'Snack',
+  'Dessert',
+  'Appetizer',
+  'Brunch',
+];
+
+export const VARIATION_TYPES: { value: string; label: string; description: string }[] = [
+  { 
+    value: 'healthier', 
+    label: 'Healthier', 
+    description: 'Reduce calories and add nutritious ingredients' 
+  },
+  { 
+    value: 'faster', 
+    label: 'Faster', 
+    description: 'Reduce cooking time and simplify steps' 
+  },
+  { 
+    value: 'budget', 
+    label: 'Budget-Friendly', 
+    description: 'Use cheaper ingredients and alternatives' 
+  },
+  { 
+    value: 'different_cuisine', 
+    label: 'Different Cuisine', 
+    description: 'Transform into a different cuisine style' 
+  },
 ];
 
 // Utility types
-export type RecipeDifficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT';
-export type InspirationTypes = 'restaurant' | 'chef' | 'cuisine' | 'city';
-export type SortOptions = 'createdAt' | 'rating' | 'cookingTime' | 'title';
+export type RecipeSortBy = 'createdAt' | 'title' | 'cookingTime' | 'difficulty';
 export type SortOrder = 'asc' | 'desc'; 

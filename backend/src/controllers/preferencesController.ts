@@ -29,6 +29,7 @@ import {
   getPreferencesSummary as getPreferencesSummaryService,
   updateUserSpiceTolerance,
 } from '../services/preferencesService';
+import { apiUsageTracker } from '../services/apiUsageTracker';
 
 /**
  * Get user preferences
@@ -260,79 +261,7 @@ export const getPreferencesOptions = async (_req: AuthenticatedRequest, res: Res
 };
 
 /**
- * Get chef suggestions with AI-powered suggestions and static fallback
- */
-export const getChefSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        error: 'User not authenticated',
-      });
-      return;
-    }
-
-    const { query = '' } = req.query as { query?: string };
-    let suggestions: string[] = [];
-    let source = 'static_fallback';
-    
-    try {
-      // Get user preferences for AI context
-      const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
-      
-      // Try AI-powered suggestions first
-      suggestions = await geminiService.suggestChefs(query, {
-        favoriteCuisines: userPreferences?.favoriteCuisines || []
-      });
-      
-      source = 'ai_powered';
-      
-      // Validate AI response
-      if (!Array.isArray(suggestions) || suggestions.length === 0) {
-        throw new Error('Invalid AI response');
-      }
-      
-    } catch (aiError) {
-      console.log('AI suggestions failed, using static fallback:', aiError);
-      
-      // Static fallback: Filter chefs based on query
-      if (query.trim()) {
-        // Filter chefs that match the query (case-insensitive)
-        suggestions = COMMON_CHEFS.filter(chef =>
-          chef.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        // If no matches, provide popular chefs
-        if (suggestions.length === 0) {
-          suggestions = COMMON_CHEFS.slice(0, 10); // Top 10 popular chefs
-        }
-      } else {
-        // No query provided, return popular chefs
-        suggestions = COMMON_CHEFS.slice(0, 15); // Top 15 popular chefs
-      }
-      
-      source = 'static_fallback';
-    }
-
-    res.status(200).json({
-      success: true,
-      data: {
-        suggestions: suggestions.slice(0, 10), // Limit to 10 suggestions
-        query: query || 'popular',
-        source,
-      },
-    });
-  } catch (error) {
-    console.error('Get chef suggestions error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get chef suggestions',
-    });
-  }
-};
-
-/**
- * Get restaurant suggestions with AI-powered suggestions and static fallback
+ * Get restaurant suggestions with optional Google Places integration
  */
 export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -344,30 +273,64 @@ export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: R
       return;
     }
 
-    const { query = '' } = req.query as { query?: string };
+    const { query = '', location = '' } = req.query as { query?: string; location?: string };
     let suggestions: string[] = [];
     let source = 'static_fallback';
     
-    try {
-      // Get user preferences for AI context
-      const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
-      
-      // Try AI-powered suggestions first
-      suggestions = await geminiService.suggestRestaurants(query, {
-        favoriteCuisines: userPreferences?.favoriteCuisines || []
-      });
-      
-      source = 'ai_powered';
-      
-      // Validate AI response
-      if (!Array.isArray(suggestions) || suggestions.length === 0) {
-        throw new Error('Invalid AI response');
+    // Try Google Places API if configured
+    if (process.env['GOOGLE_PLACES_API_KEY'] && location.trim()) {
+      try {
+        // Use the new Places API (New) format - search for any food establishment
+        const searchText = `${query} in ${location}`;
+        
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const googleResponse = await fetch(
+          `https://places.googleapis.com/v1/places:searchText`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Goog-Api-Key': process.env['GOOGLE_PLACES_API_KEY'],
+              'X-Goog-FieldMask': 'places.displayName,places.location,places.types'
+            },
+            body: JSON.stringify({
+              textQuery: searchText,
+              maxResultCount: 10
+              // Removed includedType to allow restaurants, cafes, coffee shops, etc.
+            }),
+            signal: controller.signal
+          }
+        );
+        
+        clearTimeout(timeoutId);
+        
+        // Track the API usage
+        await apiUsageTracker.trackGooglePlacesUsage();
+        
+        if (googleResponse.ok) {
+          const data = await googleResponse.json() as { places?: Array<{ displayName: { text: string } }> };
+          suggestions = data.places?.map((place) => place.displayName?.text).filter(Boolean).slice(0, 10) || [];
+          source = 'google_places';
+          
+          console.log(`✅ Google Places API returned ${suggestions.length} results for "${searchText}"`);
+        } else {
+          const errorData = await googleResponse.json();
+          console.log('Google Places API error response:', errorData);
+        }
+      } catch (googleError) {
+        if (googleError instanceof Error && googleError.name === 'AbortError') {
+          console.log('Google Places API timeout (5s), using static fallback');
+        } else {
+          console.log('Google Places API failed, using static fallback:', googleError);
+        }
       }
-      
-    } catch (aiError) {
-      console.log('AI suggestions failed, using static fallback:', aiError);
-      
-      // Static fallback: Filter restaurants based on query
+    }
+
+    // Fallback to static suggestions if Google Places failed or not configured
+    if (suggestions.length === 0) {
       if (query.trim()) {
         // Filter restaurants that match the query (case-insensitive)
         suggestions = COMMON_RESTAURANTS.filter(restaurant =>
@@ -391,6 +354,7 @@ export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: R
       data: {
         suggestions: suggestions.slice(0, 10), // Limit to 10 suggestions
         query: query || 'popular',
+        location: location || 'global',
         source,
       },
     });
@@ -399,6 +363,102 @@ export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: R
     res.status(500).json({
       success: false,
       error: 'Failed to get restaurant suggestions',
+    });
+  }
+};
+
+/**
+ * Get chef suggestions with Wikipedia API and static fallback
+ */
+export const getChefSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: 'User not authenticated',
+      });
+      return;
+    }
+
+    const { query = '', cuisine = '' } = req.query as { query?: string; cuisine?: string };
+    let suggestions: string[] = [];
+    let source = 'static_fallback';
+    
+    // Try Wikipedia API first if we have a query
+    if (query.trim()) {
+      try {
+        const { wikipediaService } = await import('../services/wikipediaService');
+        suggestions = await wikipediaService.searchChefs(query, 8);
+        
+        if (suggestions.length > 0) {
+          source = 'wikipedia_api';
+          
+          // Merge with some popular static suggestions for better quality
+          const staticMatches = COMMON_CHEFS.filter(chef =>
+            chef.toLowerCase().includes(query.toLowerCase())
+          ).slice(0, 3);
+          
+          // Combine Wikipedia results with static matches, removing duplicates
+          const combined = [...new Set([...suggestions, ...staticMatches])];
+          suggestions = combined.slice(0, 10);
+        }
+      } catch (wikipediaError) {
+        console.log('Wikipedia API failed, using static fallback:', wikipediaError);
+        suggestions = [];
+      }
+    }
+    
+    // Fallback to static suggestions if Wikipedia failed or no query
+    if (suggestions.length === 0) {
+      if (query.trim()) {
+        // Filter chefs that match the query (case-insensitive)
+        suggestions = COMMON_CHEFS.filter(chef =>
+          chef.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        // If no direct matches, try fuzzy matching
+        if (suggestions.length === 0) {
+          suggestions = COMMON_CHEFS.filter(chef => {
+            const chefWords = chef.toLowerCase().split(' ');
+            const queryWords = query.toLowerCase().split(' ');
+            return queryWords.some(queryWord => 
+              chefWords.some(chefWord => 
+                chefWord.includes(queryWord) || queryWord.includes(chefWord)
+              )
+            );
+          });
+        }
+        
+        // If still no matches, provide popular chefs
+        if (suggestions.length === 0) {
+          suggestions = COMMON_CHEFS.slice(0, 10); // Top 10 popular chefs
+        }
+      } else if (cuisine.trim()) {
+        // Filter chefs by cuisine specialty (this would require expanding our chef data)
+        // For now, return popular chefs
+        suggestions = COMMON_CHEFS.slice(0, 15);
+      } else {
+        // No query provided, return popular chefs
+        suggestions = COMMON_CHEFS.slice(0, 15); // Top 15 popular chefs
+      }
+      
+      source = 'static_fallback';
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        suggestions: suggestions.slice(0, 10), // Limit to 10 suggestions
+        query: query || 'popular',
+        cuisine: cuisine || 'all',
+        source,
+      },
+    });
+  } catch (error) {
+    console.error('Get chef suggestions error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get chef suggestions',
     });
   }
 };
@@ -618,6 +678,42 @@ export const getDishSuggestions = async (req: AuthenticatedRequest, res: Respons
     res.status(500).json({
       success: false,
       error: 'Failed to get dish suggestions',
+    });
+  }
+};
+
+/**
+ * Get API usage statistics
+ */
+export const getApiUsageStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: 'User not authenticated',
+      });
+      return;
+    }
+
+    const stats = apiUsageTracker.getUsageStats();
+    const analysis = apiUsageTracker.getCurrentMonthAnalysis();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        stats,
+        analysis,
+        warnings: {
+          approachingLimit: analysis.percentageUsed > 80,
+          exceededLimit: !analysis.withinFreeLimit,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Get API usage stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get API usage statistics',
     });
   }
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import ApiUsageDisplay from '../components/ApiUsageDisplay';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -151,6 +152,11 @@ const Profile: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* API Usage Display */}
+      <div className="mt-8">
+        <ApiUsageDisplay />
       </div>
 
       <div className="mt-8 card">
