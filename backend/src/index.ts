@@ -29,6 +29,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
+  'http://localhost:3003',
   'http://localhost:5173', // Vite default port
 ];
 
@@ -37,13 +38,26 @@ app.use(cors({
   credentials: true,
 }));
 
-// Rate limiting
-const limiter = rateLimit({
+// Rate limiting - different limits for different endpoints
+const generalLimiter = rateLimit({
   windowMs: parseInt(process.env['RATE_LIMIT_WINDOW_MS'] || '900000'), // 15 minutes
-  max: parseInt(process.env['RATE_LIMIT_MAX_REQUESTS'] || '100'), // limit each IP to 100 requests per windowMs
+  max: parseInt(process.env['RATE_LIMIT_MAX_REQUESTS'] || (process.env['NODE_ENV'] === 'development' ? '1000' : '100')), // 1000 for dev, 100 for prod
   message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
-app.use('/api/', limiter);
+
+// More lenient limiter for preferences and user data endpoints
+const preferencesLimiter = rateLimit({
+  windowMs: 60000, // 1 minute
+  max: process.env['NODE_ENV'] === 'development' ? 200 : 50, // 200 for dev, 50 for prod per minute
+  message: 'Too many preferences requests, please slow down.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply general rate limiting to all API routes
+app.use('/api/', generalLimiter);
 
 // Logging middleware
 if (process.env['NODE_ENV'] === 'development') {
@@ -69,7 +83,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
-app.use('/api/preferences', preferenceRoutes);
+app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
 
 // 404 handler
 app.use(notFound);
