@@ -27,18 +27,180 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 inline-block text-center;
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 inline-flex items-center justify-center shadow-sm hover:shadow-md;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 inline-block text-center;
-  }
-  
-  .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 inline-flex items-center justify-center shadow-sm hover:shadow-md;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white;
+  }
+  
+  .select-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white appearance-none;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+  }
+
+  /* Preferences Page Styles */
+  .preferences-container {
+    @apply min-h-screen bg-gradient-to-br from-gray-50 to-blue-50;
+  }
+
+  .preferences-header {
+    @apply bg-white border-b border-gray-200 shadow-sm;
+  }
+
+  .header-content {
+    @apply max-w-6xl mx-auto px-6 py-8;
+  }
+
+  .page-title {
+    @apply text-3xl font-bold text-gray-900 mb-2;
+  }
+
+  .page-subtitle {
+    @apply text-lg text-gray-600;
+  }
+
+  .preferences-body {
+    @apply max-w-6xl mx-auto px-6 py-8;
+  }
+
+  .tab-navigation {
+    @apply flex flex-wrap justify-center gap-2 mb-8 p-1 bg-white rounded-xl shadow-sm border border-gray-200;
+  }
+
+  .tab-button {
+    @apply flex items-center px-4 py-3 rounded-lg transition-all duration-200 font-medium;
+  }
+
+  .tab-button:not(.active) {
+    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-50;
+  }
+
+  .tab-button.active {
+    @apply bg-blue-600 text-white shadow-md;
+  }
+
+  .tab-icon {
+    @apply mr-2;
+  }
+
+  .tab-label {
+    @apply text-sm font-medium;
+  }
+
+  .preferences-form {
+    @apply space-y-8;
+  }
+
+  .tab-content {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-8;
+  }
+
+  .preference-section {
+    @apply space-y-6;
+  }
+
+  .section-header {
+    @apply mb-6;
+  }
+
+  .section-title {
+    @apply text-xl font-semibold text-gray-900 mb-2;
+  }
+
+  .section-description {
+    @apply text-gray-600;
+  }
+
+  .preference-card {
+    @apply bg-gray-50 rounded-lg p-6 border border-gray-200;
+  }
+
+  .preference-label {
+    @apply block text-sm font-medium text-gray-700 mb-3;
+  }
+
+  .form-actions {
+    @apply flex justify-between items-center pt-6 border-t border-gray-200 bg-white rounded-xl shadow-sm p-6;
+  }
+
+  /* Spice Selector Styles */
+  .spice-selector {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-3;
+  }
+
+  .spice-option {
+    @apply flex flex-col items-center p-4 rounded-lg border-2 border-gray-200 transition-all duration-200 hover:border-gray-300 bg-white;
+  }
+
+  .spice-option.selected {
+    @apply border-blue-500 bg-blue-50;
+  }
+
+  .spice-indicator {
+    @apply mb-2;
+  }
+
+  .spice-dot {
+    @apply w-4 h-4 rounded-full;
+  }
+
+  .spice-dot.mild {
+    @apply bg-green-400;
+  }
+
+  .spice-dot.medium {
+    @apply bg-yellow-400;
+  }
+
+  .spice-dot.hot {
+    @apply bg-orange-500;
+  }
+
+  .spice-dot.extreme {
+    @apply bg-red-500;
+  }
+
+  .spice-label {
+    @apply text-sm font-medium text-gray-700;
+  }
+
+  .spice-option.selected .spice-label {
+    @apply text-blue-700;
+  }
+
+  /* Loading States */
+  .loading-spinner {
+    @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .tab-navigation {
+      @apply flex-col gap-1;
+    }
+
+    .tab-button {
+      @apply justify-center;
+    }
+
+    .preferences-body {
+      @apply px-4;
+    }
+
+    .tab-content {
+      @apply p-4;
+    }
+
+    .preference-card {
+      @apply p-4;
+    }
   }
 } 

@@ -38,9 +38,20 @@ model UserPreferences {
   favoriteIngredients   String[] // Array of favorite ingredients
   dislikedFoods         String[] // Array of disliked foods
   favoriteCuisines      String[] // Array of favorite cuisines
+  favoriteDishes        String[] // Array of favorite dishes
+  favoriteChefs         String[] // Array of favorite chefs
+  favoriteRestaurants   String[] // Array of favorite restaurants
   cookingSkillLevel     SkillLevel @default(BEGINNER)
   preferredCookingTime  Int?     // Maximum cooking time in minutes
   servingSize           Int?     @default(2) // Number of servings
+  
+  // New comprehensive preference fields
+  nutritionalGoals      NutritionalGoal[] // Array of health and fitness goals
+  budgetPreference      BudgetPreference  @default(MODERATE)
+  preferredMealTypes    MealType[]        // Array of preferred meal types
+  availableEquipment    CookingEquipment[] // Array of available kitchen equipment
+  mealComplexity        MealComplexity    @default(SIMPLE)
+  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
@@ -128,4 +139,61 @@ enum Difficulty {
   MEDIUM
   HARD
   EXPERT
+}
+
+// New enums for comprehensive preferences
+enum NutritionalGoal {
+  WEIGHT_LOSS
+  MUSCLE_GAIN
+  MAINTENANCE
+  HEART_HEALTHY
+  DIABETIC_FRIENDLY
+  LOW_SODIUM
+  HIGH_PROTEIN
+  LOW_CARB
+  HIGH_FIBER
+}
+
+enum BudgetPreference {
+  BUDGET
+  MODERATE
+  PREMIUM
+  LUXURY
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACKS
+  DESSERTS
+  APPETIZERS
+  BRUNCH
+  LATE_NIGHT
+}
+
+enum CookingEquipment {
+  OVEN
+  STOVETOP
+  MICROWAVE
+  GRILL
+  AIR_FRYER
+  SLOW_COOKER
+  PRESSURE_COOKER
+  BLENDER
+  FOOD_PROCESSOR
+  STAND_MIXER
+  TOASTER_OVEN
+  RICE_COOKER
+  STEAMER
+  DEEP_FRYER
+  SOUS_VIDE
+}
+
+enum MealComplexity {
+  ONE_POT
+  SIMPLE
+  MODERATE
+  COMPLEX
+  GOURMET
 } 

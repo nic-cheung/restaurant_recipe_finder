@@ -11,9 +11,23 @@ export interface UserPreferencesResponse {
   favoriteIngredients: string[];
   dislikedFoods: string[];
   favoriteCuisines: string[];
+  favoriteDishes: string[];
+  favoriteChefs: string[];
+  favoriteRestaurants: string[];
   cookingSkillLevel: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   preferredCookingTime: number | null;
   servingSize: number | null;
+  
+  // New comprehensive preference fields
+  nutritionalGoals: ('WEIGHT_LOSS' | 'MUSCLE_GAIN' | 'MAINTENANCE' | 'HEART_HEALTHY' | 'DIABETIC_FRIENDLY' | 'LOW_SODIUM' | 'HIGH_PROTEIN' | 'LOW_CARB' | 'HIGH_FIBER')[];
+  budgetPreference: 'BUDGET' | 'MODERATE' | 'PREMIUM' | 'LUXURY';
+  preferredMealTypes: ('BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACKS' | 'DESSERTS' | 'APPETIZERS' | 'BRUNCH' | 'LATE_NIGHT')[];
+  availableEquipment: ('OVEN' | 'STOVETOP' | 'MICROWAVE' | 'GRILL' | 'AIR_FRYER' | 'SLOW_COOKER' | 'PRESSURE_COOKER' | 'BLENDER' | 'FOOD_PROCESSOR' | 'STAND_MIXER' | 'TOASTER_OVEN' | 'RICE_COOKER' | 'STEAMER' | 'DEEP_FRYER' | 'SOUS_VIDE')[];
+  mealComplexity: 'ONE_POT' | 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'GOURMET';
+  
+  // Spice tolerance from User model
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME';
+  
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,11 +36,24 @@ export interface UserPreferencesResponse {
  * Get user preferences by user ID
  */
 export const getUserPreferences = async (userId: string): Promise<UserPreferencesResponse | null> => {
-  const preferences = await prisma.userPreferences.findUnique({
-    where: { userId },
-  });
+  const [preferences, user] = await Promise.all([
+    prisma.userPreferences.findUnique({
+      where: { userId },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { spiceTolerance: true }
+    })
+  ]);
 
-  return preferences;
+  if (!preferences) {
+    return null;
+  }
+
+  return {
+    ...preferences,
+    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+  };
 };
 
 /**
@@ -36,32 +63,61 @@ export const upsertUserPreferences = async (
   userId: string,
   preferencesData: UserPreferencesInput
 ): Promise<UserPreferencesResponse> => {
-  const preferences = await prisma.userPreferences.upsert({
-    where: { userId },
-    update: {
-      dietaryRestrictions: preferencesData.dietaryRestrictions || [],
-      allergies: preferencesData.allergies || [],
-      favoriteIngredients: preferencesData.favoriteIngredients || [],
-      dislikedFoods: preferencesData.dislikedFoods || [],
-      favoriteCuisines: preferencesData.favoriteCuisines || [],
-      cookingSkillLevel: preferencesData.cookingSkillLevel || 'BEGINNER',
-      preferredCookingTime: preferencesData.preferredCookingTime ?? null,
-      servingSize: preferencesData.servingSize ?? 2,
-    },
-    create: {
-      userId,
-      dietaryRestrictions: preferencesData.dietaryRestrictions || [],
-      allergies: preferencesData.allergies || [],
-      favoriteIngredients: preferencesData.favoriteIngredients || [],
-      dislikedFoods: preferencesData.dislikedFoods || [],
-      favoriteCuisines: preferencesData.favoriteCuisines || [],
-      cookingSkillLevel: preferencesData.cookingSkillLevel || 'BEGINNER',
-      preferredCookingTime: preferencesData.preferredCookingTime ?? null,
-      servingSize: preferencesData.servingSize ?? 2,
-    },
-  });
+  const [preferences, user] = await Promise.all([
+    prisma.userPreferences.upsert({
+      where: { userId },
+      update: {
+        dietaryRestrictions: preferencesData.dietaryRestrictions || [],
+        allergies: preferencesData.allergies || [],
+        favoriteIngredients: preferencesData.favoriteIngredients || [],
+        dislikedFoods: preferencesData.dislikedFoods || [],
+        favoriteCuisines: preferencesData.favoriteCuisines || [],
+        favoriteDishes: preferencesData.favoriteDishes || [],
+        favoriteChefs: preferencesData.favoriteChefs || [],
+        favoriteRestaurants: preferencesData.favoriteRestaurants || [],
+        cookingSkillLevel: preferencesData.cookingSkillLevel || 'BEGINNER',
+        preferredCookingTime: preferencesData.preferredCookingTime ?? null,
+        servingSize: preferencesData.servingSize ?? 2,
+        
+        // New comprehensive preference fields
+        nutritionalGoals: preferencesData.nutritionalGoals || [],
+        budgetPreference: preferencesData.budgetPreference || 'MODERATE',
+        preferredMealTypes: preferencesData.preferredMealTypes || [],
+        availableEquipment: preferencesData.availableEquipment || [],
+        mealComplexity: preferencesData.mealComplexity || 'SIMPLE',
+      },
+      create: {
+        userId,
+        dietaryRestrictions: preferencesData.dietaryRestrictions || [],
+        allergies: preferencesData.allergies || [],
+        favoriteIngredients: preferencesData.favoriteIngredients || [],
+        dislikedFoods: preferencesData.dislikedFoods || [],
+        favoriteCuisines: preferencesData.favoriteCuisines || [],
+        favoriteDishes: preferencesData.favoriteDishes || [],
+        favoriteChefs: preferencesData.favoriteChefs || [],
+        favoriteRestaurants: preferencesData.favoriteRestaurants || [],
+        cookingSkillLevel: preferencesData.cookingSkillLevel || 'BEGINNER',
+        preferredCookingTime: preferencesData.preferredCookingTime ?? null,
+        servingSize: preferencesData.servingSize ?? 2,
+        
+        // New comprehensive preference fields
+        nutritionalGoals: preferencesData.nutritionalGoals || [],
+        budgetPreference: preferencesData.budgetPreference || 'MODERATE',
+        preferredMealTypes: preferencesData.preferredMealTypes || [],
+        availableEquipment: preferencesData.availableEquipment || [],
+        mealComplexity: preferencesData.mealComplexity || 'SIMPLE',
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { spiceTolerance: true }
+    })
+  ]);
 
-  return preferences;
+  return {
+    ...preferences,
+    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+  };
 };
 
 /**
@@ -98,6 +154,15 @@ export const updateUserPreferences = async (
   if (updateData.favoriteCuisines !== undefined) {
     updatePayload.favoriteCuisines = updateData.favoriteCuisines;
   }
+  if (updateData.favoriteDishes !== undefined) {
+    updatePayload.favoriteDishes = updateData.favoriteDishes;
+  }
+  if (updateData.favoriteChefs !== undefined) {
+    updatePayload.favoriteChefs = updateData.favoriteChefs;
+  }
+  if (updateData.favoriteRestaurants !== undefined) {
+    updatePayload.favoriteRestaurants = updateData.favoriteRestaurants;
+  }
   if (updateData.cookingSkillLevel !== undefined) {
     updatePayload.cookingSkillLevel = updateData.cookingSkillLevel;
   }
@@ -107,14 +172,40 @@ export const updateUserPreferences = async (
   if (updateData.servingSize !== undefined) {
     updatePayload.servingSize = updateData.servingSize;
   }
+  
+  // New comprehensive preference fields
+  if (updateData.nutritionalGoals !== undefined) {
+    updatePayload.nutritionalGoals = updateData.nutritionalGoals;
+  }
+  if (updateData.budgetPreference !== undefined) {
+    updatePayload.budgetPreference = updateData.budgetPreference;
+  }
+  if (updateData.preferredMealTypes !== undefined) {
+    updatePayload.preferredMealTypes = updateData.preferredMealTypes;
+  }
+  if (updateData.availableEquipment !== undefined) {
+    updatePayload.availableEquipment = updateData.availableEquipment;
+  }
+  if (updateData.mealComplexity !== undefined) {
+    updatePayload.mealComplexity = updateData.mealComplexity;
+  }
 
   // Update only the provided fields
-  const preferences = await prisma.userPreferences.update({
-    where: { userId },
-    data: updatePayload,
-  });
+  const [preferences, user] = await Promise.all([
+    prisma.userPreferences.update({
+      where: { userId },
+      data: updatePayload,
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { spiceTolerance: true }
+    })
+  ]);
 
-  return preferences;
+  return {
+    ...preferences,
+    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+  };
 };
 
 /**
@@ -127,12 +218,19 @@ export const deleteUserPreferences = async (userId: string): Promise<void> => {
 };
 
 /**
- * Get user preferences with defaults if not found
+ * Get user preferences with defaults if not found, including spice tolerance from User model
  */
 export const getUserPreferencesWithDefaults = async (
   userId: string
 ): Promise<UserPreferencesResponse> => {
-  const preferences = await getUserPreferences(userId);
+  // Get both preferences and user data
+  const [preferences, user] = await Promise.all([
+    getUserPreferences(userId),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { spiceTolerance: true }
+    })
+  ]);
   
   if (!preferences) {
     // Return default preferences if none exist
@@ -144,15 +242,32 @@ export const getUserPreferencesWithDefaults = async (
       favoriteIngredients: [],
       dislikedFoods: [],
       favoriteCuisines: [],
+      favoriteDishes: [],
+      favoriteChefs: [],
+      favoriteRestaurants: [],
       cookingSkillLevel: 'BEGINNER',
       preferredCookingTime: null,
       servingSize: 2,
+      
+      // New comprehensive preference fields with defaults
+      nutritionalGoals: [],
+      budgetPreference: 'MODERATE',
+      preferredMealTypes: [],
+      availableEquipment: [],
+      mealComplexity: 'SIMPLE',
+      
+      // Spice tolerance from User model
+      spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+      
       createdAt: new Date(),
       updatedAt: new Date(),
     };
   }
 
-  return preferences;
+  return {
+    ...preferences,
+    spiceTolerance: user?.spiceTolerance || 'MEDIUM',
+  };
 };
 
 /**
@@ -193,9 +308,25 @@ export const getPreferencesSummary = async (userId: string): Promise<{
     favorites: [
       ...preferences.favoriteIngredients,
       ...preferences.favoriteCuisines.map(cuisine => `${cuisine} cuisine`),
+      ...preferences.favoriteDishes.map(dish => `${dish} dish`),
+      ...preferences.favoriteChefs.map(chef => `Inspired by ${chef}`),
+      ...preferences.favoriteRestaurants.map(restaurant => `${restaurant} style`),
     ],
     skillLevel: preferences.cookingSkillLevel,
     maxCookingTime: preferences.preferredCookingTime,
     servingSize: preferences.servingSize || 2,
   };
+};
+
+/**
+ * Update user spice tolerance
+ */
+export const updateUserSpiceTolerance = async (
+  userId: string,
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME'
+): Promise<void> => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { spiceTolerance },
+  });
 }; 

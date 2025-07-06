@@ -1,10 +1,19 @@
 import OpenAI from 'openai';
 import { UserPreferences, User } from '@prisma/client';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env['OPENAI_API_KEY'],
-});
+// Initialize OpenAI client only when needed
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env['OPENAI_API_KEY'];
+    if (!apiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 export interface RecipeGenerationRequest {
   inspiration: string; // restaurant, chef, cuisine, or city
@@ -131,7 +140,7 @@ Make sure the recipe is detailed, authentic, and perfectly tailored to the user'
     try {
       const prompt = this.buildPrompt(request);
       
-      const completion = await openai.chat.completions.create({
+      const completion = await getOpenAIClient().chat.completions.create({
         model: "gpt-4-turbo-preview",
         messages: [
           {
@@ -176,7 +185,7 @@ Create a variation with this modification: ${variationRequest}
 
 Provide the new recipe in the same JSON format, keeping the same structure but with the requested changes.`;
 
-      const completion = await openai.chat.completions.create({
+      const completion = await getOpenAIClient().chat.completions.create({
         model: "gpt-4-turbo-preview",
         messages: [
           {
@@ -215,7 +224,7 @@ Provide the new recipe in the same JSON format, keeping the same structure but w
       
       prompt += ` Provide practical alternatives that maintain similar flavor profiles or cooking properties. Return as a JSON array of strings.`;
 
-      const completion = await openai.chat.completions.create({
+      const completion = await getOpenAIClient().chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
           {
@@ -242,6 +251,295 @@ Provide the new recipe in the same JSON format, keeping the same structure but w
     } catch (error) {
       console.error('OpenAI API Error:', error);
       throw new Error(error instanceof Error ? error.message : 'Failed to generate substitutions');
+    }
+  }
+
+  /**
+   * Generate chef suggestions based on user input
+   */
+  async suggestChefs(query: string = '', userPreferences?: { favoriteCuisines?: string[] }): Promise<string[]> {
+    try {
+      let prompt = `Suggest 8-10 well-known chefs`;
+      
+      if (query.trim()) {
+        prompt += ` whose names or styles match or relate to "${query}"`;
+      }
+      
+      if (userPreferences?.favoriteCuisines?.length) {
+        prompt += `. Consider the user enjoys these cuisines: ${userPreferences.favoriteCuisines.join(', ')}`;
+      }
+      
+      prompt += `. Include a mix of:
+- Celebrity chefs (Gordon Ramsay, Julia Child, etc.)
+- Michelin-starred chefs
+- Regional cuisine specialists
+- Contemporary innovative chefs
+
+Return only chef names as a JSON array of strings. No descriptions or extra text.`;
+
+      const completion = await getOpenAIClient().chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a culinary expert with extensive knowledge of chefs worldwide. Always respond with valid JSON array format containing only chef names."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+        response_format: { type: "json_object" }
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) {
+        throw new Error('No response from OpenAI');
+      }
+
+      const result = JSON.parse(response);
+      return result.chefs || result.suggestions || [];
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate chef suggestions');
+    }
+  }
+
+  /**
+   * Generate restaurant suggestions based on user input
+   */
+  async suggestRestaurants(query: string = '', userPreferences?: { favoriteCuisines?: string[], location?: string }): Promise<string[]> {
+    try {
+      let prompt = `Suggest 8-10 well-known restaurants`;
+      
+      if (query.trim()) {
+        prompt += ` whose names or styles match or relate to "${query}"`;
+      }
+      
+      if (userPreferences?.favoriteCuisines?.length) {
+        prompt += `. Consider the user enjoys these cuisines: ${userPreferences.favoriteCuisines.join(', ')}`;
+      }
+      
+      if (userPreferences?.location) {
+        prompt += `. Give preference to restaurants in or near ${userPreferences.location}`;
+      }
+      
+      prompt += `. Include a mix of:
+- Famous fine dining establishments
+- Popular chain restaurants
+- Iconic local restaurants
+- Michelin-starred restaurants
+- Trendy contemporary restaurants
+
+Return only restaurant names as a JSON array of strings. No descriptions or extra text.`;
+
+      const completion = await getOpenAIClient().chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a restaurant expert with knowledge of establishments worldwide. Always respond with valid JSON array format containing only restaurant names."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+        response_format: { type: "json_object" }
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) {
+        throw new Error('No response from OpenAI');
+      }
+
+      const result = JSON.parse(response);
+      return result.restaurants || result.suggestions || [];
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate restaurant suggestions');
+    }
+  }
+
+  /**
+   * Generate ingredient suggestions based on user input
+   */
+  async suggestIngredients(query: string = '', userPreferences?: { favoriteCuisines?: string[], dietaryRestrictions?: string[] }): Promise<string[]> {
+    try {
+      let prompt = `Suggest 8-10 cooking ingredients`;
+      
+      if (query.trim()) {
+        prompt += ` that match or relate to "${query}"`;
+      }
+      
+      if (userPreferences?.favoriteCuisines?.length) {
+        prompt += `. Consider the user enjoys these cuisines: ${userPreferences.favoriteCuisines.join(', ')}`;
+      }
+      
+      if (userPreferences?.dietaryRestrictions?.length) {
+        prompt += `. Consider these dietary restrictions: ${userPreferences.dietaryRestrictions.join(', ')}`;
+      }
+      
+      prompt += `. Include a mix of:
+- Common cooking ingredients
+- Specialty ingredients
+- Herbs and spices
+- Proteins and vegetables
+- Pantry staples
+
+Return only ingredient names as a JSON array of strings. No descriptions or extra text.`;
+
+      const completion = await getOpenAIClient().chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a culinary expert with extensive knowledge of cooking ingredients. Always respond with valid JSON array format containing only ingredient names."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+        response_format: { type: "json_object" }
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) {
+        throw new Error('No response from OpenAI');
+      }
+
+      const result = JSON.parse(response);
+      return result.ingredients || result.suggestions || [];
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate ingredient suggestions');
+    }
+  }
+
+  /**
+   * Generate cuisine suggestions based on user input
+   */
+  async suggestCuisines(query: string = '', userPreferences?: { favoriteIngredients?: string[], location?: string }): Promise<string[]> {
+    try {
+      let prompt = `Suggest 8-10 world cuisines`;
+      
+      if (query.trim()) {
+        prompt += ` that match or relate to "${query}"`;
+      }
+      
+      if (userPreferences?.favoriteIngredients?.length) {
+        prompt += `. Consider the user enjoys these ingredients: ${userPreferences.favoriteIngredients.join(', ')}`;
+      }
+      
+      if (userPreferences?.location) {
+        prompt += `. Give preference to cuisines available in ${userPreferences.location}`;
+      }
+      
+      prompt += `. Include a mix of:
+- Popular world cuisines
+- Regional specialties
+- Fusion cuisines
+- Traditional cooking styles
+- Contemporary cuisine trends
+
+Return only cuisine names as a JSON array of strings. No descriptions or extra text.`;
+
+      const completion = await getOpenAIClient().chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a culinary expert with knowledge of world cuisines. Always respond with valid JSON array format containing only cuisine names."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+        response_format: { type: "json_object" }
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) {
+        throw new Error('No response from OpenAI');
+      }
+
+      const result = JSON.parse(response);
+      return result.cuisines || result.suggestions || [];
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate cuisine suggestions');
+    }
+  }
+
+  /**
+   * Generate dish suggestions based on user input
+   */
+  async suggestDishes(query: string = '', userPreferences?: { favoriteCuisines?: string[], favoriteIngredients?: string[], dietaryRestrictions?: string[] }): Promise<string[]> {
+    try {
+      let prompt = `Suggest 8-10 popular dishes`;
+      
+      if (query.trim()) {
+        prompt += ` that match or relate to "${query}"`;
+      }
+      
+      if (userPreferences?.favoriteCuisines?.length) {
+        prompt += `. Consider the user enjoys these cuisines: ${userPreferences.favoriteCuisines.join(', ')}`;
+      }
+      
+      if (userPreferences?.favoriteIngredients?.length) {
+        prompt += `. Consider the user enjoys these ingredients: ${userPreferences.favoriteIngredients.join(', ')}`;
+      }
+      
+      if (userPreferences?.dietaryRestrictions?.length) {
+        prompt += `. Consider these dietary restrictions: ${userPreferences.dietaryRestrictions.join(', ')}`;
+      }
+      
+      prompt += `. Include a mix of:
+- Classic dishes from various cuisines
+- Popular comfort foods
+- Signature restaurant dishes
+- Traditional specialties
+- Modern interpretations
+
+Return only dish names as a JSON array of strings. No descriptions or extra text.`;
+
+      const completion = await getOpenAIClient().chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a culinary expert with knowledge of dishes from around the world. Always respond with valid JSON array format containing only dish names."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 400,
+        response_format: { type: "json_object" }
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) {
+        throw new Error('No response from OpenAI');
+      }
+
+      const result = JSON.parse(response);
+      return result.dishes || result.suggestions || [];
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to generate dish suggestions');
     }
   }
 }

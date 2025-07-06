@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 interface TagSelectorProps {
   label: string;
@@ -10,18 +10,20 @@ interface TagSelectorProps {
   maxPopularTags?: number;
   allowCustom?: boolean;
   className?: string;
+  componentId?: string;
 }
 
 const TagSelector: React.FC<TagSelectorProps> = ({
   label,
-  popularOptions,
-  allOptions,
-  selectedItems,
+  popularOptions = [],
+  allOptions = [],
+  selectedItems = [],
   onSelectionChange,
   placeholder = "Type to search or add...",
   maxPopularTags = 6,
   allowCustom = false,
   className = "",
+  componentId = "default",
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -29,20 +31,28 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Ensure we have valid arrays and remove duplicates - memoized to prevent infinite loops
+  const safeSelectedItems = useMemo(() => selectedItems || [], [selectedItems]);
+  const safePopularOptions = useMemo(() => [...new Set(popularOptions || [])], [popularOptions]);
+  const safeAllOptions = useMemo(() => [...new Set(allOptions || [])], [allOptions]);
+
   // Filter options based on input
   useEffect(() => {
     if (inputValue.trim()) {
-      const filtered = allOptions.filter(option =>
+      // Remove duplicates from safeAllOptions first, then filter
+      const uniqueOptions = [...new Set(safeAllOptions)];
+      const filtered = uniqueOptions.filter(option =>
         option.toLowerCase().includes(inputValue.toLowerCase()) &&
-        !selectedItems.includes(option)
+        !safeSelectedItems.includes(option) // Only exclude already selected items
       );
+      
       setFilteredOptions(filtered);
       setIsDropdownOpen(true);
     } else {
       setFilteredOptions([]);
       setIsDropdownOpen(false);
     }
-  }, [inputValue, allOptions, selectedItems]);
+  }, [inputValue, safeAllOptions, safeSelectedItems, safePopularOptions]);
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
@@ -57,10 +67,10 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   }, []);
 
   const toggleTag = (tag: string) => {
-    if (selectedItems.includes(tag)) {
-      onSelectionChange(selectedItems.filter(item => item !== tag));
+    if (safeSelectedItems.includes(tag)) {
+      onSelectionChange(safeSelectedItems.filter(item => item !== tag));
     } else {
-      onSelectionChange([...selectedItems, tag]);
+      onSelectionChange([...safeSelectedItems, tag]);
     }
   };
 
@@ -71,10 +81,10 @@ const TagSelector: React.FC<TagSelectorProps> = ({
         // Select first filtered option
         toggleTag(filteredOptions[0]);
         setInputValue('');
-      } else if (allowCustom && inputValue.trim() && !selectedItems.includes(inputValue.trim())) {
+      } else if (allowCustom && inputValue.trim() && !safeSelectedItems.includes(inputValue.trim())) {
         // Add custom tag
         const trimmedValue = inputValue.trim();
-        onSelectionChange([...selectedItems, trimmedValue]);
+        onSelectionChange([...safeSelectedItems, trimmedValue]);
         setInputValue('');
       }
     } else if (e.key === 'Escape') {
@@ -89,36 +99,43 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     setIsDropdownOpen(false);
   };
 
-  const displayedPopularOptions = popularOptions.slice(0, maxPopularTags);
+  const displayedPopularOptions = useMemo(() => 
+    safePopularOptions.slice(0, maxPopularTags), 
+    [safePopularOptions, maxPopularTags]
+  );
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <h3 className="text-lg font-medium text-gray-900">{label}</h3>
+      {label && <h3 className="text-lg font-medium text-gray-900">{label}</h3>}
       
       {/* Popular Tags */}
-      <div className="flex flex-wrap gap-2">
-        {displayedPopularOptions.map((tag) => (
-          <button
-            key={tag}
-            type="button"
-            onClick={() => toggleTag(tag)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              selectedItems.includes(tag)
-                ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
-                : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-            }`}
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
-
-      {/* Selected Items Display */}
-      {selectedItems.length > 0 && (
+      {displayedPopularOptions.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {selectedItems.map((item) => (
+          {displayedPopularOptions.map((tag) => (
+            <button
+              key={`${componentId}-popular-${tag}`}
+              type="button"
+              onClick={() => toggleTag(tag)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                safeSelectedItems.includes(tag)
+                  ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
+                  : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Selected Items Display - Only show items not in popular options */}
+      {safeSelectedItems.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {safeSelectedItems
+            .filter(item => !displayedPopularOptions.includes(item))
+            .map((item) => (
             <span
-              key={item}
+              key={`${componentId}-selected-${item}`}
               className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 border border-green-200"
             >
               {item}
@@ -152,7 +169,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
           <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
             {filteredOptions.map((option) => (
               <button
-                key={option}
+                key={`${componentId}-dropdown-${option}`}
                 type="button"
                 onClick={() => handleOptionClick(option)}
                 className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
@@ -160,8 +177,9 @@ const TagSelector: React.FC<TagSelectorProps> = ({
                 {option}
               </button>
             ))}
-            {allowCustom && inputValue.trim() && !allOptions.includes(inputValue.trim()) && (
+            {allowCustom && inputValue.trim() && !safeAllOptions.includes(inputValue.trim()) && (
               <button
+                key={`${componentId}-custom-add`}
                 type="button"
                 onClick={() => handleOptionClick(inputValue.trim())}
                 className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-t border-gray-200 text-blue-600"

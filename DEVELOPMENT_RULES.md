@@ -199,6 +199,46 @@ When making technical choices, always explain:
 
 ## 🎯 Project Rules
 
+### Target User Profile & Experience Guidelines
+
+#### User Demographics
+- **Primary Users**: Well-travelled and tasteful foodies with discerning palates
+- **Experience Level**: Sophisticated culinary enthusiasts who appreciate fine dining and authentic cuisine
+- **Travel Background**: Extensive travel experience with exposure to diverse global cuisines
+- **Culinary Knowledge**: Deep appreciation for quality ingredients, proper techniques, and authentic flavors
+- **Primary Goal**: Discover elevated recipes and culinary experiences that match their refined tastes
+
+#### Content Quality Standards
+**Chef Recommendations**:
+- Focus on renowned, Michelin-starred, and critically acclaimed chefs
+- Emphasize culinary innovators and masters of their craft (e.g., Thomas Keller, Daniel Boulud, Alice Waters)
+- Avoid mainstream TV personalities and celebrity chefs without serious culinary credentials
+- Include influential historical figures (Julia Child, Anthony Bourdain) and respected contemporary chefs
+
+**Restaurant Suggestions**:
+- Emphasize fine dining establishments and award-winning restaurants
+- Include authentic local gems and hidden culinary treasures
+- Focus on restaurants with critical acclaim, Michelin stars, or James Beard recognition
+- Avoid chain restaurants and mainstream casual dining establishments
+
+**Recipe Quality**:
+- Prioritize authentic, traditional recipes with proper techniques
+- Include sophisticated flavor profiles and quality ingredients
+- Provide context about regional origins and cultural significance
+- Avoid oversimplified or "dumbed-down" versions of classic dishes
+
+**Ingredient Standards**:
+- Emphasize quality, seasonal, and authentic ingredients
+- Include specialty and artisanal products when appropriate
+- Provide guidance on sourcing quality ingredients
+- Respect traditional ingredient usage and combinations
+
+#### Communication Tone
+- Respectful of culinary traditions and authenticity
+- Knowledgeable without being pretentious
+- Assumes users have sophisticated palates and culinary curiosity
+- Provides context and education about techniques and origins
+
 ### 0. User Testing & Approval (MANDATORY - HIGHEST PRIORITY)
 
 #### Feature Completion Workflow

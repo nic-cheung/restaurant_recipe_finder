@@ -6,9 +6,23 @@ export interface UserPreferences {
   favoriteIngredients: string[];
   dislikedFoods: string[];
   favoriteCuisines: string[];
+  favoriteDishes: string[];
+  favoriteChefs: string[];
+  favoriteRestaurants: string[];
   cookingSkillLevel: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   preferredCookingTime: number | null;
   servingSize: number | null;
+  
+  // New comprehensive preference fields
+  nutritionalGoals: ('WEIGHT_LOSS' | 'MUSCLE_GAIN' | 'MAINTENANCE' | 'HEART_HEALTHY' | 'DIABETIC_FRIENDLY' | 'LOW_SODIUM' | 'HIGH_PROTEIN' | 'LOW_CARB' | 'HIGH_FIBER')[];
+  budgetPreference: 'BUDGET' | 'MODERATE' | 'PREMIUM' | 'LUXURY';
+  preferredMealTypes: ('BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACKS' | 'DESSERTS' | 'APPETIZERS' | 'BRUNCH' | 'LATE_NIGHT')[];
+  availableEquipment: ('OVEN' | 'STOVETOP' | 'MICROWAVE' | 'GRILL' | 'AIR_FRYER' | 'SLOW_COOKER' | 'PRESSURE_COOKER' | 'BLENDER' | 'FOOD_PROCESSOR' | 'STAND_MIXER' | 'TOASTER_OVEN' | 'RICE_COOKER' | 'STEAMER' | 'DEEP_FRYER' | 'SOUS_VIDE')[];
+  mealComplexity: 'ONE_POT' | 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'GOURMET';
+  
+  // Spice tolerance from User model
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME';
+  
   createdAt: string;
   updatedAt: string;
 }
@@ -19,9 +33,22 @@ export interface UpdateUserPreferences {
   favoriteIngredients?: string[];
   dislikedFoods?: string[];
   favoriteCuisines?: string[];
+  favoriteDishes?: string[];
+  favoriteChefs?: string[];
+  favoriteRestaurants?: string[];
   cookingSkillLevel?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   preferredCookingTime?: number | null;
   servingSize?: number | null;
+  
+  // New comprehensive preference fields
+  nutritionalGoals?: ('WEIGHT_LOSS' | 'MUSCLE_GAIN' | 'MAINTENANCE' | 'HEART_HEALTHY' | 'DIABETIC_FRIENDLY' | 'LOW_SODIUM' | 'HIGH_PROTEIN' | 'LOW_CARB' | 'HIGH_FIBER')[];
+  budgetPreference?: 'BUDGET' | 'MODERATE' | 'PREMIUM' | 'LUXURY';
+  preferredMealTypes?: ('BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACKS' | 'DESSERTS' | 'APPETIZERS' | 'BRUNCH' | 'LATE_NIGHT')[];
+  availableEquipment?: ('OVEN' | 'STOVETOP' | 'MICROWAVE' | 'GRILL' | 'AIR_FRYER' | 'SLOW_COOKER' | 'PRESSURE_COOKER' | 'BLENDER' | 'FOOD_PROCESSOR' | 'STAND_MIXER' | 'TOASTER_OVEN' | 'RICE_COOKER' | 'STEAMER' | 'DEEP_FRYER' | 'SOUS_VIDE')[];
+  mealComplexity?: 'ONE_POT' | 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'GOURMET';
+  
+  // Spice tolerance from User model
+  spiceTolerance?: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME';
 }
 
 export interface PreferencesSummary {
@@ -36,7 +63,17 @@ export interface PreferencesOptions {
   dietaryRestrictions: readonly string[];
   allergies: readonly string[];
   cuisines: readonly string[];
+  ingredients: readonly string[];
+  dishes: readonly string[];
   skillLevels: readonly string[];
+  
+  // New comprehensive preference options
+  nutritionalGoals: readonly string[];
+  budgetPreferences: readonly string[];
+  mealTypes: readonly string[];
+  cookingEquipment: readonly string[];
+  mealComplexity: readonly string[];
+  spiceTolerance: readonly string[];
 }
 
 export interface PreferencesResponse {
@@ -65,9 +102,22 @@ export interface PreferencesFormData {
   favoriteIngredients: string[];
   dislikedFoods: string[];
   favoriteCuisines: string[];
+  favoriteDishes: string[];
+  favoriteChefs: string[];
+  favoriteRestaurants: string[];
   cookingSkillLevel: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
   preferredCookingTime: string; // Form field as string
   servingSize: string; // Form field as string
+  
+  // New comprehensive preference fields
+  nutritionalGoals: string[];
+  budgetPreference: 'BUDGET' | 'MODERATE' | 'PREMIUM' | 'LUXURY';
+  preferredMealTypes: string[];
+  availableEquipment: string[];
+  mealComplexity: 'ONE_POT' | 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'GOURMET';
+  
+  // Spice tolerance from User model
+  spiceTolerance: 'MILD' | 'MEDIUM' | 'HOT' | 'EXTREME';
 }
 
 // Skill level options for dropdowns
@@ -85,7 +135,20 @@ export const DEFAULT_PREFERENCES: Partial<UserPreferences> = {
   favoriteIngredients: [],
   dislikedFoods: [],
   favoriteCuisines: [],
+  favoriteDishes: [],
+  favoriteChefs: [],
+  favoriteRestaurants: [],
   cookingSkillLevel: 'BEGINNER',
   preferredCookingTime: null,
   servingSize: 2,
+  
+  // New comprehensive preference fields with defaults
+  nutritionalGoals: [],
+  budgetPreference: 'MODERATE',
+  preferredMealTypes: [],
+  availableEquipment: [],
+  mealComplexity: 'SIMPLE',
+  
+  // Spice tolerance default
+  spiceTolerance: 'MEDIUM',
 }; 

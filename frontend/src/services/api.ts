@@ -170,6 +170,36 @@ class ApiService {
     return response.data;
   }
 
+  async getChefSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
+    const endpoint = query ? `/preferences/suggestions/chefs?query=${encodeURIComponent(query)}` : '/preferences/suggestions/chefs';
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+    return response.data;
+  }
+
+  async getRestaurantSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
+    const endpoint = query ? `/preferences/suggestions/restaurants?query=${encodeURIComponent(query)}` : '/preferences/suggestions/restaurants';
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+    return response.data;
+  }
+
+  async getIngredientSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
+    const endpoint = query ? `/preferences/suggestions/ingredients?query=${encodeURIComponent(query)}` : '/preferences/suggestions/ingredients';
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+    return response.data;
+  }
+
+  async getCuisineSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
+    const endpoint = query ? `/preferences/suggestions/cuisines?query=${encodeURIComponent(query)}` : '/preferences/suggestions/cuisines';
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+    return response.data;
+  }
+
+  async getDishSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
+    const endpoint = query ? `/preferences/suggestions/dishes?query=${encodeURIComponent(query)}` : '/preferences/suggestions/dishes';
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+    return response.data;
+  }
+
   // Recipe methods
   async generateRecipe(request: GenerateRecipeRequest): Promise<RecipeResponse> {
     return this.request<RecipeResponse>('/recipes/generate', {

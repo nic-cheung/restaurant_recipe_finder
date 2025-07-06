@@ -7,7 +7,8 @@ import {
   SKILL_LEVELS
 } from '../types/preferences';
 import TagSelector from '../components/TagSelector';
-import IngredientInput from '../components/IngredientInput';
+import DynamicSuggestionInput from '../components/DynamicSuggestionInput';
+import '../index.css';
 
 // Define popular options for each category
 const POPULAR_DIETARY_RESTRICTIONS = [
@@ -18,28 +19,69 @@ const POPULAR_ALLERGIES = [
   'Nuts', 'Peanuts', 'Shellfish', 'Dairy', 'Eggs', 'Soy'
 ];
 
-const POPULAR_CUISINES = [
-  'Italian', 'Mexican', 'Chinese', 'Japanese', 'Thai', 'Indian', 'French', 'Mediterranean'
-];
-
-// Common ingredient suggestions
-const COMMON_INGREDIENTS = [
-  'Garlic', 'Onion', 'Tomato', 'Basil', 'Oregano', 'Thyme', 'Rosemary', 'Parsley',
-  'Olive Oil', 'Butter', 'Lemon', 'Lime', 'Ginger', 'Cilantro', 'Paprika', 'Cumin',
-  'Black Pepper', 'Salt', 'Cheese', 'Chicken', 'Beef', 'Fish', 'Pasta', 'Rice',
-  'Potatoes', 'Carrots', 'Bell Peppers', 'Mushrooms', 'Spinach', 'Broccoli'
-];
-
 const COMMON_DISLIKED_FOODS = [
-  'Mushrooms', 'Onions', 'Cilantro', 'Olives', 'Anchovies', 'Blue Cheese', 'Liver',
-  'Oysters', 'Brussel Sprouts', 'Cauliflower', 'Eggplant', 'Beets', 'Asparagus',
-  'Coconut', 'Avocado', 'Tofu', 'Quinoa', 'Kale', 'Spinach', 'Fish', 'Seafood'
+  'Mushrooms', 'Onions', 'Cilantro', 'Olives', 'Anchovies', 'Blue Cheese'
 ];
+
+const POPULAR_INGREDIENTS = [
+  'Garlic', 'Ginger', 'Basil', 'Tomatoes', 'Avocado', 'Lemon'
+];
+
+const POPULAR_CUISINES = [
+  'Italian', 'Mexican', 'Thai', 'Indian', 'Japanese', 'Mediterranean'
+];
+
+const POPULAR_DISHES = [
+  'Pizza', 'Pasta', 'Tacos', 'Sushi', 'Curry', 'Salad'
+];
+
+const POPULAR_NUTRITIONAL_GOALS = [
+  'Weight Loss', 'Muscle Gain', 'Heart Healthy', 'High Protein', 'Low Carb', 'High Fiber'
+];
+
+const POPULAR_MEAL_TYPES = [
+  'Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts', 'Brunch'
+];
+
+const POPULAR_EQUIPMENT = [
+  'Oven', 'Stovetop', 'Microwave', 'Air Fryer', 'Blender', 'Food Processor'
+];
+
+const POPULAR_CHEFS = [
+  'Thomas Keller', 'Julia Child', 'Anthony Bourdain', 'Daniel Boulud', 'Alice Waters', 'Wolfgang Puck'
+];
+
+const POPULAR_RESTAURANTS = [
+  'The French Laundry', 'Eleven Madison Park', 'Le Bernardin', 'Alinea', 'Per Se', 'Daniel'
+];
+
+// Convert enum values to human-readable format
+const convertEnumToReadable = (enumValue: string): string => {
+  return enumValue
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+// Convert array of enum values to human-readable format
+const convertEnumArrayToReadable = (enumArray: string[]): string[] => {
+  return enumArray.map(convertEnumToReadable);
+};
+
+// Convert human-readable format back to enum
+const convertReadableToEnum = (readable: string): string => {
+  return readable.toUpperCase().replace(/\s+/g, '_');
+};
+
+// Convert array of human-readable values back to enum format
+const convertReadableArrayToEnum = (readableArray: string[]): string[] => {
+  return readableArray.map(convertReadableToEnum);
+};
 
 const Preferences: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('dietary');
+  const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<any>(null);
   const [formData, setFormData] = useState<PreferencesFormData>({
     dietaryRestrictions: [],
@@ -47,271 +89,580 @@ const Preferences: React.FC = () => {
     favoriteIngredients: [],
     dislikedFoods: [],
     favoriteCuisines: [],
+    favoriteDishes: [],
+    favoriteChefs: [],
+    favoriteRestaurants: [],
     cookingSkillLevel: 'BEGINNER',
     preferredCookingTime: '',
     servingSize: '',
+    
+    // New comprehensive preference fields
+    nutritionalGoals: [],
+    budgetPreference: 'MODERATE',
+    preferredMealTypes: [],
+    availableEquipment: [],
+    mealComplexity: 'SIMPLE',
+    
+    // Spice tolerance
+    spiceTolerance: 'MEDIUM',
   });
 
   // Load preferences and options on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [preferencesData, optionsData] = await Promise.all([
+        const [preferencesResponse, optionsResponse] = await Promise.all([
           apiService.getPreferences(),
-          apiService.getPreferencesOptions(),
+          apiService.getPreferencesOptions()
         ]);
 
-        setOptions(optionsData);
+        if (preferencesResponse && typeof preferencesResponse === 'object' && 'success' in preferencesResponse) {
+          const response = preferencesResponse as { success: boolean; data?: any };
+          if (response.success && response.data) {
+            const prefs = response.data;
+            setFormData({
+              dietaryRestrictions: prefs.dietaryRestrictions || [],
+              allergies: prefs.allergies || [],
+              favoriteIngredients: prefs.favoriteIngredients || [],
+              dislikedFoods: prefs.dislikedFoods || [],
+              favoriteCuisines: prefs.favoriteCuisines || [],
+              favoriteDishes: prefs.favoriteDishes || [],
+              favoriteChefs: prefs.favoriteChefs || [],
+              favoriteRestaurants: prefs.favoriteRestaurants || [],
+              cookingSkillLevel: prefs.cookingSkillLevel || 'BEGINNER',
+              preferredCookingTime: prefs.preferredCookingTime?.toString() || '',
+              servingSize: prefs.servingSize?.toString() || '',
+              
+              // New comprehensive preference fields - convert enum values to human-readable format
+              nutritionalGoals: convertEnumArrayToReadable(prefs.nutritionalGoals || []),
+              budgetPreference: convertEnumToReadable(prefs.budgetPreference || 'MODERATE') as any,
+              preferredMealTypes: convertEnumArrayToReadable(prefs.preferredMealTypes || []),
+              availableEquipment: convertEnumArrayToReadable(prefs.availableEquipment || []),
+              mealComplexity: convertEnumToReadable(prefs.mealComplexity || 'SIMPLE') as any,
+              
+              // Spice tolerance
+              spiceTolerance: prefs.spiceTolerance || 'MEDIUM',
+            });
+          }
+        } else if (preferencesResponse && typeof preferencesResponse === 'object') {
+          // Direct preferences object
+          const prefs = preferencesResponse as any;
+          setFormData({
+            dietaryRestrictions: prefs.dietaryRestrictions || [],
+            allergies: prefs.allergies || [],
+            favoriteIngredients: prefs.favoriteIngredients || [],
+            dislikedFoods: prefs.dislikedFoods || [],
+            favoriteCuisines: prefs.favoriteCuisines || [],
+            favoriteDishes: prefs.favoriteDishes || [],
+            favoriteChefs: prefs.favoriteChefs || [],
+            favoriteRestaurants: prefs.favoriteRestaurants || [],
+            cookingSkillLevel: prefs.cookingSkillLevel || 'BEGINNER',
+            preferredCookingTime: prefs.preferredCookingTime?.toString() || '',
+            servingSize: prefs.servingSize?.toString() || '',
+            
+            // New comprehensive preference fields - convert enum values to human-readable format
+            nutritionalGoals: convertEnumArrayToReadable(prefs.nutritionalGoals || []),
+            budgetPreference: convertEnumToReadable(prefs.budgetPreference || 'MODERATE') as any,
+            preferredMealTypes: convertEnumArrayToReadable(prefs.preferredMealTypes || []),
+            availableEquipment: convertEnumArrayToReadable(prefs.availableEquipment || []),
+            mealComplexity: convertEnumToReadable(prefs.mealComplexity || 'SIMPLE') as any,
+            
+            // Spice tolerance
+            spiceTolerance: prefs.spiceTolerance || 'MEDIUM',
+          });
+        }
 
-        // Populate form with existing preferences
-        setFormData({
-          dietaryRestrictions: preferencesData.dietaryRestrictions || [],
-          allergies: preferencesData.allergies || [],
-          favoriteIngredients: preferencesData.favoriteIngredients || [],
-          dislikedFoods: preferencesData.dislikedFoods || [],
-          favoriteCuisines: preferencesData.favoriteCuisines || [],
-          cookingSkillLevel: preferencesData.cookingSkillLevel || 'BEGINNER',
-          preferredCookingTime: preferencesData.preferredCookingTime?.toString() || '',
-          servingSize: preferencesData.servingSize?.toString() || '2',
-        });
+        if (optionsResponse && typeof optionsResponse === 'object' && 'success' in optionsResponse) {
+          const response = optionsResponse as { success: boolean; data?: any };
+          if (response.success) {
+            setOptions(response.data);
+          }
+        } else if (optionsResponse && typeof optionsResponse === 'object') {
+          setOptions(optionsResponse);
+        }
       } catch (error) {
         console.error('Error loading preferences:', error);
         toast.error('Failed to load preferences');
-      } finally {
-        setIsLoading(false);
       }
     };
 
     loadData();
   }, []);
 
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
+    setLoading(true);
 
     try {
-      const preferencesData = {
-        dietaryRestrictions: formData.dietaryRestrictions,
-        allergies: formData.allergies,
-        favoriteIngredients: formData.favoriteIngredients,
-        dislikedFoods: formData.dislikedFoods,
-        favoriteCuisines: formData.favoriteCuisines,
-        cookingSkillLevel: formData.cookingSkillLevel,
+      const updatedPreferences = {
+        ...formData,
         preferredCookingTime: formData.preferredCookingTime ? parseInt(formData.preferredCookingTime) : null,
         servingSize: formData.servingSize ? parseInt(formData.servingSize) : null,
+        // Convert human-readable values to database enum values
+        nutritionalGoals: convertReadableArrayToEnum(formData.nutritionalGoals) as any,
+        budgetPreference: convertReadableToEnum(formData.budgetPreference) as any,
+        preferredMealTypes: convertReadableArrayToEnum(formData.preferredMealTypes) as any,
+        availableEquipment: convertReadableArrayToEnum(formData.availableEquipment) as any,
+        mealComplexity: convertReadableToEnum(formData.mealComplexity) as any,
+        spiceTolerance: formData.spiceTolerance, // This one is already in the correct format
       };
 
-      console.log('Updating preferences with data:', preferencesData);
-      console.log('Current token:', apiService.getToken());
-
-      await apiService.updatePreferences(preferencesData);
-      toast.success('Preferences updated successfully!');
-      navigate('/dashboard');
-    } catch (error: any) {
-      console.error('Error updating preferences:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response,
-        stack: error.stack
-      });
+      const response = await apiService.updatePreferences(updatedPreferences);
       
-      // Show more specific error message
-      let errorMessage = 'Failed to update preferences';
-      
-      if (error.message) {
-        errorMessage = error.message;
-      } else if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      if (response && typeof response === 'object' && 'success' in response) {
+        const apiResponse = response as { success: boolean; error?: string };
+        if (apiResponse.success) {
+          toast.success('Preferences saved successfully!');
+          navigate('/dashboard');
+        } else {
+          toast.error(apiResponse.error || 'Failed to save preferences');
+        }
+      } else {
+        toast.success('Preferences saved successfully!');
+        navigate('/dashboard');
       }
-      
-      toast.error(errorMessage);
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+      toast.error('Failed to save preferences');
     } finally {
-      setIsSaving(false);
+      setLoading(false);
     }
   };
 
-  const handleInputChange = (field: keyof PreferencesFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const tabs = [
+    { 
+      id: 'dietary', 
+      label: 'Dietary & Health',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      )
+    },
+    { 
+      id: 'taste', 
+      label: 'Taste & Cuisine',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      )
+    },
+    { 
+      id: 'cooking', 
+      label: 'Cooking Style',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
+        </svg>
+      )
+    },
+    { 
+      id: 'preferences', 
+      label: 'Lifestyle',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    },
+    { 
+      id: 'social', 
+      label: 'Inspirations',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        </svg>
+      )
+    }
+  ];
 
-  const handleTagSelectionChange = (field: keyof PreferencesFormData, items: string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: items,
-    }));
-  };
-
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading preferences...</p>
+  const renderDietaryTab = () => (
+    <div className="space-y-8">
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Dietary Requirements</h3>
+          <p className="section-description">Essential dietary restrictions and health considerations</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="preference-card">
+            <label className="preference-label">Dietary Restrictions</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.dietaryRestrictions}
+              onSelectionChange={(items: string[]) => handleInputChange('dietaryRestrictions', items)}
+              placeholder="Add dietary restrictions..."
+              popularOptions={options?.dietaryRestrictions || POPULAR_DIETARY_RESTRICTIONS}
+              allOptions={options?.dietaryRestrictions || POPULAR_DIETARY_RESTRICTIONS}
+              componentId="dietary-restrictions"
+            />
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Allergies</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.allergies}
+              onSelectionChange={(items: string[]) => handleInputChange('allergies', items)}
+              placeholder="Add allergies..."
+              popularOptions={options?.allergies || POPULAR_ALLERGIES}
+              allOptions={options?.allergies || POPULAR_ALLERGIES}
+              componentId="allergies"
+            />
+          </div>
         </div>
       </div>
-    );
-  }
+
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Nutritional Goals</h3>
+          <p className="section-description">Your health and wellness objectives</p>
+        </div>
+        <div className="preference-card">
+          <TagSelector
+            label=""
+            selectedItems={formData.nutritionalGoals}
+            onSelectionChange={(items: string[]) => handleInputChange('nutritionalGoals', items)}
+            placeholder="Select nutritional goals..."
+            popularOptions={convertEnumArrayToReadable(options?.nutritionalGoals || [])}
+            allOptions={convertEnumArrayToReadable(options?.nutritionalGoals || [])}
+            componentId="nutritional-goals"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderTasteTab = () => (
+    <div className="space-y-8">
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Flavor Profile</h3>
+          <p className="section-description">Your taste preferences and ingredient choices</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="preference-card">
+            <label className="preference-label">Favorite Ingredients</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.favoriteIngredients}
+              onSelectionChange={(items: string[]) => handleInputChange('favoriteIngredients', items)}
+              placeholder="Add favorite ingredients..."
+              popularOptions={options?.ingredients || POPULAR_INGREDIENTS}
+              allOptions={options?.ingredients || POPULAR_INGREDIENTS}
+              componentId="favorite-ingredients"
+            />
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Disliked Foods</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.dislikedFoods}
+              onSelectionChange={(items: string[]) => handleInputChange('dislikedFoods', items)}
+              placeholder="Add foods you dislike..."
+              popularOptions={COMMON_DISLIKED_FOODS}
+              allOptions={options?.dislikedFoods || COMMON_DISLIKED_FOODS}
+              componentId="disliked-foods"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Cuisine Preferences</h3>
+          <p className="section-description">Your favorite cuisines and signature dishes</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="preference-card">
+            <label className="preference-label">Favorite Cuisines</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.favoriteCuisines}
+              onSelectionChange={(items: string[]) => handleInputChange('favoriteCuisines', items)}
+              placeholder="Add favorite cuisines..."
+              popularOptions={options?.cuisines || POPULAR_CUISINES}
+              allOptions={options?.cuisines || POPULAR_CUISINES}
+              componentId="favorite-cuisines"
+            />
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Favorite Dishes</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.favoriteDishes}
+              onSelectionChange={(items: string[]) => handleInputChange('favoriteDishes', items)}
+              placeholder="Add favorite dishes..."
+              popularOptions={options?.dishes || POPULAR_DISHES}
+              allOptions={options?.dishes || POPULAR_DISHES}
+              componentId="favorite-dishes"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Spice Preference</h3>
+          <p className="section-description">How much heat do you enjoy in your food?</p>
+        </div>
+        <div className="preference-card">
+          <div className="spice-selector">
+            {['Mild', 'Medium', 'Hot', 'Extreme'].map((tolerance: string) => (
+              <button
+                key={tolerance}
+                type="button"
+                onClick={() => handleInputChange('spiceTolerance', tolerance.toUpperCase().replace(' ', '_'))}
+                className={`spice-option ${formData.spiceTolerance === tolerance.toUpperCase().replace(' ', '_') ? 'selected' : ''}`}
+              >
+                <div className="spice-indicator">
+                  {tolerance === 'Mild' && <div className="spice-dot mild"></div>}
+                  {tolerance === 'Medium' && <div className="spice-dot medium"></div>}
+                  {tolerance === 'Hot' && <div className="spice-dot hot"></div>}
+                  {tolerance === 'Extreme' && <div className="spice-dot extreme"></div>}
+                </div>
+                <span className="spice-label">{tolerance}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCookingTab = () => (
+    <div className="space-y-8">
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Cooking Experience</h3>
+          <p className="section-description">Your skill level and time preferences</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="preference-card">
+            <label className="preference-label">Skill Level</label>
+            <select
+              value={formData.cookingSkillLevel}
+              onChange={(e) => handleInputChange('cookingSkillLevel', e.target.value)}
+              className="select-field"
+            >
+              {SKILL_LEVELS.map((level) => (
+                <option key={level.value} value={level.value}>
+                  {level.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Preferred Cooking Time (minutes)</label>
+            <input
+              type="number"
+              value={formData.preferredCookingTime}
+              onChange={(e) => handleInputChange('preferredCookingTime', e.target.value)}
+              placeholder="e.g., 30"
+              className="input-field"
+              min="5"
+              max="300"
+            />
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Typical Serving Size</label>
+            <input
+              type="number"
+              value={formData.servingSize}
+              onChange={(e) => handleInputChange('servingSize', e.target.value)}
+              placeholder="e.g., 4"
+              className="input-field"
+              min="1"
+              max="20"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Kitchen Setup</h3>
+          <p className="section-description">Available equipment and preferred complexity</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="preference-card">
+            <label className="preference-label">Available Equipment</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.availableEquipment}
+              onSelectionChange={(items: string[]) => handleInputChange('availableEquipment', items)}
+              placeholder="Select available equipment..."
+              popularOptions={convertEnumArrayToReadable(options?.cookingEquipment || [])}
+              allOptions={convertEnumArrayToReadable(options?.cookingEquipment || [])}
+              componentId="available-equipment"
+            />
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Meal Complexity</label>
+            <select
+              value={formData.mealComplexity}
+              onChange={(e) => handleInputChange('mealComplexity', e.target.value)}
+              className="select-field"
+            >
+              <option value="">Select complexity</option>
+              {(options?.mealComplexity || []).map((complexity: string) => (
+                <option key={complexity} value={convertEnumToReadable(complexity)}>
+                  {convertEnumToReadable(complexity)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPreferencesTab = () => (
+    <div className="space-y-8">
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Lifestyle Preferences</h3>
+          <p className="section-description">Budget and meal planning preferences</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="preference-card">
+            <label className="preference-label">Budget Preference</label>
+            <select
+              value={formData.budgetPreference}
+              onChange={(e) => handleInputChange('budgetPreference', e.target.value)}
+              className="select-field"
+            >
+              <option value="">Select budget preference</option>
+              {(options?.budgetPreferences || []).map((budget: string) => (
+                <option key={budget} value={convertEnumToReadable(budget)}>
+                  {convertEnumToReadable(budget)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Meal Types</label>
+            <TagSelector
+              label=""
+              selectedItems={formData.preferredMealTypes}
+              onSelectionChange={(items: string[]) => handleInputChange('preferredMealTypes', items)}
+              placeholder="Select meal types..."
+              popularOptions={convertEnumArrayToReadable(options?.mealTypes || [])}
+              allOptions={convertEnumArrayToReadable(options?.mealTypes || [])}
+              componentId="preferred-meal-types"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSocialTab = () => (
+    <div className="space-y-8">
+      <div className="preference-section">
+        <div className="section-header">
+          <h3 className="section-title">Culinary Inspirations</h3>
+          <p className="section-description">Chefs and restaurants that inspire your cooking</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="preference-card">
+            <label className="preference-label">Favorite Chefs</label>
+            <DynamicSuggestionInput
+              label=""
+              selectedItems={formData.favoriteChefs}
+              onSelectionChange={(items: string[]) => handleInputChange('favoriteChefs', items)}
+              placeholder="Search for chefs..."
+              suggestionType="chefs"
+              staticSuggestions={POPULAR_CHEFS}
+            />
+          </div>
+          <div className="preference-card">
+            <label className="preference-label">Favorite Restaurants</label>
+            <DynamicSuggestionInput
+              label=""
+              selectedItems={formData.favoriteRestaurants}
+              onSelectionChange={(items: string[]) => handleInputChange('favoriteRestaurants', items)}
+              placeholder="Search for restaurants..."
+              suggestionType="restaurants"
+              staticSuggestions={POPULAR_RESTAURANTS}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'dietary':
+        return renderDietaryTab();
+      case 'taste':
+        return renderTasteTab();
+      case 'cooking':
+        return renderCookingTab();
+      case 'preferences':
+        return renderPreferencesTab();
+      case 'social':
+        return renderSocialTab();
+      default:
+        return renderDietaryTab();
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Your Preferences
-        </h1>
-        <p className="text-lg text-gray-600">
-          Customize your cooking experience by setting your dietary preferences, favorite ingredients, and cooking style.
-        </p>
+    <div className="preferences-container">
+      <div className="preferences-header">
+        <div className="header-content">
+          <h1 className="page-title">Culinary Preferences</h1>
+          <p className="page-subtitle">
+            Personalize your cooking experience with detailed preferences
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Dietary Restrictions */}
-        <div className="card">
-          <TagSelector
-            label="Dietary Restrictions"
-            popularOptions={POPULAR_DIETARY_RESTRICTIONS}
-            allOptions={options?.dietaryRestrictions || []}
-            selectedItems={formData.dietaryRestrictions}
-            onSelectionChange={(items) => handleTagSelectionChange('dietaryRestrictions', items)}
-            placeholder="Search for dietary restrictions..."
-            maxPopularTags={6}
-          />
+      <div className="preferences-body">
+        <div className="tab-navigation">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+            >
+              <span className="tab-icon">{tab.icon}</span>
+              <span className="tab-label">{tab.label}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Allergies */}
-        <div className="card">
-          <TagSelector
-            label="Allergies & Intolerances"
-            popularOptions={POPULAR_ALLERGIES}
-            allOptions={options?.allergies || []}
-            selectedItems={formData.allergies}
-            onSelectionChange={(items) => handleTagSelectionChange('allergies', items)}
-            placeholder="Search for allergies..."
-            maxPopularTags={6}
-          />
-        </div>
-
-        {/* Favorite Cuisines */}
-        <div className="card">
-          <TagSelector
-            label="Favorite Cuisines"
-            popularOptions={POPULAR_CUISINES}
-            allOptions={options?.cuisines || []}
-            selectedItems={formData.favoriteCuisines}
-            onSelectionChange={(items) => handleTagSelectionChange('favoriteCuisines', items)}
-            placeholder="Search for cuisines..."
-            maxPopularTags={8}
-          />
-        </div>
-
-        {/* Cooking Preferences */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Cooking Preferences
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Cooking Skill Level
-              </label>
-              <select
-                value={formData.cookingSkillLevel}
-                onChange={(e) => handleInputChange('cookingSkillLevel', e.target.value)}
-                className="input-field"
-              >
-                {SKILL_LEVELS.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Preferred Cooking Time (minutes)
-              </label>
-              <input
-                type="number"
-                min="5"
-                max="480"
-                value={formData.preferredCookingTime}
-                onChange={(e) => handleInputChange('preferredCookingTime', e.target.value)}
-                className="input-field"
-                placeholder="e.g., 30"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Maximum time you'd like to spend cooking
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Default Serving Size
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                value={formData.servingSize}
-                onChange={(e) => handleInputChange('servingSize', e.target.value)}
-                className="input-field"
-                placeholder="e.g., 2"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Number of people you usually cook for
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Custom Ingredients */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="card">
-            <IngredientInput
-              label="Favorite Ingredients"
-              selectedItems={formData.favoriteIngredients}
-              onSelectionChange={(items) => handleTagSelectionChange('favoriteIngredients', items)}
-              placeholder="Type to search or add ingredients..."
-              suggestions={COMMON_INGREDIENTS}
-              tagColor="green"
-            />
+        <form onSubmit={handleSubmit} className="preferences-form">
+          <div className="tab-content">
+            {renderTabContent()}
           </div>
 
-          <div className="card">
-            <IngredientInput
-              label="Disliked Foods"
-              selectedItems={formData.dislikedFoods}
-              onSelectionChange={(items) => handleTagSelectionChange('dislikedFoods', items)}
-              placeholder="Type to search or add foods..."
-              suggestions={COMMON_DISLIKED_FOODS}
-              tagColor="red"
-            />
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary"
+            >
+              {loading ? 'Saving...' : 'Save Preferences'}
+            </button>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-between items-center pt-6">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard')}
-            className="btn-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="btn-primary"
-          >
-            {isSaving ? 'Saving...' : 'Save Preferences'}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
