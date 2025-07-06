@@ -168,6 +168,32 @@ export class GeminiService {
       ).slice(0, 5);
     }
   }
+
+  /**
+   * Generate a complete recipe using AI
+   */
+  async generateRecipe(prompt: string): Promise<string> {
+    try {
+      const fullPrompt = `${prompt}
+
+IMPORTANT: You are a professional chef creating recipes for sophisticated food enthusiasts. 
+Please ensure the recipe is:
+- Authentic and well-balanced
+- Uses quality ingredients and proper techniques
+- Includes accurate cooking times and temperatures
+- Provides clear, step-by-step instructions
+- Considers dietary restrictions and preferences mentioned
+- Includes realistic nutritional estimates
+
+Return ONLY the JSON response, no additional text or explanations.`;
+
+      const response = await this.generateText(fullPrompt);
+      return response;
+    } catch (error) {
+      console.error('Recipe generation failed:', error);
+      throw new Error('Failed to generate recipe with AI');
+    }
+  }
 }
 
 // Export singleton instance

@@ -1070,4 +1070,98 @@ export const SPICE_TOLERANCE = [
   'MEDIUM',
   'HOT',
   'EXTREME'
-] as const; 
+] as const;
+
+/**
+ * Recipe generation validation schema
+ */
+export const recipeGenerationSchema = z.object({
+  inspiration: z
+    .string()
+    .min(1, 'Inspiration cannot be empty')
+    .max(200, 'Inspiration must be less than 200 characters')
+    .optional(),
+  ingredients: z
+    .array(z.string().min(1, 'Ingredient cannot be empty'))
+    .max(50, 'Too many ingredients')
+    .optional(),
+  cookingTime: z
+    .number()
+    .int('Cooking time must be an integer')
+    .min(5, 'Cooking time must be at least 5 minutes')
+    .max(480, 'Cooking time cannot exceed 8 hours')
+    .optional(),
+  servings: z
+    .number()
+    .int('Servings must be an integer')
+    .min(1, 'Servings must be at least 1')
+    .max(20, 'Servings cannot exceed 20')
+    .optional(),
+  difficulty: z
+    .enum(['EASY', 'MEDIUM', 'HARD', 'EXPERT'])
+    .optional(),
+  mealType: z
+    .string()
+    .min(1, 'Meal type cannot be empty')
+    .max(50, 'Meal type must be less than 50 characters')
+    .optional(),
+  additionalRequests: z
+    .string()
+    .max(500, 'Additional requests must be less than 500 characters')
+    .optional(),
+});
+
+/**
+ * Recipe rating validation schema
+ */
+export const recipeRatingSchema = z.object({
+  rating: z
+    .number()
+    .int('Rating must be an integer')
+    .min(1, 'Rating must be at least 1')
+    .max(5, 'Rating cannot exceed 5'),
+  notes: z
+    .string()
+    .max(1000, 'Notes must be less than 1000 characters')
+    .optional(),
+});
+
+// Type exports for recipe validation
+export type RecipeGenerationInput = z.infer<typeof recipeGenerationSchema>;
+export type RecipeRatingInput = z.infer<typeof recipeRatingSchema>;
+
+/**
+ * Validate recipe generation request
+ */
+export function validateRecipeGeneration(data: any): { success: boolean; errors?: string[] } {
+  try {
+    recipeGenerationSchema.parse(data);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        errors: error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+      };
+    }
+    return { success: false, errors: ['Invalid data format'] };
+  }
+}
+
+/**
+ * Validate recipe rating request
+ */
+export function validateRecipeRating(data: any): { success: boolean; errors?: string[] } {
+  try {
+    recipeRatingSchema.parse(data);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        errors: error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+      };
+    }
+    return { success: false, errors: ['Invalid data format'] };
+  }
+} 
