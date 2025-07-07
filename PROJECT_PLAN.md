@@ -79,6 +79,28 @@
 - ✅ Recipe search and filtering
 - ✅ Comprehensive recipe display with ingredients and instructions
 
+## 🎨 **Recent Major Enhancements**
+1. **Enhanced Meal Types System** (July 2025)
+   - Expanded from 8 to 47 specific meal categories
+   - Added popular suggestions for quick selection
+   - Improved user experience in both preferences and registration
+
+2. **Clickable Step Navigation** (July 2025)
+   - Made registration step icons clickable for free navigation
+   - Added validation logic to prevent invalid step skipping
+   - Enhanced user experience with visual feedback
+
+3. **Dropdown Cutoff Fixes** (July 2025)
+   - Resolved dropdown visibility issues in registration form
+   - Improved z-index management and container overflow handling
+   - Enhanced form usability across all steps
+
+4. **Consistent Capitalization System** (July 2025)
+   - Implemented comprehensive lowercase aesthetic with strategic exceptions
+   - Added detailed capitalization rules to development guidelines
+   - Systematically updated 300+ text elements across all components
+   - Enhanced design consistency and user experience
+
 ## 🎯 **RECENT MAJOR ENHANCEMENTS**
 
 ### ✅ **Enhanced Meal Types System (July 2025)**
