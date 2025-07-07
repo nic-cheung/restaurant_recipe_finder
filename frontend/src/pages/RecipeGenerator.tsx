@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
+// import { useAuth } from '../contexts/AuthContext'; // Available if needed
 import { 
   RecipeGenerationRequest, 
   GeneratedRecipe, 
@@ -635,7 +635,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
     
     // Common pattern: "2 cups flour" or "1 tablespoon olive oil"
     const match = clean.match(/^(\d+(?:\/\d+)?(?:\.\d+)?)\s+([a-zA-Z]+)\s+(.+)$/);
-    if (match) {
+    if (match && match[1] && match[2] && match[3]) {
       return {
         amount: match[1],
         unit: match[2],
@@ -645,7 +645,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
     
     // Pattern: "2 cups of flour"
     const ofMatch = clean.match(/^(\d+(?:\/\d+)?(?:\.\d+)?)\s+([a-zA-Z]+)\s+of\s+(.+)$/);
-    if (ofMatch) {
+    if (ofMatch && ofMatch[1] && ofMatch[2] && ofMatch[3]) {
       return {
         amount: ofMatch[1],
         unit: ofMatch[2],
@@ -655,7 +655,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
     
     // Pattern: just number and ingredient "2 eggs"
     const simpleMatch = clean.match(/^(\d+(?:\/\d+)?(?:\.\d+)?)\s+(.+)$/);
-    if (simpleMatch) {
+    if (simpleMatch && simpleMatch[1] && simpleMatch[2]) {
       return {
         amount: simpleMatch[1],
         unit: '',
@@ -759,25 +759,25 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8" style={{ backgroundColor: 'var(--flambé-cream)' }}>
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Recipe Generator</h1>
-          <p className="text-xl text-gray-600">Create personalized recipes with AI magic</p>
+          <h1 className="text-4xl font-bold flambé-heading mb-2">ai recipe generator</h1>
+          <p className="text-xl flambé-body">create personalized recipes with ai magic</p>
         </div>
 
         {/* Success Message */}
         {state.showSaveSuccess && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="mb-6 rounded-lg p-4" style={{ backgroundColor: 'var(--flambé-sage)', borderColor: 'var(--flambé-forest)' }}>
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5" style={{ color: 'var(--flambé-forest)' }} viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
-                  Recipe saved successfully! You can find it in your saved recipes.
+                <p className="text-sm font-medium flambé-body" style={{ color: 'var(--flambé-forest)' }}>
+                  recipe saved successfully! you can find it in your saved recipes.
                 </p>
               </div>
             </div>
@@ -786,15 +786,15 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
 
         {/* Error Message */}
         {state.error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-6 rounded-lg p-4" style={{ backgroundColor: 'var(--flambé-fog)', borderColor: 'var(--flambé-rust)' }}>
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5" style={{ color: 'var(--flambé-rust)' }} viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-red-800">{state.error}</p>
+                <p className="text-sm font-medium flambé-body" style={{ color: 'var(--flambé-rust)' }}>{state.error}</p>
               </div>
             </div>
           </div>
@@ -804,7 +804,12 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
           {/* Recipe Creation */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-gray-900">🍳 What are you in the mood for?</h2>
+              <h2 className="text-2xl font-semibold flambé-heading">
+                <svg className="w-6 h-6 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
+                </svg>
+                what are you in the mood for?
+              </h2>
               {isLoadingPreferences && (
                 <div className="flex items-center text-sm text-blue-600">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
@@ -917,30 +922,46 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   {/* AI Prompt Display */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-medium text-gray-900">🤖 AI Prompt Generated</h3>
+                      <h3 className="text-lg font-medium flambé-heading">
+                        <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        </svg>
+                        ai prompt generated
+                      </h3>
                       <button
                         onClick={() => {
                           // Extract technical prompt from response
                           const technicalPrompt = parseTechnicalPromptFromResponse(state.generatedPrompt || '');
                           navigator.clipboard.writeText(technicalPrompt);
                         }}
-                        className="text-sm bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 font-medium"
+                        className="text-sm btn-primary"
                       >
-                        📋 Copy Prompt
+                        <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        copy prompt
                       </button>
                     </div>
                     
                     <div className="space-y-4">
                       {/* Clean Prompt for Display */}
                       <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">📋 Your Personalized Recipe Request</h4>
+                        <h4 className="text-sm font-medium flambé-heading mb-2">
+                          <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                          </svg>
+                          your personalized recipe request
+                        </h4>
                         <div className="bg-white border rounded-md p-3 max-h-96 overflow-y-auto">
                           <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
                             {parseAIPromptFromResponse(state.generatedPrompt || '')}
                           </pre>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          📋 Click "Copy Prompt" above to copy the full technical version with JSON formatting instructions
+                        <p className="text-xs flambé-body mt-1">
+                          <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                          </svg>
+                          click "copy prompt" above to copy the full technical version with json formatting instructions
                         </p>
                       </div>
                     </div>
@@ -950,23 +971,38 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   <div className="flex space-x-3">
                     <button
                       onClick={handleUseExternalAI}
-                      className="flex-1 bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 font-medium"
+                      className="flex-1 btn-secondary"
                     >
-                      🔗 Use External AI
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      use external ai
                     </button>
                     <button
                       onClick={handleUseBuiltInAI}
                       disabled={state.isGeneratingRecipe}
-                      className="flex-1 bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {state.isGeneratingRecipe ? 'Generating...' : '⚡ Use Built-in AI'}
+                      {state.isGeneratingRecipe ? 'generating...' : (
+                        <>
+                          <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          use built-in ai
+                        </>
+                      )}
                     </button>
                   </div>
 
                   {/* Manual Input Section */}
                   {state.showManualInput && (
                     <div className="bg-blue-50 rounded-lg p-4 space-y-3">
-                      <h4 className="font-medium text-blue-900">📝 Paste Your AI Response</h4>
+                      <h4 className="font-medium flambé-heading">
+                        <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        paste your ai response
+                      </h4>
                       <p className="text-sm text-blue-700">
                         Copy the prompt above, use it in ChatGPT/Claude, then paste the response below:
                       </p>
@@ -1005,9 +1041,12 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                       generatedRecipe: null,
                       savedRecipe: null
                     }))}
-                    className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 font-medium"
+                    className="w-full btn-secondary"
                   >
-                    🔄 Start Over
+                    <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    start over
                   </button>
                 </div>
               )}
@@ -1038,11 +1077,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   {/* Favorites Group */}
                   {userPreferences.favoriteCuisines.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🌍</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Cuisines: ${getFullValue(userPreferences.favoriteCuisines)}`}>
-                          <span className="font-medium text-gray-700">Cuisines:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.favoriteCuisines, 20)}</span>
+                          <span className="font-medium flambé-body">cuisines:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.favoriteCuisines, 20)}</span>
                         </div>
                       </div>
                     </div>
@@ -1050,11 +1091,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.favoriteIngredients.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🥘</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Ingredients: ${getFullValue(userPreferences.favoriteIngredients)}`}>
-                          <span className="font-medium text-gray-700">Ingredients:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.favoriteIngredients, 18)}</span>
+                          <span className="font-medium flambé-body">ingredients:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.favoriteIngredients, 18)}</span>
                         </div>
                       </div>
                     </div>
@@ -1062,11 +1105,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.favoriteDishes.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🍝</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Dishes: ${getFullValue(userPreferences.favoriteDishes)}`}>
-                          <span className="font-medium text-gray-700">Dishes:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.favoriteDishes, 22)}</span>
+                          <span className="font-medium flambé-body">dishes:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.favoriteDishes, 22)}</span>
                         </div>
                       </div>
                     </div>
@@ -1074,11 +1119,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.favoriteChefs.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">👨‍🍳</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Chefs: ${getFullValue(userPreferences.favoriteChefs)}`}>
-                          <span className="font-medium text-gray-700">Chefs:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.favoriteChefs, 22)}</span>
+                          <span className="font-medium flambé-body">chefs:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.favoriteChefs, 22)}</span>
                         </div>
                       </div>
                     </div>
@@ -1086,11 +1133,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.favoriteRestaurants.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🏪</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Restaurants: ${getFullValue(userPreferences.favoriteRestaurants)}`}>
-                          <span className="font-medium text-gray-700">Restaurants:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.favoriteRestaurants, 18)}</span>
+                          <span className="font-medium flambé-body">restaurants:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.favoriteRestaurants, 18)}</span>
                         </div>
                       </div>
                     </div>
@@ -1099,11 +1148,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   {/* Dietary Restrictions */}
                   {userPreferences.dietaryRestrictions.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🥗</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Dietary: ${getFullValue(userPreferences.dietaryRestrictions)}`}>
-                          <span className="font-medium text-gray-700">Dietary:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.dietaryRestrictions, 22)}</span>
+                          <span className="font-medium flambé-body">dietary:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.dietaryRestrictions, 22)}</span>
                         </div>
                       </div>
                     </div>
@@ -1111,11 +1162,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.allergies.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">⚠️</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Allergies: ${getFullValue(userPreferences.allergies)}`}>
-                          <span className="font-medium text-gray-700">Allergies:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.allergies, 20)}</span>
+                          <span className="font-medium flambé-body">allergies:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.allergies, 20)}</span>
                         </div>
                       </div>
                     </div>
@@ -1123,11 +1176,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.dislikedFoods.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🚫</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Avoid: ${getFullValue(userPreferences.dislikedFoods)}`}>
-                          <span className="font-medium text-gray-700">Avoid:</span>
-                          <span className="ml-1">{truncateToSingleLine(userPreferences.dislikedFoods, 23)}</span>
+                          <span className="font-medium flambé-body">avoid:</span>
+                          <span className="ml-1 flambé-body">{truncateToSingleLine(userPreferences.dislikedFoods, 23)}</span>
                         </div>
                       </div>
                     </div>
@@ -1136,11 +1191,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   {/* Goals & Equipment */}
                   {userPreferences.nutritionalGoals.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🎯</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Goals: ${getFullValue(userPreferences.nutritionalGoals, true)}`}>
-                          <span className="font-medium text-gray-700">Goals:</span>
-                          <span className="ml-1">{formatAndTruncateEnumArray(userPreferences.nutritionalGoals, 22)}</span>
+                          <span className="font-medium flambé-body">goals:</span>
+                          <span className="ml-1 flambé-body">{formatAndTruncateEnumArray(userPreferences.nutritionalGoals, 22)}</span>
                         </div>
                       </div>
                     </div>
@@ -1148,11 +1205,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.preferredMealTypes.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🍽️</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Meals: ${getFullValue(userPreferences.preferredMealTypes, true)}`}>
-                          <span className="font-medium text-gray-700">Meals:</span>
-                          <span className="ml-1">{formatAndTruncateEnumArray(userPreferences.preferredMealTypes, 22)}</span>
+                          <span className="font-medium flambé-body">meals:</span>
+                          <span className="ml-1 flambé-body">{formatAndTruncateEnumArray(userPreferences.preferredMealTypes, 22)}</span>
                         </div>
                       </div>
                     </div>
@@ -1160,11 +1219,14 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   
                   {userPreferences.availableEquipment.length > 0 && (
                     <div className="flex items-start">
-                      <span className="font-medium mr-2">🔧</span>
+                      <svg className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Equipment: ${getFullValue(userPreferences.availableEquipment, true)}`}>
-                          <span className="font-medium text-gray-700">Equipment:</span>
-                          <span className="ml-1">{formatAndTruncateEnumArray(userPreferences.availableEquipment, 18)}</span>
+                          <span className="font-medium flambé-body">equipment:</span>
+                          <span className="ml-1 flambé-body">{formatAndTruncateEnumArray(userPreferences.availableEquipment, 18)}</span>
                         </div>
                       </div>
                     </div>
@@ -1173,49 +1235,62 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   {/* Quick Stats */}
                   <div className="flex items-center overflow-hidden">
                     <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Time: ${userPreferences.preferredCookingTime ? `${userPreferences.preferredCookingTime} minutes` : 'Any cooking time'}`}>
-                      <span className="font-medium mr-2">⏱️</span>
-                      <span className="font-medium text-gray-700">Time:</span>
-                      <span className="ml-1">{userPreferences.preferredCookingTime ? `${userPreferences.preferredCookingTime}min` : 'Any'}</span>
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium flambé-body">time:</span>
+                      <span className="ml-1 flambé-body">{userPreferences.preferredCookingTime ? `${userPreferences.preferredCookingTime}min` : 'any'}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center overflow-hidden">
                     <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Serves: ${userPreferences.servingSize || 4} people`}>
-                      <span className="font-medium mr-2">👥</span>
-                      <span className="font-medium text-gray-700">Serves:</span>
-                      <span className="ml-1">{userPreferences.servingSize || 4}</span>
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      </svg>
+                      <span className="font-medium flambé-body">serves:</span>
+                      <span className="ml-1 flambé-body">{userPreferences.servingSize || 4}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center overflow-hidden">
                     <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Skill: ${formatEnumValue(userPreferences.cookingSkillLevel || 'Any')} cooking skill level`}>
-                      <span className="font-medium mr-2">📊</span>
-                      <span className="font-medium text-gray-700">Skill:</span>
-                      <span className="ml-1">{formatEnumValue(userPreferences.cookingSkillLevel || 'Any')}</span>
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <span className="font-medium flambé-body">skill:</span>
+                      <span className="ml-1 flambé-body">{formatEnumValue(userPreferences.cookingSkillLevel || 'any')}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center overflow-hidden">
                     <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Spice: ${formatEnumValue(userPreferences.spiceTolerance || 'Medium')} spice tolerance`}>
-                      <span className="font-medium mr-2">🌶️</span>
-                      <span className="font-medium text-gray-700">Spice:</span>
-                      <span className="ml-1">{formatEnumValue(userPreferences.spiceTolerance || 'Medium')}</span>
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+                      </svg>
+                      <span className="font-medium flambé-body">spice:</span>
+                      <span className="ml-1 flambé-body">{formatEnumValue(userPreferences.spiceTolerance || 'medium')}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center overflow-hidden">
                     <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Budget: ${formatEnumValue(userPreferences.budgetPreference || 'Moderate')} budget preference`}>
-                      <span className="font-medium mr-2">💰</span>
-                      <span className="font-medium text-gray-700">Budget:</span>
-                      <span className="ml-1">{formatEnumValue(userPreferences.budgetPreference || 'Moderate')}</span>
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium flambé-body">budget:</span>
+                      <span className="ml-1 flambé-body">{formatEnumValue(userPreferences.budgetPreference || 'moderate')}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center overflow-hidden">
                     <div className="whitespace-nowrap overflow-hidden text-ellipsis" title={`Complexity: ${formatEnumValue(userPreferences.mealComplexity || 'Simple')} meal complexity`}>
-                      <span className="font-medium mr-2">🔄</span>
-                      <span className="font-medium text-gray-700">Complexity:</span>
-                      <span className="ml-1">{formatEnumValue(userPreferences.mealComplexity || 'Simple')}</span>
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span className="font-medium flambé-body">complexity:</span>
+                      <span className="ml-1 flambé-body">{formatEnumValue(userPreferences.mealComplexity || 'simple')}</span>
                     </div>
                   </div>
                 </div>

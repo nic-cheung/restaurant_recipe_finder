@@ -106,21 +106,19 @@ const TagSelector: React.FC<TagSelectorProps> = ({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      {label && <h3 className="text-lg font-medium text-gray-900">{label}</h3>}
+      {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
       
-      {/* Popular Tags */}
-      {displayedPopularOptions.length > 0 && (
+      {/* Popular Tags - Only show unselected ones */}
+      {displayedPopularOptions.filter(tag => !safeSelectedItems.includes(tag)).length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {displayedPopularOptions.map((tag) => (
+          {displayedPopularOptions
+            .filter(tag => !safeSelectedItems.includes(tag))
+            .map((tag) => (
             <button
               key={`${componentId}-popular-${tag}`}
               type="button"
               onClick={() => toggleTag(tag)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                safeSelectedItems.includes(tag)
-                  ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
-                  : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-              }`}
+              className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200"
             >
               {tag}
             </button>
@@ -128,21 +126,19 @@ const TagSelector: React.FC<TagSelectorProps> = ({
         </div>
       )}
 
-      {/* Selected Items Display - Only show items not in popular options */}
+      {/* Selected Items Display - All selected items with blue styling */}
       {safeSelectedItems.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {safeSelectedItems
-            .filter(item => !displayedPopularOptions.includes(item))
-            .map((item) => (
+          {safeSelectedItems.map((item) => (
             <span
               key={`${componentId}-selected-${item}`}
-              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 border border-green-200"
+              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border-2 border-blue-300"
             >
               {item}
               <button
                 type="button"
                 onClick={() => toggleTag(item)}
-                className="ml-2 text-green-600 hover:text-green-800 focus:outline-none"
+                className="ml-2 text-current hover:text-opacity-80 focus:outline-none"
               >
                 ×
               </button>

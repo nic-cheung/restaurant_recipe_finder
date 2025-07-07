@@ -1,206 +1,482 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Source+Serif+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --primary-50: #eff6ff;
-    --primary-100: #dbeafe;
-    --primary-200: #bfdbfe;
-    --primary-300: #93c5fd;
-    --primary-400: #60a5fa;
-    --primary-500: #3b82f6;
-    --primary-600: #2563eb;
-    --primary-700: #1d4ed8;
-    --primary-800: #1e40af;
-    --primary-900: #1e3a8a;
-  }
+/* Flambé Brand Variables - Inspired by Noma/Scandinavian Design */
+:root {
+  /* Primary Nordic Color Palette */
+  --flambé-cream: #F7F5F3;          /* Warm off-white */
+  --flambé-stone: #E8E4E0;          /* Light stone */
+  --flambé-sage: #A8B5A0;           /* Muted sage green */
+  --flambé-charcoal: #2C2C2C;       /* Deep charcoal */
+  --flambé-ash: #6B6B6B;            /* Medium ash grey */
+  --flambé-ember: #D4A574;          /* Warm ember gold */
+  --flambé-smoke: #9B9B9B;          /* Light smoke grey */
   
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
+  /* Accent Colors */
+  --flambé-forest: #4A5D3A;         /* Deep forest green */
+  --flambé-rust: #A67C52;           /* Muted rust */
+  --flambé-fog: #F0EFED;            /* Lightest fog */
   
-  body {
-    @apply bg-gray-50 text-gray-900;
-  }
+  /* Typography */
+  --font-serif: 'Crimson Text', serif;
+  --font-body: 'Source Serif Pro', serif;
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 inline-flex items-center justify-center shadow-sm hover:shadow-md;
-  }
-  
-  .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 inline-flex items-center justify-center shadow-sm hover:shadow-md;
-  }
-  
-  .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white;
-  }
-  
-  .select-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white appearance-none;
-  }
-  
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
-  }
+/* Base Styles */
+body {
+  font-family: var(--font-body);
+  background-color: var(--flambé-cream);
+  color: var(--flambé-charcoal);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
 
-  /* Preferences Page Styles */
-  .preferences-container {
-    @apply min-h-screen bg-gradient-to-br from-gray-50 to-blue-50;
-  }
+/* Flambé Brand Typography */
+.flambé-logo {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--flambé-charcoal);
+}
 
-  .preferences-header {
-    @apply bg-white border-b border-gray-200 shadow-sm;
-  }
+.flambé-heading {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--flambé-charcoal);
+  letter-spacing: 0.01em;
+}
 
-  .header-content {
-    @apply max-w-6xl mx-auto px-6 py-8;
-  }
+.flambé-body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  color: var(--flambé-ash);
+  letter-spacing: 0.005em;
+}
 
+/* Component Styles with Nordic Aesthetic */
+.btn-primary {
+  @apply px-6 py-3 rounded-sm font-medium transition-all duration-200;
+  background-color: var(--flambé-charcoal);
+  color: var(--flambé-cream);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--flambé-charcoal);
+}
+
+.btn-primary:hover {
+  background-color: var(--flambé-forest);
+  border-color: var(--flambé-forest);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(44, 44, 44, 0.15);
+}
+
+.btn-primary:disabled {
+  background-color: var(--flambé-smoke);
+  border-color: var(--flambé-smoke);
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 rounded-sm font-medium transition-all duration-200;
+  background-color: transparent;
+  color: var(--flambé-ash);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--flambé-stone);
+}
+
+.btn-secondary:hover {
+  background-color: var(--flambé-stone);
+  color: var(--flambé-charcoal);
+  border-color: var(--flambé-sage);
+}
+
+/* Input Fields - Minimalist Nordic Style */
+.input-field {
+  @apply w-full px-4 py-3 rounded-sm transition-all duration-200;
+  background-color: var(--flambé-fog);
+  border: 1px solid var(--flambé-stone);
+  color: var(--flambé-charcoal);
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: 0.005em;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--flambé-sage);
+  background-color: var(--flambé-cream);
+  box-shadow: 0 0 0 3px rgba(168, 181, 160, 0.1);
+}
+
+.input-field::placeholder {
+  color: var(--flambé-smoke);
+  font-style: italic;
+}
+
+/* Select Fields */
+.select-field {
+  @apply w-full px-4 py-3 rounded-sm transition-all duration-200;
+  background-color: var(--flambé-fog);
+  border: 1px solid var(--flambé-stone);
+  color: var(--flambé-charcoal);
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: 0.005em;
+}
+
+.select-field:focus {
+  outline: none;
+  border-color: var(--flambé-sage);
+  background-color: var(--flambé-cream);
+  box-shadow: 0 0 0 3px rgba(168, 181, 160, 0.1);
+}
+
+/* Cards - Clean Scandinavian Style */
+.preference-card {
+  background-color: var(--flambé-cream);
+  border: 1px solid var(--flambé-stone);
+  border-radius: 2px;
+  padding: 2rem;
+  transition: all 0.2s ease;
+}
+
+.preference-card:hover {
+  border-color: var(--flambé-sage);
+  box-shadow: 0 4px 20px rgba(44, 44, 44, 0.08);
+}
+
+/* Section Headers */
+.section-header {
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--flambé-charcoal);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
+}
+
+.section-description {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--flambé-ash);
+  letter-spacing: 0.005em;
+}
+
+/* Page Titles */
+.page-title {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--flambé-charcoal);
+  letter-spacing: 0.01em;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: var(--flambé-ash);
+  letter-spacing: 0.005em;
+  font-style: italic;
+}
+
+/* Preference Labels */
+.preference-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--flambé-charcoal);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.005em;
+}
+
+/* Tags - Nordic Color Palette */
+.tag {
+  @apply inline-flex items-center px-3 py-1 rounded-sm text-sm font-medium transition-all duration-200;
+  font-family: var(--font-body);
+  letter-spacing: 0.005em;
+  margin: 0.25rem 0.25rem 0.25rem 0;
+}
+
+.tag-blue {
+  background-color: rgba(168, 181, 160, 0.15);
+  color: var(--flambé-forest);
+  border: 1px solid rgba(168, 181, 160, 0.3);
+}
+
+.tag-green {
+  background-color: rgba(74, 93, 58, 0.1);
+  color: var(--flambé-forest);
+  border: 1px solid rgba(74, 93, 58, 0.2);
+}
+
+.tag-red {
+  background-color: rgba(166, 124, 82, 0.1);
+  color: var(--flambé-rust);
+  border: 1px solid rgba(166, 124, 82, 0.2);
+}
+
+.tag-purple {
+  background-color: rgba(107, 107, 107, 0.1);
+  color: var(--flambé-ash);
+  border: 1px solid rgba(107, 107, 107, 0.2);
+}
+
+.tag-orange {
+  background-color: rgba(212, 165, 116, 0.15);
+  color: var(--flambé-rust);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+}
+
+/* Spice Tolerance Selector - Nordic Style */
+.spice-selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.spice-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--flambé-stone);
+  border-radius: 2px;
+  background-color: var(--flambé-fog);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.spice-option:hover {
+  border-color: var(--flambé-sage);
+  background-color: var(--flambé-cream);
+}
+
+.spice-option.selected {
+  border-color: var(--flambé-forest);
+  background-color: rgba(74, 93, 58, 0.05);
+}
+
+.spice-indicator {
+  margin-bottom: 0.5rem;
+}
+
+.spice-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.spice-dot.mild { background-color: var(--flambé-sage); }
+.spice-dot.medium { background-color: var(--flambé-ember); }
+.spice-dot.hot { background-color: var(--flambé-rust); }
+.spice-dot.extreme { background-color: var(--flambé-charcoal); }
+
+.spice-label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: var(--flambé-ash);
+  letter-spacing: 0.005em;
+}
+
+/* Tab Navigation - Minimalist */
+.tab-navigation {
+  display: flex;
+  border-bottom: 1px solid var(--flambé-stone);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  color: var(--flambé-smoke);
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: 0.005em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: var(--flambé-ash);
+  background-color: rgba(168, 181, 160, 0.05);
+}
+
+.tab-button.active {
+  color: var(--flambé-charcoal);
+  border-bottom-color: var(--flambé-sage);
+  background-color: rgba(168, 181, 160, 0.08);
+}
+
+.tab-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.tab-label {
+  font-size: 0.9rem;
+}
+
+/* Container Styles */
+.preferences-container {
+  min-height: 100vh;
+  background-color: var(--flambé-cream);
+}
+
+.preferences-header {
+  background: linear-gradient(135deg, var(--flambé-fog) 0%, var(--flambé-stone) 100%);
+  padding: 3rem 2rem;
+  border-bottom: 1px solid var(--flambé-stone);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.preferences-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.preferences-form {
+  background-color: var(--flambé-cream);
+}
+
+.tab-content {
+  min-height: 500px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--flambé-stone);
+}
+
+/* Multi-Step Registration - Nordic Gradient */
+.registration-gradient {
+  background: linear-gradient(135deg, var(--flambé-fog) 0%, var(--flambé-stone) 50%, rgba(168, 181, 160, 0.1) 100%);
+}
+
+.registration-card {
+  background-color: var(--flambé-cream);
+  border: 1px solid var(--flambé-stone);
+  box-shadow: 0 10px 40px rgba(44, 44, 44, 0.1);
+}
+
+/* Progress Bar - Minimalist */
+.progress-bar {
+  background-color: rgba(168, 181, 160, 0.2);
+  height: 2px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background-color: var(--flambé-sage);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+/* Step Indicators */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+.step-indicator.active {
+  background-color: var(--flambé-charcoal);
+  color: var(--flambé-cream);
+}
+
+.step-indicator.inactive {
+  background-color: var(--flambé-stone);
+  color: var(--flambé-smoke);
+}
+
+/* Enhanced Search Button */
+.enhanced-search-btn {
+  @apply w-full mt-3 px-4 py-2 rounded-sm text-sm transition-all duration-200;
+  background-color: rgba(168, 181, 160, 0.1);
+  color: var(--flambé-ash);
+  border: 1px solid rgba(168, 181, 160, 0.2);
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: 0.005em;
+}
+
+.enhanced-search-btn:hover {
+  background-color: rgba(168, 181, 160, 0.15);
+  border-color: var(--flambé-sage);
+  color: var(--flambé-charcoal);
+}
+
+/* Hand-drawn Flame Logo */
+.flame-logo {
+  width: 2rem;
+  height: 2rem;
+  fill: none;
+  stroke: var(--flambé-cream);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .page-title {
-    @apply text-3xl font-bold text-gray-900 mb-2;
+    font-size: 2rem;
   }
-
-  .page-subtitle {
-    @apply text-lg text-gray-600;
+  
+  .preferences-header {
+    padding: 2rem 1rem;
   }
-
+  
   .preferences-body {
-    @apply max-w-6xl mx-auto px-6 py-8;
+    padding: 1rem;
   }
-
+  
   .tab-navigation {
-    @apply flex flex-wrap justify-center gap-2 mb-8 p-1 bg-white rounded-xl shadow-sm border border-gray-200;
+    margin: 0 -1rem 2rem;
+    padding: 0 1rem;
   }
-
-  .tab-button {
-    @apply flex items-center px-4 py-3 rounded-lg transition-all duration-200 font-medium;
-  }
-
-  .tab-button:not(.active) {
-    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-50;
-  }
-
-  .tab-button.active {
-    @apply bg-blue-600 text-white shadow-md;
-  }
-
-  .tab-icon {
-    @apply mr-2;
-  }
-
-  .tab-label {
-    @apply text-sm font-medium;
-  }
-
-  .preferences-form {
-    @apply space-y-8;
-  }
-
-  .tab-content {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-8;
-  }
-
-  .preference-section {
-    @apply space-y-6;
-  }
-
-  .section-header {
-    @apply mb-6;
-  }
-
-  .section-title {
-    @apply text-xl font-semibold text-gray-900 mb-2;
-  }
-
-  .section-description {
-    @apply text-gray-600;
-  }
-
-  .preference-card {
-    @apply bg-gray-50 rounded-lg p-6 border border-gray-200;
-  }
-
-  .preference-label {
-    @apply block text-sm font-medium text-gray-700 mb-3;
-  }
-
-  .form-actions {
-    @apply flex justify-between items-center pt-6 border-t border-gray-200 bg-white rounded-xl shadow-sm p-6;
-  }
-
-  /* Spice Selector Styles */
+  
   .spice-selector {
-    @apply grid grid-cols-2 md:grid-cols-4 gap-3;
-  }
-
-  .spice-option {
-    @apply flex flex-col items-center p-4 rounded-lg border-2 border-gray-200 transition-all duration-200 hover:border-gray-300 bg-white;
-  }
-
-  .spice-option.selected {
-    @apply border-blue-500 bg-blue-50;
-  }
-
-  .spice-indicator {
-    @apply mb-2;
-  }
-
-  .spice-dot {
-    @apply w-4 h-4 rounded-full;
-  }
-
-  .spice-dot.mild {
-    @apply bg-green-400;
-  }
-
-  .spice-dot.medium {
-    @apply bg-yellow-400;
-  }
-
-  .spice-dot.hot {
-    @apply bg-orange-500;
-  }
-
-  .spice-dot.extreme {
-    @apply bg-red-500;
-  }
-
-  .spice-label {
-    @apply text-sm font-medium text-gray-700;
-  }
-
-  .spice-option.selected .spice-label {
-    @apply text-blue-700;
-  }
-
-  /* Loading States */
-  .loading-spinner {
-    @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .tab-navigation {
-      @apply flex-col gap-1;
-    }
-
-    .tab-button {
-      @apply justify-center;
-    }
-
-    .preferences-body {
-      @apply px-4;
-    }
-
-    .tab-content {
-      @apply p-4;
-    }
-
-    .preference-card {
-      @apply p-4;
-    }
+    justify-content: center;
   }
 } 

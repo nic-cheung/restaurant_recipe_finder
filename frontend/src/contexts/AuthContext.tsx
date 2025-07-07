@@ -8,14 +8,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    // During HMR, provide a fallback to prevent crashes
+    // During HMR or if called outside provider, provide a safe fallback
     console.warn('useAuth called outside AuthProvider - this may be due to HMR');
+    
+    // Return a safe fallback that won't break the app
     return {
       user: null,
       token: null,
-      login: async () => {},
-      register: async () => {},
-      logout: async () => {},
+      login: async () => {
+        throw new Error('Auth provider not available');
+      },
+      register: async () => {
+        throw new Error('Auth provider not available');
+      },
+      logout: async () => {
+        console.warn('Logout called outside AuthProvider');
+      },
       isLoading: false,
     } as AuthContextType;
   }
@@ -34,27 +42,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state from localStorage
   useEffect(() => {
-    // Prevent duplicate initialization in React Strict Mode
+    // Prevent duplicate initialization in React Strict Mode or HMR
     if (hasInitialized) return;
     
     const initializeAuth = async () => {
-      setHasInitialized(true);
-      const storedToken = apiService.getToken();
-      
-      if (storedToken) {
-        setToken(storedToken);
-        try {
-          const userData = await apiService.getCurrentUser();
-          setUser(userData);
-        } catch (error) {
-          console.error('Failed to get current user:', error);
-          // Token might be invalid, remove it
-          apiService.removeToken();
-          setToken(null);
+      try {
+        setHasInitialized(true);
+        const storedToken = apiService.getToken();
+        
+        if (storedToken) {
+          setToken(storedToken);
+          try {
+            const userData = await apiService.getCurrentUser();
+            setUser(userData);
+          } catch (error) {
+            console.error('Failed to get current user:', error);
+            // Token might be invalid, remove it
+            apiService.removeToken();
+            setToken(null);
+          }
         }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
 
     initializeAuth();

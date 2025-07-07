@@ -42,11 +42,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
   const getDifficultyColor = (difficulty: Difficulty): string => {
     switch (difficulty) {
-      case 'EASY': return 'bg-green-100 text-green-800';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800';
-      case 'HARD': return 'bg-orange-100 text-orange-800';
-      case 'EXPERT': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'EASY': return 'tag tag-green';
+      case 'MEDIUM': return 'tag tag-yellow';
+      case 'HARD': return 'tag tag-orange';
+      case 'EXPERT': return 'tag tag-red';
+      default: return 'tag tag-gray';
     }
   };
 
@@ -112,16 +112,16 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="preference-card overflow-hidden">
       {/* Recipe Header */}
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold flambé-heading mb-2">
               {recipe.title}
             </h3>
             {recipe.description && (
-              <p className="text-gray-600 mb-3">
+              <p className="flambé-body mb-3">
                 {recipe.description}
               </p>
             )}
@@ -134,9 +134,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               disabled={isTogglingFavorite}
               className={`ml-4 p-2 rounded-full ${
                 isFavorite 
-                  ? 'text-red-500 hover:text-red-600' 
-                  : 'text-gray-400 hover:text-red-500'
+                  ? 'hover:opacity-80' 
+                  : 'hover:opacity-80'
               } disabled:opacity-50`}
+              style={{ 
+                color: isFavorite ? 'var(--flambé-rust)' : 'var(--flambé-smoke)'
+              }}
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
@@ -148,16 +151,16 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         {/* Recipe Meta */}
         <div className="flex flex-wrap gap-2 mb-4">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(recipe.difficulty)}`}>
-            {recipe.difficulty}
+            {recipe.difficulty.toLowerCase()}
           </span>
-          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+          <span className="tag tag-blue">
             {formatCookingTime(recipe.cookingTime)}
           </span>
-          <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+          <span className="tag tag-purple">
             {recipe.servings} servings
           </span>
           {recipe.cuisineType && (
-            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
+            <span className="tag tag-gray">
               {recipe.cuisineType}
             </span>
           )}
@@ -166,10 +169,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         {/* User Rating Display */}
         {userRating && (
           <div className="flex items-center mb-4">
-            <span className="text-sm text-gray-600 mr-2">Your rating:</span>
+            <span className="text-sm flambé-body mr-2">your rating:</span>
             {renderStars(userRating)}
             {userNotes && (
-              <span className="ml-2 text-sm text-gray-500">"{userNotes}"</span>
+              <span className="ml-2 text-sm flambé-body" style={{ color: 'var(--flambé-smoke)' }}>"{userNotes}"</span>
             )}
           </div>
         )}
@@ -178,7 +181,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         {recipe.tags && recipe.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-4">
             {recipe.tags.map((tag, index) => (
-              <span key={index} className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs">
+              <span key={index} className="tag tag-indigo">
                 {tag}
               </span>
             ))}
@@ -188,9 +191,16 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         {/* Expand/Collapse Button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+          className="flex items-center font-medium transition-colors"
+          style={{ color: 'var(--flambé-sage)' }}
+          onMouseEnter={(e) => {
+            (e.target as HTMLElement).style.color = 'var(--flambé-forest)';
+          }}
+          onMouseLeave={(e) => {
+            (e.target as HTMLElement).style.color = 'var(--flambé-sage)';
+          }}
         >
-          {isExpanded ? 'Hide Details' : 'Show Details'}
+          {isExpanded ? 'hide details' : 'show details'}
           <svg 
             className={`ml-1 w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             fill="none" 
@@ -204,16 +214,16 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="px-6 pb-6 border-t border-gray-100">
+        <div className="px-6 pb-6 border-t" style={{ borderColor: 'var(--flambé-ash)' }}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             {/* Ingredients */}
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">Ingredients</h4>
+              <h4 className="text-lg font-semibold flambé-heading mb-3">ingredients</h4>
               <ul className="space-y-2">
                 {recipe.ingredients.map((ingredient, index) => (
                   <li key={index} className="flex items-center">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></span>
-                    <span className="text-gray-700">
+                    <span className="w-2 h-2 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: 'var(--flambé-sage)' }}></span>
+                    <span className="flambé-body">
                       {typeof ingredient === 'string' 
                         ? ingredient 
                         : `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`
@@ -226,14 +236,14 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
             {/* Instructions */}
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">Instructions</h4>
+              <h4 className="text-lg font-semibold flambé-heading mb-3">instructions</h4>
               <ol className="space-y-3">
                 {recipe.instructions.map((instruction, index) => (
                   <li key={index} className="flex">
-                    <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium mr-3" style={{ backgroundColor: 'var(--flambé-sage)', color: 'var(--flambé-cream)' }}>
                       {index + 1}
                     </span>
-                    <span className="text-gray-700">{instruction}</span>
+                    <span className="flambé-body">{instruction}</span>
                   </li>
                 ))}
               </ol>
@@ -243,23 +253,23 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           {/* Nutrition Info */}
           {recipe.nutritionInfo && (
             <div className="mt-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">Nutrition Information</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg">
+              <h4 className="text-lg font-semibold flambé-heading mb-3">nutrition information</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--flambé-stone)' }}>
                 <div>
-                  <span className="text-sm text-gray-600">Calories</span>
-                  <p className="font-medium">{recipe.nutritionInfo.calories}</p>
+                  <span className="text-sm flambé-body">calories</span>
+                  <p className="font-medium flambé-body">{recipe.nutritionInfo.calories}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Protein</span>
-                  <p className="font-medium">{recipe.nutritionInfo.protein}g</p>
+                  <span className="text-sm flambé-body">protein</span>
+                  <p className="font-medium flambé-body">{recipe.nutritionInfo.protein}g</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Carbs</span>
-                  <p className="font-medium">{recipe.nutritionInfo.carbs}g</p>
+                  <span className="text-sm flambé-body">carbs</span>
+                  <p className="font-medium flambé-body">{recipe.nutritionInfo.carbs}g</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Fat</span>
-                  <p className="font-medium">{recipe.nutritionInfo.fat}g</p>
+                  <span className="text-sm flambé-body">fat</span>
+                  <p className="font-medium flambé-body">{recipe.nutritionInfo.fat}g</p>
                 </div>
               </div>
             </div>
@@ -268,28 +278,37 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           {/* AI Prompt Used */}
           {(recipe as GeneratedRecipe).aiPromptUsed && (
             <div className="mt-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">🤖 AI Prompt Used</h4>
-              <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+              <h4 className="text-lg font-semibold flambé-heading mb-3">
+                <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                ai prompt used
+              </h4>
+              <div className="p-4 rounded-lg space-y-4" style={{ backgroundColor: 'var(--flambé-stone)' }}>
                 
                 {/* Clean Version */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium text-gray-900">📋 Clean Version</h5>
+                    <h5 className="font-medium flambé-heading">
+                      <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                      clean version
+                    </h5>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText((recipe as GeneratedRecipe).aiPromptUsed?.prompt || '');
-                        // Could add a toast notification here
                       }}
-                      className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                      className="btn-primary text-sm"
                     >
-                      Copy Clean
+                      copy clean
                     </button>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Perfect for ChatGPT, Claude, or any AI assistant:
+                  <p className="text-sm flambé-body mb-2">
+                    perfect for chatgpt, claude, or any ai assistant:
                   </p>
-                  <div className="bg-white p-3 rounded border border-gray-200 max-h-96 overflow-y-auto">
-                    <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono">
+                  <div className="p-3 rounded border max-h-96 overflow-y-auto" style={{ backgroundColor: 'var(--flambé-cream)', borderColor: 'var(--flambé-ash)' }}>
+                    <pre className="text-sm flambé-body whitespace-pre-wrap font-mono">
                       {(recipe as GeneratedRecipe).aiPromptUsed?.prompt}
                     </pre>
                   </div>
@@ -299,25 +318,31 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 {(recipe as GeneratedRecipe).aiPromptUsed?.technicalPrompt && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <h5 className="font-medium text-gray-900">🔧 Technical Version</h5>
+                      <h5 className="font-medium flambé-heading">
+                        <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        technical version
+                      </h5>
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText((recipe as GeneratedRecipe).aiPromptUsed?.technicalPrompt || '');
                         }}
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                        className="btn-secondary text-sm"
                       >
-                        Copy Technical
+                        copy technical
                       </button>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      Includes JSON formatting instructions:
+                    <p className="text-sm flambé-body mb-2">
+                      includes json formatting instructions:
                     </p>
-                    <details className="bg-white rounded border border-gray-200">
-                      <summary className="p-3 cursor-pointer hover:bg-gray-50 text-sm font-medium">
-                        Click to expand technical version
+                    <details className="rounded border" style={{ backgroundColor: 'var(--flambé-cream)', borderColor: 'var(--flambé-ash)' }}>
+                      <summary className="p-3 cursor-pointer text-sm font-medium flambé-body hover:opacity-80">
+                        click to expand technical version
                       </summary>
                       <div className="p-3 pt-0 max-h-96 overflow-y-auto">
-                        <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono">
+                        <pre className="text-sm flambé-body whitespace-pre-wrap font-mono">
                           {(recipe as GeneratedRecipe).aiPromptUsed?.technicalPrompt}
                         </pre>
                       </div>
@@ -326,9 +351,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 )}
 
                 {/* Instructions */}
-                <div className="border-t pt-3">
-                  <p className="text-sm text-gray-600">
-                    💡 <strong>Tip:</strong> Most AI assistants work great with the clean version. Use the technical version if you need specific JSON formatting.
+                <div className="border-t pt-3" style={{ borderColor: 'var(--flambé-ash)' }}>
+                  <p className="text-sm flambé-body">
+                    <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                    <strong>tip:</strong> most ai assistants work great with the clean version. use the technical version if you need specific json formatting.
                   </p>
                 </div>
               </div>
@@ -342,9 +370,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               {isGeneratedRecipe && onSave && (
                 <button
                   onClick={handleSaveRecipe}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 font-medium"
+                  className="btn-primary"
                 >
-                  Save Recipe
+                  save recipe
                 </button>
               )}
 
@@ -352,9 +380,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               {!isGeneratedRecipe && onRate && (
                 <button
                   onClick={() => setShowRatingForm(!showRatingForm)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-medium"
+                  className="btn-secondary"
                 >
-                  {userRating ? 'Update Rating' : 'Rate Recipe'}
+                  {userRating ? 'update rating' : 'rate recipe'}
                 </button>
               )}
             </div>
@@ -362,40 +390,40 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
           {/* Rating Form */}
           {showRatingForm && !isGeneratedRecipe && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <h5 className="font-medium text-gray-900 mb-3">Rate this recipe</h5>
+            <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: 'var(--flambé-stone)' }}>
+              <h5 className="font-medium flambé-heading mb-3">rate this recipe</h5>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Rating
+                  <label className="preference-label">
+                    rating
                   </label>
                   {renderStars(rating, true)}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes (optional)
+                  <label className="preference-label">
+                    notes (optional)
                   </label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field"
                     rows={3}
-                    placeholder="Share your thoughts about this recipe..."
+                    placeholder="share your thoughts about this recipe..."
                   />
                 </div>
                 <div className="flex space-x-2">
                   <button
                     onClick={handleSubmitRating}
                     disabled={!rating || isSubmittingRating}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="btn-primary"
                   >
-                    {isSubmittingRating ? 'Submitting...' : 'Submit Rating'}
+                    {isSubmittingRating ? 'submitting...' : 'submit rating'}
                   </button>
                   <button
                     onClick={() => setShowRatingForm(false)}
-                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 font-medium"
+                    className="btn-secondary"
                   >
-                    Cancel
+                    cancel
                   </button>
                 </div>
               </div>

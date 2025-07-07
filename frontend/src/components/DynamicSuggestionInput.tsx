@@ -6,10 +6,20 @@ interface DynamicSuggestionInputProps {
   selectedItems: string[];
   onSelectionChange: (items: string[]) => void;
   placeholder?: string;
-  suggestionType: 'chefs' | 'restaurants' | 'ingredients' | 'cuisines' | 'dishes';
+  suggestionType: 'restaurants' | 'chefs' | 'dishes' | 'ingredients' | 'static';
   staticSuggestions?: string[];
+  popularSuggestions?: string[];
   tagColor?: 'green' | 'red' | 'blue' | 'purple' | 'orange';
   maxDisplayedSuggestions?: number;
+  maxPopularTags?: number;
+}
+
+interface SuggestionResponse {
+  suggestions: string[];
+  query: string;
+  source: string;
+  hasMoreResults?: boolean;
+  message?: string;
 }
 
 const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
@@ -19,53 +29,73 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
   placeholder = "Type to search...",
   suggestionType,
   staticSuggestions = [],
-  tagColor = 'green',
+  popularSuggestions = [],
+  tagColor = 'blue',
   maxDisplayedSuggestions = 8,
+  maxPopularTags = 5,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [locationValue, setLocationValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [suggestionSource, setSuggestionSource] = useState<'static' | 'dynamic'>('static');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showEnhancedSearchOption, setShowEnhancedSearchOption] = useState(false);
+  const [isEnhancedSearchActive, setIsEnhancedSearchActive] = useState(false);
+  const [suggestionSource, setSuggestionSource] = useState<'static' | 'enhanced'>('static');
   const debounceRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchSuggestions = async (query: string, location?: string) => {
-    if (!query.trim()) {
-      setSuggestions([]);
-      setIsDropdownOpen(false);
-      return;
+  // Filter static suggestions based on input
+  const getFilteredStaticSuggestions = (query: string): string[] => {
+    if (!query.trim()) return [];
+    
+    const normalizedQuery = query.toLowerCase();
+    return (staticSuggestions || [])
+      .filter(suggestion => 
+        suggestion.toLowerCase().includes(normalizedQuery) &&
+        !selectedItems.includes(suggestion)
+      )
+      .slice(0, maxDisplayedSuggestions);
+  };
+
+  // Handle enhanced search API call
+  const performEnhancedSearch = async (query: string, location?: string) => {
+    if (!query.trim()) return;
+
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
 
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController();
+    
     setIsLoading(true);
+    setIsEnhancedSearchActive(true);
+    
     try {
-      let response: { suggestions: string[]; query: string; source: string } | undefined;
+      let response: SuggestionResponse | undefined;
       
-      switch (suggestionType) {
-        case 'chefs':
-          response = await apiService.getChefSuggestions(query);
-          break;
-        case 'restaurants':
-          // Use location for restaurants to trigger Google Places API
-          response = await apiService.getRestaurantSuggestions(query, location || '');
-          break;
-        case 'ingredients':
-          response = await apiService.getIngredientSuggestions(query);
-          break;
-        case 'cuisines':
-          response = await apiService.getCuisineSuggestions(query);
-          break;
-        case 'dishes':
-          response = await apiService.getDishSuggestions(query);
-          break;
-        default:
-          throw new Error(`Unknown suggestion type: ${suggestionType}`);
+      // Use the enhanced API endpoints for better results
+      if (suggestionType === 'restaurants') {
+        response = await apiService.getRestaurantSuggestions(query, location || '', abortControllerRef.current.signal);
+      } else if (suggestionType === 'chefs') {
+        response = await apiService.getEnhancedChefSuggestions(query, abortControllerRef.current.signal);
+      } else if (suggestionType === 'dishes') {
+        response = await apiService.getEnhancedDishSuggestions(query, abortControllerRef.current.signal);
+      } else if (suggestionType === 'ingredients') {
+        response = await apiService.getEnhancedIngredientSuggestions(query, abortControllerRef.current.signal);
       }
       
       if (!response) {
-        throw new Error('No response received from API');
+        throw new Error(`Unknown suggestion type: ${suggestionType}`);
+      }
+      
+      // Check if the request was aborted
+      if (abortControllerRef.current?.signal.aborted) {
+        return;
       }
       
       // Filter out already selected items
@@ -74,20 +104,23 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
       );
       
       setSuggestions(filteredSuggestions);
-      setSuggestionSource(response.source === 'ai_powered' || response.source === 'google_places' ? 'dynamic' : 'static');
+      setSuggestionSource('enhanced');
+      setShowEnhancedSearchOption(false);
       setIsDropdownOpen(filteredSuggestions.length > 0);
     } catch (error) {
-      console.error('API call failed, using static fallback:', error);
+      // Don't log error if it was just an abort
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       
-      // Static fallback
-      const filteredStatic = (staticSuggestions || []).filter(suggestion => 
-        suggestion.toLowerCase().includes(query.toLowerCase()) &&
-        !selectedItems.includes(suggestion)
-      );
+      console.error('Enhanced search failed:', error);
       
-      setSuggestions(filteredStatic);
+      // Fall back to static suggestions
+      const staticResults = getFilteredStaticSuggestions(query);
+      setSuggestions(staticResults);
       setSuggestionSource('static');
-      setIsDropdownOpen(filteredStatic.length > 0);
+      setShowEnhancedSearchOption(staticResults.length === 0);
+      setIsDropdownOpen(staticResults.length > 0 || showEnhancedSearchOption);
     } finally {
       setIsLoading(false);
     }
@@ -97,16 +130,97 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
+    setIsEnhancedSearchActive(false);
+    setSuggestionSource('static');
     
     // Clear existing debounce
     if (debounceRef.current) {
       window.clearTimeout(debounceRef.current);
     }
     
-    // Debounce the API call
-    debounceRef.current = window.setTimeout(() => {
-      fetchSuggestions(value, locationValue);
+    if (!value.trim()) {
+      setSuggestions([]);
+      setShowEnhancedSearchOption(false);
+      setIsDropdownOpen(false);
+      return;
+    }
+    
+    // For static-only suggestion types, only use static suggestions
+    if (suggestionType === 'static') {
+      const staticResults = getFilteredStaticSuggestions(value);
+      setSuggestions(staticResults);
+      setShowEnhancedSearchOption(false);
+      setIsDropdownOpen(staticResults.length > 0);
+      return;
+    }
+    
+    // For API-enabled suggestion types, use regular API endpoints first
+    // These will show hasMoreResults flag if enhanced search is available
+    debounceRef.current = window.setTimeout(async () => {
+      try {
+        // Cancel any existing request
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+        
+        // Create new abort controller
+        abortControllerRef.current = new AbortController();
+        
+        setIsLoading(true);
+        
+        let response: SuggestionResponse | undefined;
+        
+        if (suggestionType === 'chefs') {
+          response = await apiService.getChefSuggestions(value, abortControllerRef.current.signal);
+        } else if (suggestionType === 'dishes') {
+          response = await apiService.getDishSuggestions(value, abortControllerRef.current.signal);
+        } else if (suggestionType === 'ingredients') {
+          response = await apiService.getIngredientSuggestions(value, abortControllerRef.current.signal);
+        } else if (suggestionType === 'restaurants') {
+          // For restaurants, fall back to static suggestions initially
+          const staticResults = getFilteredStaticSuggestions(value);
+          setSuggestions(staticResults);
+          setShowEnhancedSearchOption(true); // Always show enhanced search for restaurants
+          setIsDropdownOpen(staticResults.length > 0 || true);
+          setIsLoading(false);
+          return;
+        }
+        
+        if (response) {
+          // Filter out already selected items
+          const filteredSuggestions = response.suggestions.filter(
+            suggestion => !selectedItems.includes(suggestion)
+          );
+          
+          setSuggestions(filteredSuggestions);
+          setShowEnhancedSearchOption(response.hasMoreResults || false);
+          setIsDropdownOpen(filteredSuggestions.length > 0 || (response.hasMoreResults || false));
+        }
+        
+      } catch (error) {
+        // Don't log error if it was just an abort
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+        
+        console.error('Initial suggestions failed:', error);
+        
+        // Fall back to static suggestions
+        const staticResults = getFilteredStaticSuggestions(value);
+        setSuggestions(staticResults);
+        setShowEnhancedSearchOption(staticResults.length === 0);
+        setIsDropdownOpen(staticResults.length > 0 || staticResults.length === 0);
+      } finally {
+        setIsLoading(false);
+      }
     }, 300);
+  };
+
+  // Handle enhanced search activation
+  const handleEnhancedSearchActivation = () => {
+    if (inputValue.trim()) {
+      performEnhancedSearch(inputValue, locationValue);
+    }
   };
 
   // Handle location changes for restaurants
@@ -114,8 +228,8 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
     const value = e.target.value;
     setLocationValue(value);
     
-    // If we have a query, refetch with new location
-    if (inputValue.trim() && suggestionType === 'restaurants') {
+    // If we have a query and enhanced search is active, refetch
+    if (inputValue.trim() && isEnhancedSearchActive && suggestionType === 'restaurants') {
       // Clear existing debounce
       if (debounceRef.current) {
         window.clearTimeout(debounceRef.current);
@@ -123,16 +237,19 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
       
       // Debounce the API call
       debounceRef.current = window.setTimeout(() => {
-        fetchSuggestions(inputValue, value);
+        performEnhancedSearch(inputValue, value);
       }, 300);
     }
   };
 
-  // Cleanup debounce on unmount
+  // Cleanup debounce and abort controller on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
         window.clearTimeout(debounceRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
     };
   }, []);
@@ -141,7 +258,10 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
     if (item.trim() && !selectedItems.includes(item.trim())) {
       onSelectionChange([...selectedItems, item.trim()]);
       setInputValue('');
+      setSuggestions([]);
+      setShowEnhancedSearchOption(false);
       setIsDropdownOpen(false);
+      setIsEnhancedSearchActive(false);
     }
   };
 
@@ -152,12 +272,10 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (inputValue.trim()) {
-        if (suggestions.length > 0 && suggestions[0]) {
-          addItem(suggestions[0]);
-        } else {
-          addItem(inputValue);
-        }
+      if (suggestions.length > 0 && suggestions[0]) {
+        addItem(suggestions[0]);
+      } else if (inputValue.trim()) {
+        addItem(inputValue);
       }
     } else if (e.key === 'Escape') {
       setIsDropdownOpen(false);
@@ -177,61 +295,56 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
   }, []);
 
   const tagColorClasses = {
-    green: 'bg-green-100 text-green-800',
-    red: 'bg-red-100 text-red-800',
-    blue: 'bg-blue-100 text-blue-800',
-    purple: 'bg-purple-100 text-purple-800',
-    orange: 'bg-orange-100 text-orange-800',
+    green: 'tag tag-green',
+    red: 'tag tag-red',
+    blue: 'tag tag-blue',
+    purple: 'tag tag-purple',
+    orange: 'tag tag-orange',
   };
-
-  // All unselected suggestions will be grey regardless of tagColor
-  const suggestionButtonColorClasses = 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200';
-
-  // Get available suggestions to display as clickable pills
-  const availableSuggestions = (staticSuggestions || [])
-    .filter(suggestion => !selectedItems.includes(suggestion))
-    .slice(0, maxDisplayedSuggestions);
 
   return (
     <div className="space-y-3">
       <label className="block text-sm font-medium text-gray-700">
         {label}
-        {suggestionSource === 'dynamic' && (
-          <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            {suggestionType === 'restaurants' ? 'Google Places' : 'AI-Powered'}
+        {suggestionSource === 'enhanced' && (
+          <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--flambé-stone)', color: 'var(--flambé-charcoal)' }}>
+            {suggestionType === 'restaurants' ? 'Google Places' : 'Wikidata'}
           </span>
         )}
       </label>
-      
-      {/* Available suggestions as clickable pills - all grey */}
-      {availableSuggestions.length > 0 && (
+
+      {/* Popular suggestions as clickable tags - Only show unselected ones */}
+      {popularSuggestions.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {availableSuggestions.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              onClick={() => addItem(suggestion)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border-2 ${suggestionButtonColorClasses}`}
-            >
-              {suggestion}
-            </button>
-          ))}
+          {popularSuggestions
+            .filter(suggestion => !selectedItems.includes(suggestion))
+            .slice(0, maxPopularTags)
+            .map((suggestion) => (
+              <button
+                key={`popular-${suggestion}`}
+                type="button"
+                onClick={() => addItem(suggestion)}
+                className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200"
+              >
+                {suggestion}
+              </button>
+            ))}
         </div>
       )}
 
-      {/* Selected items - colored based on tagColor */}
+      {/* Selected items */}
       {selectedItems.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {selectedItems.map((item, index) => (
             <span
               key={index}
-              className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${tagColorClasses[tagColor]}`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${tagColorClasses[tagColor]}`}
             >
               {item}
               <button
                 type="button"
                 onClick={() => removeItem(item)}
-                className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-gray-200 focus:outline-none"
+                className="ml-2 text-current hover:text-opacity-80 focus:outline-none"
               >
                 ×
               </button>
@@ -248,10 +361,26 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
             value={locationValue}
             onChange={handleLocationChange}
             placeholder="Enter location (e.g., New York, London) - required for Google Places API"
-            className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+            className="w-full p-2 border rounded-md focus:ring-2 focus:outline-none"
+            style={{ 
+              borderColor: 'var(--flambé-sage)', 
+              backgroundColor: 'var(--flambé-fog)',
+              color: 'var(--flambé-charcoal)'
+            }}
+            onFocus={(e) => {
+              (e.target as HTMLInputElement).style.borderColor = 'var(--flambé-ember)';
+              (e.target as HTMLInputElement).style.boxShadow = '0 0 0 2px rgba(var(--flambé-ember-rgb), 0.2)';
+            }}
+            onBlur={(e) => {
+              (e.target as HTMLInputElement).style.borderColor = 'var(--flambé-sage)';
+              (e.target as HTMLInputElement).style.boxShadow = 'none';
+            }}
           />
-          <div className="text-xs text-blue-600 mt-1">
-            💡 Add a location to use Google Places API for real restaurant suggestions
+          <div className="text-xs mt-1" style={{ color: 'var(--flambé-ember)' }}>
+            <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Add a location to use Google Places API for real restaurant suggestions
           </div>
         </div>
       )}
@@ -265,19 +394,29 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none"
+          style={{ color: 'var(--flambé-charcoal)' }}
+          onFocus={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = 'var(--flambé-ember)';
+            (e.target as HTMLInputElement).style.boxShadow = '0 0 0 2px rgba(var(--flambé-ember-rgb), 0.2)';
+          }}
+          onBlur={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = '#d1d5db';
+            (e.target as HTMLInputElement).style.boxShadow = 'none';
+          }}
         />
         
         {/* Loading indicator */}
         {isLoading && (
           <div className="absolute right-2 top-2">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: 'var(--flambé-ember)' }}></div>
           </div>
         )}
 
         {/* Suggestions dropdown */}
-        {isDropdownOpen && suggestions.length > 0 && (
+        {isDropdownOpen && (
           <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+            {/* Static suggestions */}
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
@@ -288,6 +427,63 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
                 {suggestion}
               </button>
             ))}
+            
+            {/* Enhanced search option */}
+            {showEnhancedSearchOption && suggestionType !== 'static' && (
+              <button
+                type="button"
+                onClick={handleEnhancedSearchActivation}
+                disabled={isLoading}
+                className="w-full text-left px-3 py-2 hover:focus:outline-none border-t disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                style={{ 
+                  backgroundColor: 'var(--flambé-fog)', 
+                  color: 'var(--flambé-ember)',
+                  borderColor: 'var(--flambé-stone)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoading) {
+                    (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-fog)';
+                }}
+                onFocus={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
+                }}
+                onBlur={(e) => {
+                  (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-fog)';
+                }}
+              >
+                <div className="flex items-center space-x-2">
+                  <div style={{ color: 'var(--flambé-ember)' }}>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-medium">
+                      {isLoading 
+                        ? 'Searching...' 
+                        : suggestions.length > 0 
+                          ? 'Click for more results' 
+                          : 'No search results found. Select to activate enhanced search.'
+                      }
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--flambé-rust)' }}>
+                      Search {suggestionType === 'restaurants' ? 'Google Places' : 'Wikidata'} for more options
+                    </div>
+                  </div>
+                </div>
+              </button>
+            )}
+            
+            {/* No results message for static-only */}
+            {suggestions.length === 0 && !showEnhancedSearchOption && suggestionType === 'static' && (
+              <div className="px-3 py-2 text-gray-500 text-sm">
+                No matching suggestions found
+              </div>
+            )}
           </div>
         )}
       </div>

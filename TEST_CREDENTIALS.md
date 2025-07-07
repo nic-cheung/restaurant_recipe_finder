@@ -3,6 +3,65 @@
 ## Quick Reference
 Use these pre-defined credentials for testing different scenarios without having to think up new ones each time.
 
+## 🧪 SIGNUP FLOW TESTING - Disposable Test Emails
+**Use these for testing registration flow repeatedly (feel free to delete from database after testing):**
+
+### Quick Test Emails - Registration Flow
+- **Email**: `test.signup1@test.local`
+- **Password**: `TestPass123!`
+- **Name**: `Test User One`
+
+- **Email**: `test.signup2@test.local`
+- **Password**: `TestPass123!`
+- **Name**: `Test User Two`
+
+- **Email**: `test.signup3@test.local`
+- **Password**: `TestPass123!`
+- **Name**: `Test User Three`
+
+- **Email**: `test.signup4@test.local`
+- **Password**: `TestPass123!`
+- **Name**: `Test User Four`
+
+- **Email**: `test.signup5@test.local`
+- **Password**: `TestPass123!`
+- **Name**: `Test User Five`
+
+### Even Simpler Test Emails
+- **Email**: `test@test.dev`
+- **Password**: `Test123!`
+- **Name**: `Test User`
+
+- **Email**: `demo@test.dev`
+- **Password**: `Test123!`
+- **Name**: `Demo User`
+
+- **Email**: `signup@test.dev`
+- **Password**: `Test123!`
+- **Name**: `Signup Test`
+
+### 🗑️ Easy Database Cleanup
+To remove all test accounts after testing:
+```sql
+-- Delete test accounts (safe to run anytime)
+DELETE FROM user_recipes WHERE user_id IN (
+  SELECT id FROM users WHERE email LIKE '%@test.local' OR email LIKE '%@test.dev'
+);
+DELETE FROM favorite_recipes WHERE user_id IN (
+  SELECT id FROM users WHERE email LIKE '%@test.local' OR email LIKE '%@test.dev'
+);
+DELETE FROM user_preferences WHERE user_id IN (
+  SELECT id FROM users WHERE email LIKE '%@test.local' OR email LIKE '%@test.dev'
+);
+DELETE FROM users WHERE email LIKE '%@test.local' OR email LIKE '%@test.dev';
+```
+
+Or use this one-liner in your terminal:
+```bash
+# Quick cleanup of test accounts
+npx prisma db execute --file cleanup-test-accounts.sql
+```
+
 ## 🔄 Registration Flow Testing
 **Use these for testing the multi-step registration process:**
 

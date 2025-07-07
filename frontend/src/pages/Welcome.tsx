@@ -1,113 +1,199 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
 const Welcome: React.FC = () => {
-  const { user } = useAuth();
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 text-center">
-        {/* Success Animation */}
-        <div className="relative">
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-          </div>
-          
-          {/* Confetti Effect */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/4 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
-            <div className="absolute top-4 right-1/4 w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-            <div className="absolute top-8 left-1/3 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-            <div className="absolute top-2 right-1/3 w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
-          </div>
-        </div>
-
-        {/* Welcome Message */}
-        <div className="space-y-4">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome to Recipe Finder, {user?.name?.split(' ')[0]}! 🎉
-          </h1>
-          <p className="text-lg text-gray-600">
-            Your account is all set up and your preferences have been saved. 
-            You're ready to discover amazing recipes tailored just for you!
-          </p>
-        </div>
-
-        {/* Features Highlight */}
-        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">What's Next?</h2>
-          <div className="space-y-3 text-left">
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-sm font-bold">1</span>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Generate Your First Recipe</h3>
-                <p className="text-sm text-gray-600">Get personalized recommendations based on your preferences</p>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--flambé-cream)' }}>
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: 'linear-gradient(135deg, var(--flambé-fog) 0%, var(--flambé-stone) 50%, rgba(168, 181, 160, 0.1) 100%)'
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            {/* Logo */}
+            <div className="text-center mb-8">
+              <div className="flex justify-center items-center mb-4">
+                <img 
+                  src="/logo.svg" 
+                  alt="flambé" 
+                  className="h-40 sm:h-48 w-auto"
+                />
               </div>
             </div>
-            
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-sm font-bold">2</span>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Save Your Favorites</h3>
-                <p className="text-sm text-gray-600">Build your personal recipe collection</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-600 text-sm font-bold">3</span>
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">Update Preferences</h3>
-                <p className="text-sm text-gray-600">Refine your taste profile anytime</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-4">
-          <Link
-            to="/generate"
-            className="w-full btn-primary text-lg py-3 px-6 flex items-center justify-center space-x-2"
-          >
-            <span>🍳</span>
-            <span>Generate My First Recipe</span>
-          </Link>
-          
-          <div className="flex space-x-3">
-            <Link
-              to="/dashboard"
-              className="flex-1 btn-secondary py-2 px-4 text-center"
+            {/* Tagline */}
+            <p 
+              className="flambé-body text-xl sm:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed"
+              style={{ color: 'var(--flambé-ash)' }}
             >
-              Go to Dashboard
-            </Link>
-            <Link
-              to="/preferences"
-              className="flex-1 btn-secondary py-2 px-4 text-center"
-            >
-              Edit Preferences
-            </Link>
-          </div>
-        </div>
+              discover recipes that match your taste, 
+              <br />
+              crafted with precision and passion
+            </p>
 
-        {/* Tips */}
-        <div className="bg-blue-50 rounded-lg p-4 text-left">
-          <h3 className="font-medium text-blue-900 mb-2">💡 Pro Tips:</h3>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Try different cuisine types to discover new flavors</li>
-            <li>• Update your preferences as your tastes evolve</li>
-            <li>• Rate recipes to get better recommendations</li>
-          </ul>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                to="/register"
+                className="btn-primary text-lg px-8 py-4"
+              >
+                start your culinary journey
+              </Link>
+              <Link
+                to="/login"
+                className="btn-secondary text-lg px-8 py-4"
+              >
+                welcome back
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Features Section */}
+      <div className="py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="flambé-heading text-3xl sm:text-4xl mb-4">
+              thoughtfully curated
+            </h2>
+            <p 
+              className="flambé-body text-lg max-w-2xl mx-auto"
+              style={{ color: 'var(--flambé-ash)' }}
+            >
+              every recipe suggestion is tailored to your preferences, 
+              dietary needs, and culinary aspirations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="preference-card text-center">
+              <div 
+                className="w-12 h-12 mx-auto mb-6 rounded-sm flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(168, 181, 160, 0.15)' }}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h3 className="flambé-heading text-xl mb-3">
+                chef-inspired
+              </h3>
+              <p className="flambé-body text-sm leading-relaxed">
+                recipes from michelin-starred chefs and culinary masters, 
+                adapted for your home kitchen
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="preference-card text-center">
+              <div 
+                className="w-12 h-12 mx-auto mb-6 rounded-sm flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(74, 93, 58, 0.1)' }}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <h3 className="flambé-heading text-xl mb-3">
+                ingredient-focused
+              </h3>
+              <p className="flambé-body text-sm leading-relaxed">
+                seasonal ingredients and sustainable choices, 
+                sourced from the finest producers
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="preference-card text-center">
+              <div 
+                className="w-12 h-12 mx-auto mb-6 rounded-sm flex items-center justify-center"
+                style={{ backgroundColor: 'rgba(212, 165, 116, 0.15)' }}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="flambé-heading text-xl mb-3">
+                precisely personal
+              </h3>
+              <p className="flambé-body text-sm leading-relaxed">
+                algorithms that understand your palate, 
+                dietary restrictions, and cooking style
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Philosophy Section */}
+      <div 
+        className="py-24"
+        style={{ backgroundColor: 'var(--flambé-fog)' }}
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <blockquote className="flambé-body text-lg sm:text-xl leading-relaxed mb-8" style={{ color: 'var(--flambé-ash)' }}>
+            "cooking is not about convenience. it's about love, 
+            <br />
+            craft, and the joy of creating something beautiful."
+          </blockquote>
+          <div className="flambé-body text-sm" style={{ color: 'var(--flambé-smoke)' }}>
+            — our philosophy
+          </div>
+        </div>
+      </div>
+
+      {/* Final CTA */}
+      <div className="py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="flambé-heading text-3xl sm:text-4xl mb-6">
+            ready to begin?
+          </h2>
+          <p 
+            className="flambé-body text-lg mb-8 max-w-2xl mx-auto"
+            style={{ color: 'var(--flambé-ash)' }}
+          >
+            join flambé and discover recipes that speak to your soul
+          </p>
+          <Link
+            to="/register"
+            className="btn-primary text-lg px-8 py-4"
+          >
+            create your profile
+          </Link>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer 
+        className="py-12 border-t"
+        style={{ 
+          backgroundColor: 'var(--flambé-fog)',
+          borderColor: 'var(--flambé-stone)'
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center items-center">
+            <div className="flex items-center justify-center space-x-3">
+              <img 
+                src="/logo.svg" 
+                alt="flambé" 
+                className="h-16 w-auto"
+              />
+            </div>
+          </div>
+          <div className="text-center mt-4">
+            <p className="flambé-body text-sm" style={{ color: 'var(--flambé-smoke)' }}>
+              crafted with passion for culinary excellence
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

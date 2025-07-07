@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react' // Not needed in React 18 with new JSX transform
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'

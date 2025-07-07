@@ -81,41 +81,57 @@ const IngredientInput: React.FC<IngredientInputProps> = ({
     addItem(suggestion);
   };
 
-  const colorClasses = {
-    green: {
-      tag: 'bg-green-100 text-green-800 border-green-200',
-      button: 'text-green-600 hover:text-green-800'
-    },
-    red: {
-      tag: 'bg-red-100 text-red-800 border-red-200',
-      button: 'text-red-600 hover:text-red-800'
-    }
-  };
+
+
+  // Get available suggestions to display as clickable pills (excluding selected ones)
+  const availableSuggestions = suggestions.filter(suggestion => !selectedItems.includes(suggestion));
 
   return (
     <div className="space-y-3">
-      <h2 className="text-xl font-semibold text-gray-900">
+      <label className="block text-sm font-medium text-gray-700">
         {label}
-      </h2>
+      </label>
       
-      {/* Selected Items Display */}
-      <div className="flex flex-wrap gap-2">
-        {selectedItems.map((item) => (
-          <span
-            key={item}
-            className={`inline-flex items-center px-3 py-1 rounded-full text-sm border ${colorClasses[tagColor].tag}`}
-          >
-            {item}
+      {/* Available suggestions as clickable pills - Only show unselected ones */}
+      {availableSuggestions.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {availableSuggestions.map((suggestion) => (
             <button
+              key={suggestion}
               type="button"
-              onClick={() => removeItem(item)}
-              className={`ml-2 focus:outline-none ${colorClasses[tagColor].button}`}
+              onClick={() => addItem(suggestion)}
+              className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200"
             >
-              ×
+              {suggestion}
             </button>
-          </span>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* Selected Items Display - All selected items with blue styling */}
+      {selectedItems.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedItems.map((item) => (
+            <span
+              key={item}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                tagColor === 'green' 
+                  ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                  : 'bg-red-100 text-red-800 border-2 border-red-300'
+              }`}
+            >
+              {item}
+              <button
+                type="button"
+                onClick={() => removeItem(item)}
+                className="ml-2 text-current hover:text-opacity-80 focus:outline-none"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Autocomplete Input */}
       <div className="relative" ref={dropdownRef}>
@@ -127,18 +143,18 @@ const IngredientInput: React.FC<IngredientInputProps> = ({
           onKeyDown={handleInputKeyDown}
           onFocus={() => inputValue && setIsDropdownOpen(filteredSuggestions.length > 0)}
           placeholder={placeholder}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         
         {/* Dropdown */}
         {isDropdownOpen && filteredSuggestions.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {filteredSuggestions.map((suggestion) => (
               <button
                 key={suggestion}
                 type="button"
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
               >
                 {suggestion}
               </button>

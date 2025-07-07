@@ -1,9 +1,8 @@
 import { Recipe, Difficulty } from '@prisma/client';
 export interface RecipeGenerationRequest {
     inspiration?: string;
-    ingredients?: string[];
-    cookingTime?: number;
-    servings?: number;
+    occasion?: string;
+    currentCravings?: string;
     difficulty?: Difficulty;
     mealType?: string;
     additionalRequests?: string;
@@ -20,6 +19,11 @@ export interface GeneratedRecipe {
     servings: number;
     nutritionInfo?: NutritionInfo;
     tags: string[];
+    aiPromptUsed?: {
+        prompt: string;
+        technicalPrompt?: string;
+        instructions: string[];
+    };
 }
 export interface RecipeIngredient {
     name: string;
@@ -38,12 +42,16 @@ export interface NutritionInfo {
 export declare class RecipeService {
     generateRecipe(userId: string, request: RecipeGenerationRequest): Promise<GeneratedRecipe>;
     saveRecipe(userId: string, recipe: GeneratedRecipe): Promise<Recipe>;
-    getUserRecipes(userId: string, limit?: number, offset?: number): Promise<Recipe[]>;
+    getUserRecipes(userId: string, limit?: number, offset?: number): Promise<(Recipe & {
+        userRecipe: any;
+    })[]>;
     getRecipe(recipeId: string): Promise<Recipe | null>;
     rateRecipe(userId: string, recipeId: string, rating: number, notes?: string): Promise<void>;
     addToFavorites(userId: string, recipeId: string): Promise<void>;
     removeFromFavorites(userId: string, recipeId: string): Promise<void>;
-    getFavoriteRecipes(userId: string): Promise<Recipe[]>;
+    getFavoriteRecipes(userId: string): Promise<(Recipe & {
+        userRecipe: any;
+    })[]>;
     generateRecipeVariation(userId: string, baseRecipeId: string, variationType: 'healthier' | 'faster' | 'budget' | 'different_cuisine'): Promise<GeneratedRecipe>;
     private buildRecipeContext;
     private buildRecipePrompt;

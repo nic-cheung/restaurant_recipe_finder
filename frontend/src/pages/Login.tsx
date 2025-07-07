@@ -65,16 +65,23 @@ const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="flex justify-center">
-            <span className="text-6xl">🍳</span>
+            <img 
+              src="/logo.svg" 
+              alt="flambé" 
+              className="h-40 sm:h-48 w-auto"
+            />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+          <h2 className="mt-6 text-center text-3xl flambé-heading">
+            sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+          <p className="mt-2 text-center text-sm flambé-body">
+            or{' '}
             <Link
               to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium transition-colors duration-200"
+              style={{ color: 'var(--flambé-ember)' }}
+              onMouseEnter={(e) => (e.target as HTMLElement).style.color = 'var(--flambé-charcoal)'}
+              onMouseLeave={(e) => (e.target as HTMLElement).style.color = 'var(--flambé-ember)'}
             >
               create a new account
             </Link>
@@ -85,7 +92,7 @@ const Login: React.FC = () => {
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
-                Email address
+                email address
               </label>
               <input
                 id="email"
@@ -93,21 +100,21 @@ const Login: React.FC = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Email address"
+                className={`input-field rounded-t-sm rounded-b-none ${
+                  errors.email ? 'border-red-300' : ''
+                }`}
+                placeholder="email address"
                 value={credentials.email}
                 onChange={handleChange}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                <p className="mt-1 text-sm" style={{ color: 'var(--flambé-rust)' }}>{errors.email}</p>
               )}
             </div>
             
             <div>
               <label htmlFor="password" className="sr-only">
-                Password
+                password
               </label>
               <input
                 id="password"
@@ -115,15 +122,15 @@ const Login: React.FC = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
-                  errors.password ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Password"
+                className={`input-field rounded-b-sm rounded-t-none ${
+                  errors.password ? 'border-red-300' : ''
+                }`}
+                placeholder="password"
                 value={credentials.password}
                 onChange={handleChange}
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                <p className="mt-1 text-sm" style={{ color: 'var(--flambé-rust)' }}>{errors.password}</p>
               )}
             </div>
           </div>
@@ -132,7 +139,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full flex justify-center py-3 px-4 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
@@ -140,14 +147,49 @@ const Login: React.FC = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Signing in...
+                  signing in...
                 </>
               ) : (
-                'Sign in'
+                'sign in'
               )}
             </button>
           </div>
         </form>
+
+        {/* Development-only test data button */}
+        {window.location.hostname === 'localhost' && (
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => {
+                const testCredentials: LoginCredentials = {
+                  email: 'test.user@example.com',
+                  password: 'TestPass123!'
+                };
+                setCredentials(testCredentials);
+                setErrors({});
+              }}
+              className="w-full flex justify-center py-2 px-4 border border-dashed text-sm font-medium rounded-sm transition-all duration-200"
+              style={{ 
+                borderColor: 'var(--flambé-sage)', 
+                color: 'var(--flambé-forest)', 
+                backgroundColor: 'var(--flambé-fog)' 
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-fog)';
+              }}
+                          >
+                fill test login (dev only)
+              </button>
+            <p className="mt-1 text-xs text-gray-500 text-center">
+              auto-fills with test login credentials for development
+            </p>
+          </div>
+        )}
+
       </div>
     </div>
   );

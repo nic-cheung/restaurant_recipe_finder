@@ -29,6 +29,13 @@ class RecipeController {
         }
         catch (error) {
             console.error('Generate recipe error:', error);
+            if (error instanceof Error && error.message.includes('Failed to generate recipe with AI')) {
+                res.status(503).json({
+                    error: 'AI service temporarily unavailable',
+                    message: 'The AI recipe generation service is currently experiencing high demand. Please try again in a few minutes, or your recipe will be generated using our fallback system.'
+                });
+                return;
+            }
             res.status(500).json({
                 error: 'Failed to generate recipe',
                 message: error instanceof Error ? error.message : 'Unknown error'

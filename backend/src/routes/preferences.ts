@@ -13,6 +13,9 @@ import {
   getCuisineSuggestions,
   getDishSuggestions,
   getApiUsageStats,
+  getEnhancedChefSuggestions,
+  getEnhancedIngredientSuggestions,
+  getEnhancedDishSuggestions,
 } from '../controllers/preferencesController';
 
 const router = Router();
@@ -71,6 +74,69 @@ router.get('/suggestions/cuisines', authenticateToken, getCuisineSuggestions);
 // @desc    Get dish suggestions based on query
 // @access  Private
 router.get('/suggestions/dishes', authenticateToken, getDishSuggestions);
+
+// Public endpoints for registration (no auth required)
+// @route   GET /api/preferences/public/options
+// @desc    Get common options for preferences (public access for registration)
+// @access  Public
+router.get('/public/options', getPreferencesOptions);
+
+// @route   GET /api/preferences/public/suggestions/chefs
+// @desc    Get chef suggestions for registration (public access)
+// @access  Public
+router.get('/public/suggestions/chefs', getChefSuggestions);
+
+// @route   GET /api/preferences/public/suggestions/restaurants
+// @desc    Get restaurant suggestions for registration (public access)
+// @access  Public
+router.get('/public/suggestions/restaurants', getRestaurantSuggestions);
+
+// @route   GET /api/preferences/public/suggestions/ingredients
+// @desc    Get ingredient suggestions for registration (public access)
+// @access  Public
+router.get('/public/suggestions/ingredients', getIngredientSuggestions);
+
+// @route   GET /api/preferences/public/suggestions/cuisines
+// @desc    Get cuisine suggestions for registration (public access)
+// @access  Public
+router.get('/public/suggestions/cuisines', getCuisineSuggestions);
+
+// @route   GET /api/preferences/public/suggestions/dishes
+// @desc    Get dish suggestions for registration (public access)
+// @access  Public
+router.get('/public/suggestions/dishes', getDishSuggestions);
+
+// Enhanced search endpoints (private)
+// @route   GET /api/preferences/enhanced/chefs
+// @desc    Enhanced chef search using Wikidata API
+// @access  Private
+router.get('/enhanced/chefs', authenticateToken, getEnhancedChefSuggestions);
+
+// @route   GET /api/preferences/enhanced/ingredients
+// @desc    Enhanced ingredient search using Wikidata API
+// @access  Private
+router.get('/enhanced/ingredients', authenticateToken, getEnhancedIngredientSuggestions);
+
+// @route   GET /api/preferences/enhanced/dishes
+// @desc    Enhanced dish search using Wikidata API
+// @access  Private
+router.get('/enhanced/dishes', authenticateToken, getEnhancedDishSuggestions);
+
+// Enhanced search endpoints (public for registration)
+// @route   GET /api/preferences/public/enhanced/chefs
+// @desc    Enhanced chef search for registration (public access)
+// @access  Public
+router.get('/public/enhanced/chefs', getEnhancedChefSuggestions);
+
+// @route   GET /api/preferences/public/enhanced/ingredients
+// @desc    Enhanced ingredient search for registration (public access)
+// @access  Public
+router.get('/public/enhanced/ingredients', getEnhancedIngredientSuggestions);
+
+// @route   GET /api/preferences/public/enhanced/dishes
+// @desc    Enhanced dish search for registration (public access)
+// @access  Public
+router.get('/public/enhanced/dishes', getEnhancedDishSuggestions);
 
 // @route   GET /api/preferences/api-usage
 // @desc    Get API usage statistics for monitoring free tier limits

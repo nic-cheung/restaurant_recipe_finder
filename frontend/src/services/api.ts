@@ -16,8 +16,8 @@ import {
   RecipeVariationRequest,
   RecipeVariationResponse,
   FavoriteRecipesResponse,
-  GenerateAndSaveResponse,
-  ApiErrorResponse
+  GenerateAndSaveResponse
+  // ApiErrorResponse // Not currently used
 } from '../types/recipe';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -35,9 +35,14 @@ class ApiService {
     const url = `${API_BASE_URL}${endpoint}`;
     const authHeaders = this.getAuthHeaders();
     
-    // Add timeout to prevent hanging requests
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout (slightly longer than backend)
+    // Use provided signal or create a timeout controller
+    let controller: AbortController | undefined;
+    let timeoutId: number | undefined;
+    
+    if (!options.signal) {
+      controller = new AbortController();
+      timeoutId = setTimeout(() => controller!.abort(), 8000); // 8 second timeout
+    }
     
     const config: RequestInit = {
       ...options,
@@ -46,12 +51,12 @@ class ApiService {
         ...authHeaders,
         ...options.headers,
       },
-      signal: controller.signal,
+      signal: options.signal || controller!.signal,
     };
 
     try {
       const response = await fetch(url, config);
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -71,7 +76,7 @@ class ApiService {
 
       return response.json();
     } catch (error) {
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       throw error;
     }
   }
@@ -180,37 +185,95 @@ class ApiService {
     return response.data;
   }
 
-  async getChefSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
-    const endpoint = query ? `/preferences/suggestions/chefs?query=${encodeURIComponent(query)}` : '/preferences/suggestions/chefs';
-    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+  async getChefSuggestions(query: string = '', signal?: AbortSignal): Promise<{ suggestions: string[]; query: string; source: string }> {
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/suggestions' : '/preferences/public/suggestions';
+    const endpoint = query ? `${basePath}/chefs?query=${encodeURIComponent(query)}` : `${basePath}/chefs`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint, signal ? {
+      signal
+    } : {});
     return response.data;
   }
 
-  async getRestaurantSuggestions(query: string = '', location: string = ''): Promise<{ suggestions: string[]; query: string; location: string; source: string }> {
+  async getRestaurantSuggestions(query: string = '', location: string = '', signal?: AbortSignal): Promise<{ suggestions: string[]; query: string; location: string; source: string }> {
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/suggestions' : '/preferences/public/suggestions';
+    
     const params = new URLSearchParams();
     if (query) params.append('query', query);
     if (location) params.append('location', location);
     
-    const endpoint = `/preferences/suggestions/restaurants${params.toString() ? '?' + params.toString() : ''}`;
-    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; location: string; source: string } }>(endpoint);
+    const endpoint = `${basePath}/restaurants${params.toString() ? '?' + params.toString() : ''}`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; location: string; source: string } }>(endpoint, signal ? {
+      signal
+    } : {});
     return response.data;
   }
 
-  async getIngredientSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
-    const endpoint = query ? `/preferences/suggestions/ingredients?query=${encodeURIComponent(query)}` : '/preferences/suggestions/ingredients';
-    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+  async getIngredientSuggestions(query: string = '', signal?: AbortSignal): Promise<{ suggestions: string[]; query: string; source: string }> {
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/suggestions' : '/preferences/public/suggestions';
+    const endpoint = query ? `${basePath}/ingredients?query=${encodeURIComponent(query)}` : `${basePath}/ingredients`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint, signal ? {
+      signal
+    } : {});
     return response.data;
   }
 
   async getCuisineSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
-    const endpoint = query ? `/preferences/suggestions/cuisines?query=${encodeURIComponent(query)}` : '/preferences/suggestions/cuisines';
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/suggestions' : '/preferences/public/suggestions';
+    const endpoint = query ? `${basePath}/cuisines?query=${encodeURIComponent(query)}` : `${basePath}/cuisines`;
     const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
     return response.data;
   }
 
-  async getDishSuggestions(query: string = ''): Promise<{ suggestions: string[]; query: string; source: string }> {
-    const endpoint = query ? `/preferences/suggestions/dishes?query=${encodeURIComponent(query)}` : '/preferences/suggestions/dishes';
-    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint);
+  async getDishSuggestions(query: string = '', signal?: AbortSignal): Promise<{ suggestions: string[]; query: string; source: string }> {
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/suggestions' : '/preferences/public/suggestions';
+    const endpoint = query ? `${basePath}/dishes?query=${encodeURIComponent(query)}` : `${basePath}/dishes`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint, signal ? {
+      signal
+    } : {});
+    return response.data;
+  }
+
+  // Enhanced search methods
+  async getEnhancedChefSuggestions(query: string = '', signal?: AbortSignal): Promise<{ suggestions: string[]; query: string; source: string }> {
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/enhanced' : '/preferences/public/enhanced';
+    const endpoint = query ? `${basePath}/chefs?query=${encodeURIComponent(query)}` : `${basePath}/chefs`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint, signal ? {
+      signal
+    } : {});
+    return response.data;
+  }
+
+  async getEnhancedDishSuggestions(query: string = '', signal?: AbortSignal): Promise<{ suggestions: string[]; query: string; source: string }> {
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/enhanced' : '/preferences/public/enhanced';
+    const endpoint = query ? `${basePath}/dishes?query=${encodeURIComponent(query)}` : `${basePath}/dishes`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint, signal ? {
+      signal
+    } : {});
+    return response.data;
+  }
+
+  async getEnhancedIngredientSuggestions(query: string = '', signal?: AbortSignal): Promise<{ suggestions: string[]; query: string; source: string }> {
+    // Use public endpoint if not authenticated (during registration)
+    const isAuthenticated = !!localStorage.getItem('token');
+    const basePath = isAuthenticated ? '/preferences/enhanced' : '/preferences/public/enhanced';
+    const endpoint = query ? `${basePath}/ingredients?query=${encodeURIComponent(query)}` : `${basePath}/ingredients`;
+    const response = await this.request<{ success: boolean; data: { suggestions: string[]; query: string; source: string } }>(endpoint, signal ? {
+      signal
+    } : {});
     return response.data;
   }
 
@@ -309,4 +372,4 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService(); 
+export const apiService = new ApiService();

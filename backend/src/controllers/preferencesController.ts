@@ -13,14 +13,16 @@ import {
   COMMON_RESTAURANTS,
   COMMON_INGREDIENTS,
   COMMON_DISHES,
+  COMMON_DISLIKED_FOODS,
   NUTRITIONAL_GOALS,
   BUDGET_PREFERENCES,
   MEAL_TYPES,
+  POPULAR_MEAL_TYPES,
   COOKING_EQUIPMENT,
   MEAL_COMPLEXITY,
   SPICE_TOLERANCE,
 } from '../utils/validation';
-import { geminiService } from '../services/geminiService';
+
 import {
   getUserPreferencesWithDefaults,
   upsertUserPreferences,
@@ -30,6 +32,9 @@ import {
   updateUserSpiceTolerance,
 } from '../services/preferencesService';
 import { apiUsageTracker } from '../services/apiUsageTracker';
+import { wikidataIngredientsService } from '../services/wikidataIngredientsService';
+import { wikidataDishesService } from '../services/wikidataDishesService';
+import { googleAuthService } from '../services/googleAuthService';
 
 /**
  * Get user preferences
@@ -241,11 +246,13 @@ export const getPreferencesOptions = async (_req: AuthenticatedRequest, res: Res
         dishes: COMMON_DISHES,
         chefs: COMMON_CHEFS,
         restaurants: COMMON_RESTAURANTS,
+        dislikedFoods: COMMON_DISLIKED_FOODS,
         
         // New comprehensive preference options
         nutritionalGoals: NUTRITIONAL_GOALS,
         budgetPreferences: BUDGET_PREFERENCES,
         mealTypes: MEAL_TYPES,
+        popularMealTypes: POPULAR_MEAL_TYPES,
         cookingEquipment: COOKING_EQUIPMENT,
         mealComplexity: MEAL_COMPLEXITY,
         spiceTolerance: SPICE_TOLERANCE,
@@ -261,24 +268,65 @@ export const getPreferencesOptions = async (_req: AuthenticatedRequest, res: Res
 };
 
 /**
- * Get restaurant suggestions with optional Google Places integration
+ * Get restaurant suggestions with optional Google Places integration using OAuth
  */
 export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        error: 'User not authenticated',
-      });
-      return;
-    }
-
+    // Allow unauthenticated access for registration flow
     const { query = '', location = '' } = req.query as { query?: string; location?: string };
     let suggestions: string[] = [];
     let source = 'static_fallback';
     
-    // Try Google Places API if configured
-    if (process.env['GOOGLE_PLACES_API_KEY'] && location.trim()) {
+    // Try Google Places API with OAuth if configured
+    if (googleAuthService.isConfigured() && location.trim()) {
+      try {
+        // Use the new Places API (New) format - search for any food establishment
+        const searchText = `${query} in ${location}`;
+        
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const googleResponse = await googleAuthService.makeAuthenticatedRequest(
+          'https://places.googleapis.com/v1/places:searchText',
+          {
+            method: 'POST',
+            headers: {
+              'X-Goog-FieldMask': 'places.displayName,places.location,places.types'
+            },
+            body: JSON.stringify({
+              textQuery: searchText,
+              maxResultCount: 10
+            }),
+            signal: controller.signal
+          }
+        );
+        
+        clearTimeout(timeoutId);
+        
+        // Track the API usage
+        await apiUsageTracker.trackGooglePlacesUsage();
+        
+        if (googleResponse.ok) {
+          const data = await googleResponse.json() as { places?: Array<{ displayName: { text: string } }> };
+          suggestions = data.places?.map((place) => place.displayName?.text).filter(Boolean).slice(0, 10) || [];
+          source = 'google_places_oauth';
+          
+          console.log(`✅ Google Places API (OAuth) returned ${suggestions.length} results for "${searchText}"`);
+        } else {
+          const errorData = await googleResponse.json();
+          console.log('Google Places API (OAuth) error response:', errorData);
+        }
+      } catch (googleError) {
+        if (googleError instanceof Error && googleError.name === 'AbortError') {
+          console.log('Google Places API (OAuth) timeout (5s), using static fallback');
+        } else {
+          console.log('Google Places API (OAuth) failed, using static fallback:', googleError);
+        }
+      }
+    }
+    // Fallback to API key method if OAuth not configured
+    else if (process.env['GOOGLE_PLACES_API_KEY'] && location.trim()) {
       try {
         // Use the new Places API (New) format - search for any food establishment
         const searchText = `${query} in ${location}`;
@@ -299,7 +347,6 @@ export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: R
             body: JSON.stringify({
               textQuery: searchText,
               maxResultCount: 10
-              // Removed includedType to allow restaurants, cafes, coffee shops, etc.
             }),
             signal: controller.signal
           }
@@ -313,18 +360,18 @@ export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: R
         if (googleResponse.ok) {
           const data = await googleResponse.json() as { places?: Array<{ displayName: { text: string } }> };
           suggestions = data.places?.map((place) => place.displayName?.text).filter(Boolean).slice(0, 10) || [];
-          source = 'google_places';
+          source = 'google_places_api_key';
           
-          console.log(`✅ Google Places API returned ${suggestions.length} results for "${searchText}"`);
+          console.log(`✅ Google Places API (API Key) returned ${suggestions.length} results for "${searchText}"`);
         } else {
           const errorData = await googleResponse.json();
-          console.log('Google Places API error response:', errorData);
+          console.log('Google Places API (API Key) error response:', errorData);
         }
       } catch (googleError) {
         if (googleError instanceof Error && googleError.name === 'AbortError') {
-          console.log('Google Places API timeout (5s), using static fallback');
+          console.log('Google Places API (API Key) timeout (5s), using static fallback');
         } else {
-          console.log('Google Places API failed, using static fallback:', googleError);
+          console.log('Google Places API (API Key) failed, using static fallback:', googleError);
         }
       }
     }
@@ -368,90 +415,90 @@ export const getRestaurantSuggestions = async (req: AuthenticatedRequest, res: R
 };
 
 /**
- * Get chef suggestions with Wikipedia API and static fallback
+ * Normalize text for accent-insensitive matching
+ */
+function normalizeForMatching(text: string): string {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+/**
+ * Get chef suggestions with static-first approach
  */
 export const getChefSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        error: 'User not authenticated',
-      });
-      return;
-    }
-
+    // Allow unauthenticated access for registration flow
     const { query = '', cuisine = '' } = req.query as { query?: string; cuisine?: string };
     let suggestions: string[] = [];
-    let source = 'static_fallback';
+    let source = 'static';
+    let hasMoreResults = false;
     
-    // Try Wikipedia API first if we have a query
     if (query.trim()) {
-      try {
-        const { wikipediaService } = await import('../services/wikipediaService');
-        suggestions = await wikipediaService.searchChefs(query, 8);
-        
-        if (suggestions.length > 0) {
-          source = 'wikipedia_api';
-          
-          // Merge with some popular static suggestions for better quality
-          const staticMatches = COMMON_CHEFS.filter(chef =>
-            chef.toLowerCase().includes(query.toLowerCase())
-          ).slice(0, 3);
-          
-          // Combine Wikipedia results with static matches, removing duplicates
-          const combined = [...new Set([...suggestions, ...staticMatches])];
-          suggestions = combined.slice(0, 10);
-        }
-      } catch (wikipediaError) {
-        console.log('Wikipedia API failed, using static fallback:', wikipediaError);
-        suggestions = [];
-      }
-    }
-    
-    // Fallback to static suggestions if Wikipedia failed or no query
-    if (suggestions.length === 0) {
-      if (query.trim()) {
-        // Filter chefs that match the query (case-insensitive)
-        suggestions = COMMON_CHEFS.filter(chef =>
-          chef.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        // If no direct matches, try fuzzy matching
-        if (suggestions.length === 0) {
-          suggestions = COMMON_CHEFS.filter(chef => {
-            const chefWords = chef.toLowerCase().split(' ');
-            const queryWords = query.toLowerCase().split(' ');
-            return queryWords.some(queryWord => 
-              chefWords.some(chefWord => 
-                chefWord.includes(queryWord) || queryWord.includes(chefWord)
-              )
-            );
-          });
-        }
-        
-        // If still no matches, provide popular chefs
-        if (suggestions.length === 0) {
-          suggestions = COMMON_CHEFS.slice(0, 10); // Top 10 popular chefs
-        }
-      } else if (cuisine.trim()) {
-        // Filter chefs by cuisine specialty (this would require expanding our chef data)
-        // For now, return popular chefs
-        suggestions = COMMON_CHEFS.slice(0, 15);
-      } else {
-        // No query provided, return popular chefs
-        suggestions = COMMON_CHEFS.slice(0, 15); // Top 15 popular chefs
+      // Static search first - normalize for accent-insensitive matching
+      const normalizedQuery = normalizeForMatching(query);
+      
+      // Try exact matches first
+      const exactMatches = COMMON_CHEFS.filter(chef =>
+        normalizeForMatching(chef).toLowerCase() === normalizedQuery.toLowerCase()
+      );
+      
+      // Then partial matches
+      const partialMatches = COMMON_CHEFS.filter(chef =>
+        normalizeForMatching(chef).toLowerCase().includes(normalizedQuery.toLowerCase()) &&
+        !exactMatches.includes(chef)
+      );
+      
+      // If no direct matches, try fuzzy matching (word-based)
+      let fuzzyMatches: string[] = [];
+      if (exactMatches.length === 0 && partialMatches.length === 0) {
+        fuzzyMatches = COMMON_CHEFS.filter(chef => {
+          const chefWords = normalizeForMatching(chef).toLowerCase().split(' ');
+          const queryWords = normalizedQuery.toLowerCase().split(' ');
+          return queryWords.some(queryWord => 
+            chefWords.some(chefWord => 
+              chefWord.includes(queryWord) || queryWord.includes(chefWord)
+            )
+          );
+        });
       }
       
-      source = 'static_fallback';
+      // Combine and sort by relevance
+      suggestions = [...exactMatches, ...partialMatches, ...fuzzyMatches];
+      suggestions = sortSuggestionsByRelevance(suggestions, query);
+      
+      if (suggestions.length > 0) {
+        source = 'static_match';
+        // Suggest enhanced search if we have few results or user might want more variety
+        hasMoreResults = suggestions.length < 8;
+      } else {
+        // No matches found - don't show popular suggestions in dropdown
+        // Instead, encourage enhanced search
+        suggestions = [];
+        source = 'no_match';
+        hasMoreResults = true; // Definitely suggest enhanced search
+      }
+    } else if (cuisine.trim()) {
+      // Filter chefs by cuisine specialty (this would require expanding our chef data)
+      // For now, return popular chefs and suggest enhanced search for cuisine-specific results
+      suggestions = COMMON_CHEFS.slice(0, 12);
+      source = 'static_popular';
+      hasMoreResults = true; // Enhanced search can find cuisine-specific chefs
+    } else {
+      // No query provided, return popular chefs
+      suggestions = COMMON_CHEFS.slice(0, 12);
+      source = 'static_popular';
     }
 
     res.status(200).json({
       success: true,
       data: {
-        suggestions: suggestions.slice(0, 10), // Limit to 10 suggestions
+        suggestions: suggestions.slice(0, 10),
         query: query || 'popular',
         cuisine: cuisine || 'all',
         source,
+        hasMoreResults,
+        message: hasMoreResults && (query.trim() || cuisine.trim()) ? 
+          'Try enhanced search for more chef options' : 
+          undefined
       },
     });
   } catch (error) {
@@ -464,67 +511,132 @@ export const getChefSuggestions = async (req: AuthenticatedRequest, res: Respons
 };
 
 /**
- * Get ingredient suggestions with AI-powered suggestions and static fallback
+ * Enhanced chef search using Wikidata API
  */
-export const getIngredientSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getEnhancedChefSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        error: 'User not authenticated',
-      });
-      return;
-    }
-
-    const { query = '' } = req.query as { query?: string };
+    const { query = '', cuisine = '' } = req.query as { query?: string; cuisine?: string };
     let suggestions: string[] = [];
     let source = 'static_fallback';
     
-    try {
-      // Get user preferences for AI context
-      const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
-      
-      // Try AI-powered suggestions first
-      suggestions = await geminiService.suggestIngredients(query, {
-        favoriteCuisines: userPreferences?.favoriteCuisines || [],
-        dietaryRestrictions: userPreferences?.dietaryRestrictions || []
+    if (!query.trim()) {
+      res.status(400).json({
+        success: false,
+        error: 'Query is required for enhanced search',
       });
+      return;
+    }
+    
+    try {
+      // Use Wikidata API for enhanced results
+      const { wikidataService } = await import('../services/wikidataService');
+      const wikidataResults = await wikidataService.searchChefs(query, 10);
       
-      source = 'ai_powered';
-      
-      // Validate AI response
-      if (!Array.isArray(suggestions) || suggestions.length === 0) {
-        throw new Error('Invalid AI response');
-      }
-      
-    } catch (aiError) {
-      console.log('AI suggestions failed, using static fallback:', aiError);
-      
-      // Static fallback: Filter ingredients based on query
-      if (query.trim()) {
-        // Filter ingredients that match the query (case-insensitive)
-        suggestions = COMMON_INGREDIENTS.filter(ingredient =>
-          ingredient.toLowerCase().includes(query.toLowerCase())
+      if (wikidataResults.length > 0) {
+        // Merge with static suggestions using accent-insensitive matching
+        const normalizedQuery = normalizeForMatching(query);
+        const staticMatches = COMMON_CHEFS.filter(chef =>
+          normalizeForMatching(chef).includes(normalizedQuery)
         );
         
-        // If no matches, provide popular ingredients
-        if (suggestions.length === 0) {
-          suggestions = COMMON_INGREDIENTS.slice(0, 15); // Top 15 popular ingredients
-        }
+        // Combine and deduplicate, prioritizing Wikidata results
+        const allSuggestions = [...wikidataResults, ...staticMatches];
+        suggestions = [...new Set(allSuggestions)];
+        source = 'wikidata_enhanced';
       } else {
-        // No query provided, return popular ingredients
-        suggestions = COMMON_INGREDIENTS.slice(0, 20); // Top 20 popular ingredients
+        // Fallback to more comprehensive static search
+        const normalizedQuery = normalizeForMatching(query);
+        suggestions = COMMON_CHEFS.filter(chef =>
+          normalizeForMatching(chef).includes(normalizedQuery)
+        );
+        source = 'static_comprehensive';
       }
-      
-      source = 'static_fallback';
+    } catch (wikidataError) {
+      console.log('Enhanced Wikidata chef search failed:', wikidataError);
+      // Comprehensive static fallback
+      const normalizedQuery = normalizeForMatching(query);
+      suggestions = COMMON_CHEFS.filter(chef =>
+        normalizeForMatching(chef).includes(normalizedQuery)
+      );
+      source = 'static_comprehensive';
     }
 
     res.status(200).json({
       success: true,
       data: {
-        suggestions: suggestions.slice(0, 10), // Limit to 10 suggestions
+        suggestions: suggestions.slice(0, 15), // More results for enhanced search
+        query,
+        cuisine: cuisine || 'all',
+        source,
+        enhanced: true,
+      },
+    });
+  } catch (error) {
+    console.error('Enhanced chef search error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to perform enhanced chef search',
+    });
+  }
+};
+
+/**
+ * Get ingredient suggestions with static-first approach
+ */
+export const getIngredientSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    // Allow unauthenticated access for registration flow
+    const { query = '' } = req.query as { query?: string };
+    let suggestions: string[] = [];
+    let source = 'static';
+    let hasMoreResults = false;
+    
+    if (query.trim()) {
+      // Static search first - normalize for accent-insensitive matching
+      const normalizedQuery = normalizeForMatching(query);
+      
+      // Try exact matches first
+      const exactMatches = COMMON_INGREDIENTS.filter(ingredient =>
+        normalizeForMatching(ingredient).toLowerCase() === normalizedQuery.toLowerCase()
+      );
+      
+      // Then partial matches
+      const partialMatches = COMMON_INGREDIENTS.filter(ingredient =>
+        normalizeForMatching(ingredient).toLowerCase().includes(normalizedQuery.toLowerCase()) &&
+        !exactMatches.includes(ingredient)
+      );
+      
+      // Combine and sort by relevance
+      suggestions = [...exactMatches, ...partialMatches];
+      suggestions = sortSuggestionsByRelevance(suggestions, query);
+      
+      if (suggestions.length > 0) {
+        source = 'static_match';
+        // Suggest enhanced search if we have few results or user might want more variety
+        hasMoreResults = suggestions.length < 8;
+      } else {
+        // No matches found - don't show popular suggestions in dropdown
+        // Instead, encourage enhanced search
+        suggestions = [];
+        source = 'no_match';
+        hasMoreResults = true; // Definitely suggest enhanced search
+      }
+    } else {
+      // No query provided, return popular ingredients
+      suggestions = COMMON_INGREDIENTS.slice(0, 12);
+      source = 'static_popular';
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        suggestions: suggestions.slice(0, 10),
         query: query || 'popular',
         source,
+        hasMoreResults,
+        message: hasMoreResults && query.trim() ? 
+          'Try enhanced search for more ingredient options' : 
+          undefined
       },
     });
   } catch (error) {
@@ -537,42 +649,89 @@ export const getIngredientSuggestions = async (req: AuthenticatedRequest, res: R
 };
 
 /**
- * Get cuisine suggestions with AI-powered suggestions and static fallback
+ * Enhanced ingredient search using Wikidata API
  */
-export const getCuisineSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getEnhancedIngredientSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        error: 'User not authenticated',
-      });
-      return;
-    }
-
     const { query = '' } = req.query as { query?: string };
     let suggestions: string[] = [];
     let source = 'static_fallback';
     
-    try {
-      // Get user preferences for AI context
-      const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
-      
-      // Try AI-powered suggestions first
-      suggestions = await geminiService.suggestCuisines(query, {
-        favoriteIngredients: userPreferences?.favoriteIngredients || []
+    if (!query.trim()) {
+      res.status(400).json({
+        success: false,
+        error: 'Query is required for enhanced search',
       });
+      return;
+    }
+    
+    try {
+      // Use Wikidata API for enhanced results
+      const wikidataResults = await wikidataIngredientsService.getIngredientSuggestions(query);
       
-      source = 'ai_powered';
-      
-      // Validate AI response
-      if (!Array.isArray(suggestions) || suggestions.length === 0) {
-        throw new Error('Invalid AI response');
+      if (wikidataResults.length > 0) {
+        // Merge with static suggestions using accent-insensitive matching
+        const normalizedQuery = normalizeForMatching(query);
+        const staticMatches = COMMON_INGREDIENTS.filter(ingredient =>
+          normalizeForMatching(ingredient).includes(normalizedQuery)
+        );
+        
+        // Combine and deduplicate, prioritizing Wikidata results
+        const allSuggestions = [...wikidataResults, ...staticMatches];
+        suggestions = [...new Set(allSuggestions)];
+        source = 'wikidata_enhanced';
+      } else {
+        // Fallback to more comprehensive static search
+        const normalizedQuery = normalizeForMatching(query);
+        suggestions = COMMON_INGREDIENTS.filter(ingredient =>
+          normalizeForMatching(ingredient).includes(normalizedQuery)
+        );
+        source = 'static_comprehensive';
       }
-      
-    } catch (aiError) {
-      console.log('AI suggestions failed, using static fallback:', aiError);
-      
-      // Static fallback: Filter cuisines based on query
+    } catch (wikidataError) {
+      console.log('Enhanced Wikidata ingredients search failed:', wikidataError);
+      // Comprehensive static fallback
+      const normalizedQuery = normalizeForMatching(query);
+      suggestions = COMMON_INGREDIENTS.filter(ingredient =>
+        normalizeForMatching(ingredient).includes(normalizedQuery)
+      );
+      source = 'static_comprehensive';
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        suggestions: suggestions.slice(0, 15), // More results for enhanced search
+        query,
+        source,
+        enhanced: true,
+      },
+    });
+  } catch (error) {
+    console.error('Enhanced ingredient search error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to perform enhanced ingredient search',
+    });
+  }
+};
+
+/**
+ * Get cuisine suggestions with static fallback only
+ */
+export const getCuisineSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    // Allow unauthenticated access for registration flow
+    const { query = '' } = req.query as { query?: string };
+    let suggestions: string[] = [];
+    let source = 'static_fallback';
+    
+    // Go directly to static fallback (no external API for cuisines, no AI to preserve quota)
+
+    // Skip AI to preserve quota - go directly to static fallback
+
+    // Static fallback (no AI to preserve quota)
+    if (suggestions.length === 0) {
       if (query.trim()) {
         // Filter cuisines that match the query (case-insensitive)
         suggestions = COMMON_CUISINES.filter(cuisine =>
@@ -609,68 +768,79 @@ export const getCuisineSuggestions = async (req: AuthenticatedRequest, res: Resp
 };
 
 /**
- * Get dish suggestions with AI-powered suggestions and static fallback
+ * Get dish suggestions with static-first approach
  */
 export const getDishSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        error: 'User not authenticated',
-      });
-      return;
-    }
-
+    // Allow unauthenticated access for registration flow
     const { query = '' } = req.query as { query?: string };
     let suggestions: string[] = [];
-    let source = 'static_fallback';
+    let source = 'static';
+    let hasMoreResults = false;
     
-    try {
-      // Get user preferences for AI context
-      const userPreferences = await getUserPreferencesWithDefaults(req.user.userId);
+    if (query.trim()) {
+      // Static search first - normalize for accent-insensitive matching
+      const normalizedQuery = normalizeForMatching(query);
       
-      // Try AI-powered suggestions first
-      suggestions = await geminiService.suggestDishes(query, {
-        favoriteCuisines: userPreferences?.favoriteCuisines || [],
-        favoriteIngredients: userPreferences?.favoriteIngredients || [],
-        dietaryRestrictions: userPreferences?.dietaryRestrictions || []
-      });
+      // Try exact matches first
+      const exactMatches = COMMON_DISHES.filter(dish =>
+        normalizeForMatching(dish).toLowerCase() === normalizedQuery.toLowerCase()
+      );
       
-      source = 'ai_powered';
+      // Then partial matches
+      const partialMatches = COMMON_DISHES.filter(dish =>
+        normalizeForMatching(dish).toLowerCase().includes(normalizedQuery.toLowerCase()) &&
+        !exactMatches.includes(dish)
+      );
       
-      // Validate AI response
-      if (!Array.isArray(suggestions) || suggestions.length === 0) {
-        throw new Error('Invalid AI response');
-      }
+      // Combine and sort by relevance
+      suggestions = [...exactMatches, ...partialMatches];
+      suggestions = sortSuggestionsByRelevance(suggestions, query);
       
-    } catch (aiError) {
-      console.log('AI suggestions failed, using static fallback:', aiError);
-      
-      // Static fallback: Filter dishes based on query
-      if (query.trim()) {
-        // Filter dishes that match the query (case-insensitive)
-        suggestions = COMMON_DISHES.filter(dish =>
-          dish.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        // If no matches, provide popular dishes
-        if (suggestions.length === 0) {
-          suggestions = COMMON_DISHES.slice(0, 15); // Top 15 popular dishes
-        }
+      if (suggestions.length > 0) {
+        source = 'static_match';
+        // Suggest enhanced search if we have few results or user might want more variety
+        hasMoreResults = suggestions.length < 8;
       } else {
-        // No query provided, return popular dishes
-        suggestions = COMMON_DISHES.slice(0, 20); // Top 20 popular dishes
+        // No static matches found - try Wikidata API
+        try {
+          const wikidataResults = await wikidataDishesService.getDishSuggestions(query);
+          
+          if (wikidataResults.length > 0) {
+            suggestions = wikidataResults;
+            source = 'wikidata_api';
+            hasMoreResults = false; // We got enhanced results
+          } else {
+            // No Wikidata results either - don't show popular dishes in dropdown
+            // Instead, encourage enhanced search
+            suggestions = [];
+            source = 'no_match';
+            hasMoreResults = true; // Definitely suggest enhanced search
+          }
+        } catch (wikidataError) {
+          console.log('Wikidata dish search failed:', wikidataError);
+          // No fallback to popular dishes in dropdown
+          suggestions = [];
+          source = 'no_match';
+          hasMoreResults = true; // Suggest enhanced search
+        }
       }
-      
-      source = 'static_fallback';
+    } else {
+      // No query provided, return popular dishes
+      suggestions = COMMON_DISHES.slice(0, 12);
+      source = 'static_popular';
     }
 
     res.status(200).json({
       success: true,
       data: {
-        suggestions: suggestions.slice(0, 10), // Limit to 10 suggestions
+        suggestions: suggestions.slice(0, 10),
         query: query || 'popular',
         source,
+        hasMoreResults,
+        message: hasMoreResults && query.trim() ? 
+          'Try enhanced search for more dish options' : 
+          undefined
       },
     });
   } catch (error) {
@@ -678,6 +848,74 @@ export const getDishSuggestions = async (req: AuthenticatedRequest, res: Respons
     res.status(500).json({
       success: false,
       error: 'Failed to get dish suggestions',
+    });
+  }
+};
+
+/**
+ * Enhanced dish search using Wikidata API
+ */
+export const getEnhancedDishSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { query = '' } = req.query as { query?: string };
+    let suggestions: string[] = [];
+    let source = 'static_fallback';
+    
+    if (!query.trim()) {
+      res.status(400).json({
+        success: false,
+        error: 'Query is required for enhanced search',
+      });
+      return;
+    }
+    
+    try {
+      // Use Wikidata API for enhanced results
+      const wikidataResults = await wikidataDishesService.getDishSuggestions(query);
+      
+      if (wikidataResults.length > 0) {
+        // Merge with static suggestions using accent-insensitive matching
+        const normalizedQuery = normalizeForMatching(query);
+        const staticMatches = COMMON_DISHES.filter(dish =>
+          normalizeForMatching(dish).includes(normalizedQuery)
+        );
+        
+        // Combine and deduplicate, prioritizing Wikidata results
+        const allSuggestions = [...wikidataResults, ...staticMatches];
+        suggestions = [...new Set(allSuggestions)];
+        source = 'wikidata_enhanced';
+      } else {
+        // Fallback to more comprehensive static search
+        const normalizedQuery = normalizeForMatching(query);
+        suggestions = COMMON_DISHES.filter(dish =>
+          normalizeForMatching(dish).includes(normalizedQuery)
+        );
+        source = 'static_comprehensive';
+      }
+    } catch (wikidataError) {
+      console.log('Enhanced Wikidata search failed:', wikidataError);
+      // Comprehensive static fallback
+      const normalizedQuery = normalizeForMatching(query);
+      suggestions = COMMON_DISHES.filter(dish =>
+        normalizeForMatching(dish).includes(normalizedQuery)
+      );
+      source = 'static_comprehensive';
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        suggestions: suggestions.slice(0, 15), // More results for enhanced search
+        query,
+        source,
+        enhanced: true,
+      },
+    });
+  } catch (error) {
+    console.error('Enhanced dish search error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to perform enhanced dish search',
     });
   }
 };
@@ -717,5 +955,42 @@ export const getApiUsageStats = async (req: AuthenticatedRequest, res: Response)
     });
   }
 };
+
+/**
+ * Sort suggestions by relevance to the query
+ */
+function sortSuggestionsByRelevance(suggestions: string[], query: string): string[] {
+  if (!query.trim()) return suggestions;
+
+  const queryLower = query.toLowerCase();
+
+  return suggestions.sort((a, b) => {
+    const aLower = a.toLowerCase();
+    const bLower = b.toLowerCase();
+
+    // Exact matches first
+    const aExact = aLower === queryLower;
+    const bExact = bLower === queryLower;
+    if (aExact && !bExact) return -1;
+    if (!aExact && bExact) return 1;
+
+    // Starts with query
+    const aStarts = aLower.startsWith(queryLower);
+    const bStarts = bLower.startsWith(queryLower);
+    if (aStarts && !bStarts) return -1;
+    if (!aStarts && bStarts) return 1;
+
+    // Contains query (closer to beginning wins)
+    const aIndex = aLower.indexOf(queryLower);
+    const bIndex = bLower.indexOf(queryLower);
+    if (aIndex !== bIndex) return aIndex - bIndex;
+
+    // Shorter names win (more specific)
+    if (a.length !== b.length) return a.length - b.length;
+
+    // Alphabetical as final tiebreaker
+    return a.localeCompare(b);
+  });
+}
 
 // Dynamic suggestion endpoints will be implemented after static fallback system is complete 

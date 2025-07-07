@@ -550,7 +550,23 @@ Make sure the recipe is authentic, well-balanced, and matches the user's prefere
         throw new Error('No valid JSON found in AI response');
       }
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      // Clean up common JSON formatting issues from AI responses
+      let jsonString = jsonMatch[0];
+      
+      // Fix common issues with amount fields that have fractions or mixed content
+      jsonString = jsonString.replace(/"amount":\s*([^",\}]+),/g, (match, amount) => {
+        // Handle cases like "amount": 1/4, "amount": 1 bunch, etc.
+        const cleanAmount = amount.trim();
+        if (cleanAmount.includes('/') || cleanAmount.includes(' ')) {
+          return `"amount": "${cleanAmount}",`;
+        }
+        return match;
+      });
+      
+      // Fix trailing commas in arrays and objects
+      jsonString = jsonString.replace(/,(\s*[}\]])/g, '$1');
+
+      const parsed = JSON.parse(jsonString);
 
       // Check if this is an AI prompt response (quota exceeded scenario)
       if (parsed.aiPrompt && parsed.tags && parsed.tags.includes('ai-prompt')) {

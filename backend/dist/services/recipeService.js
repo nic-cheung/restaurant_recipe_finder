@@ -65,7 +65,20 @@ class RecipeService {
                 take: limit,
                 skip: offset,
             });
-            return userRecipes.map(ur => ur.recipe);
+            return userRecipes.map(ur => ({
+                ...ur.recipe,
+                userRecipe: {
+                    id: ur.id,
+                    userId: ur.userId,
+                    recipeId: ur.recipeId,
+                    rating: ur.rating,
+                    notes: ur.notes,
+                    cookedDate: ur.cookedDate,
+                    isFavorite: ur.isFavorite,
+                    createdAt: ur.createdAt,
+                    updatedAt: ur.updatedAt,
+                },
+            }));
         }
         catch (error) {
             console.error('Get user recipes error:', error);
@@ -112,6 +125,14 @@ class RecipeService {
     }
     async addToFavorites(userId, recipeId) {
         try {
+            const existingFavorite = await prisma.favoriteRecipe.findUnique({
+                where: {
+                    userId_recipeId: { userId, recipeId }
+                }
+            });
+            if (existingFavorite) {
+                return;
+            }
             await prisma.favoriteRecipe.create({
                 data: { userId, recipeId }
             });
@@ -153,10 +174,33 @@ class RecipeService {
         try {
             const favorites = await prisma.favoriteRecipe.findMany({
                 where: { userId },
-                include: { recipe: true },
+                include: {
+                    recipe: true,
+                },
                 orderBy: { createdAt: 'desc' },
             });
-            return favorites.map(f => f.recipe);
+            const favoriteRecipes = await Promise.all(favorites.map(async (favorite) => {
+                const userRecipe = await prisma.userRecipe.findUnique({
+                    where: {
+                        userId_recipeId: { userId, recipeId: favorite.recipeId }
+                    }
+                });
+                return {
+                    ...favorite.recipe,
+                    userRecipe: {
+                        id: userRecipe?.id || null,
+                        userId: userRecipe?.userId || userId,
+                        recipeId: userRecipe?.recipeId || favorite.recipeId,
+                        rating: userRecipe?.rating || null,
+                        notes: userRecipe?.notes || null,
+                        cookedDate: userRecipe?.cookedDate || null,
+                        isFavorite: true,
+                        createdAt: userRecipe?.createdAt || favorite.createdAt,
+                        updatedAt: userRecipe?.updatedAt || favorite.createdAt,
+                    },
+                };
+            }));
+            return favoriteRecipes;
         }
         catch (error) {
             console.error('Get favorite recipes error:', error);
@@ -179,7 +223,6 @@ class RecipeService {
             const variationPrompt = this.buildVariationPrompt(baseRecipe, variationType, user.preferences);
             const aiResponse = await geminiService_1.geminiService.generateRecipe(variationPrompt);
             const variation = this.parseRecipeResponse(aiResponse, {
-                servings: baseRecipe.servings,
                 difficulty: baseRecipe.difficulty,
             });
             return variation;
@@ -204,11 +247,31 @@ class RecipeService {
             if (preferences.favoriteIngredients.length > 0) {
                 context.push(`Favorite ingredients: ${preferences.favoriteIngredients.join(', ')}`);
             }
+            if (preferences.favoriteDishes.length > 0) {
+                context.push(`Favorite dishes: ${preferences.favoriteDishes.join(', ')}`);
+            }
+            if (preferences.favoriteChefs.length > 0) {
+                context.push(`Favorite chefs: ${preferences.favoriteChefs.join(', ')}`);
+            }
+            if (preferences.favoriteRestaurants.length > 0) {
+                context.push(`Favorite restaurants: ${preferences.favoriteRestaurants.join(', ')}`);
+            }
             if (preferences.dislikedFoods.length > 0) {
                 context.push(`Disliked foods: ${preferences.dislikedFoods.join(', ')}`);
             }
             context.push(`Cooking skill level: ${preferences.cookingSkillLevel}`);
             context.push(`Spice tolerance: ${user.spiceTolerance}`);
+            context.push(`Meal complexity preference: ${preferences.mealComplexity}`);
+            context.push(`Budget preference: ${preferences.budgetPreference}`);
+            if (preferences.preferredCookingTime) {
+                context.push(`Preferred cooking time: ${preferences.preferredCookingTime} minutes maximum`);
+            }
+            if (preferences.servingSize) {
+                context.push(`Preferred serving size: ${preferences.servingSize} people`);
+            }
+            if (preferences.preferredMealTypes.length > 0) {
+                context.push(`Preferred meal types: ${preferences.preferredMealTypes.join(', ')}`);
+            }
             if (preferences.nutritionalGoals.length > 0) {
                 context.push(`Nutritional goals: ${preferences.nutritionalGoals.join(', ')}`);
             }
@@ -227,14 +290,11 @@ class RecipeService {
         if (request.inspiration) {
             prompt += `- Inspiration: ${request.inspiration}\n`;
         }
-        if (request.ingredients && request.ingredients.length > 0) {
-            prompt += `- Must include ingredients: ${request.ingredients.join(', ')}\n`;
+        if (request.occasion) {
+            prompt += `- Occasion: ${request.occasion}\n`;
         }
-        if (request.cookingTime) {
-            prompt += `- Maximum cooking time: ${request.cookingTime} minutes\n`;
-        }
-        if (request.servings) {
-            prompt += `- Servings: ${request.servings}\n`;
+        if (request.currentCravings) {
+            prompt += `- Current cravings: ${request.currentCravings}\n`;
         }
         if (request.difficulty) {
             prompt += `- Difficulty level: ${request.difficulty}\n`;
@@ -327,7 +387,55 @@ Make sure the recipe is authentic, well-balanced, and matches the user's prefere
             if (!jsonMatch) {
                 throw new Error('No valid JSON found in AI response');
             }
-            const parsed = JSON.parse(jsonMatch[0]);
+            let jsonString = jsonMatch[0];
+            jsonString = jsonString.replace(/"amount":\s*([^",\}]+),/g, (match, amount) => {
+                const cleanAmount = amount.trim();
+                if (cleanAmount.includes('/') || cleanAmount.includes(' ')) {
+                    return `"amount": "${cleanAmount}",`;
+                }
+                return match;
+            });
+            jsonString = jsonString.replace(/,(\s*[}\]])/g, '$1');
+            const parsed = JSON.parse(jsonString);
+            if (parsed.aiPrompt && parsed.tags && parsed.tags.includes('ai-prompt')) {
+                const recipe = {
+                    title: "Your Personalized Recipe Prompt",
+                    description: "Copy this prompt and paste it into ChatGPT, Claude, or any AI assistant:",
+                    ingredients: [
+                        {
+                            name: "Copy the prompt below and paste it into your preferred AI assistant",
+                            amount: "",
+                            unit: "",
+                            category: "prompt"
+                        }
+                    ],
+                    instructions: [parsed.aiPrompt],
+                    cookingTime: 0,
+                    difficulty: 'EASY',
+                    cuisineType: 'AI-Generated',
+                    servings: 1,
+                    nutritionInfo: {
+                        calories: 0,
+                        protein: 0,
+                        carbs: 0,
+                        fat: 0
+                    },
+                    tags: ['ai-prompt', 'copy-paste', 'personalized'],
+                    aiPromptUsed: {
+                        prompt: parsed.aiPrompt,
+                        technicalPrompt: parsed.technicalPrompt,
+                        instructions: [
+                            "Copy the clean prompt above for easy use with any AI assistant",
+                            "Use the technical version below if you need JSON formatting",
+                            "Both will generate the same personalized recipe based on your preferences"
+                        ]
+                    }
+                };
+                if (request.inspiration) {
+                    recipe.inspirationSource = request.inspiration;
+                }
+                return recipe;
+            }
             if (!parsed.title || !parsed.ingredients || !parsed.instructions) {
                 throw new Error('Missing required recipe fields');
             }
@@ -336,13 +444,16 @@ Make sure the recipe is authentic, well-balanced, and matches the user's prefere
                 description: parsed.description || '',
                 ingredients: parsed.ingredients,
                 instructions: parsed.instructions,
-                cookingTime: parsed.cookingTime || request.cookingTime || 30,
+                cookingTime: parsed.cookingTime || 30,
                 difficulty: parsed.difficulty || request.difficulty || 'MEDIUM',
                 cuisineType: parsed.cuisineType || 'International',
-                servings: parsed.servings || request.servings || 2,
+                servings: parsed.servings || 2,
                 nutritionInfo: parsed.nutritionInfo,
                 tags: parsed.tags || [],
             };
+            if (parsed.aiPromptUsed) {
+                recipe.aiPromptUsed = parsed.aiPromptUsed;
+            }
             if (request.inspiration) {
                 recipe.inspirationSource = request.inspiration;
             }

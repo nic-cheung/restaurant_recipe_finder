@@ -6,60 +6,61 @@ import {
   PreferencesFormData,
   SKILL_LEVELS
 } from '../types/preferences';
-import TagSelector from '../components/TagSelector';
+
 import DynamicSuggestionInput from '../components/DynamicSuggestionInput';
 import '../index.css';
 
-// Define popular options for each category
+// Define popular options for each category - Updated based on 2024-2025 research data
 const POPULAR_DIETARY_RESTRICTIONS = [
-  'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Paleo'
+  'gluten-free', 'vegetarian', 'Keto', 'dairy-free', 'vegan'
 ];
 
 const POPULAR_ALLERGIES = [
-  'Nuts', 'Peanuts', 'Shellfish', 'Dairy', 'Eggs', 'Soy'
+  'nuts', 'shellfish', 'dairy', 'eggs', 'soy'
 ];
 
 const COMMON_DISLIKED_FOODS = [
-  'Mushrooms', 'Onions', 'Cilantro', 'Olives', 'Anchovies', 'Blue Cheese'
+  'cilantro', 'mushrooms', 'anchovies', 'blue cheese', 'liver'
 ];
 
 const POPULAR_INGREDIENTS = [
-  'Garlic', 'Ginger', 'Basil', 'Tomatoes', 'Avocado', 'Lemon'
+  'garlic', 'onions', 'tomatoes', 'olive oil', 'ginger'
 ];
 
 const POPULAR_CUISINES = [
-  'Italian', 'Mexican', 'Thai', 'Indian', 'Japanese', 'Mediterranean'
+  'Italian', 'Mexican', 'Chinese', 'Japanese', 'Indian'
 ];
 
 const POPULAR_DISHES = [
-  'Pizza', 'Pasta', 'Tacos', 'Sushi', 'Curry', 'Salad'
+  'pizza', 'pasta', 'tacos', 'sushi', 'curry'
 ];
 
-const POPULAR_NUTRITIONAL_GOALS = [
-  'Weight Loss', 'Muscle Gain', 'Heart Healthy', 'High Protein', 'Low Carb', 'High Fiber'
-];
+// Popular suggestions for form fields (commented out as they're not currently used)
+// const POPULAR_NUTRITIONAL_GOALS = [
+//   'Weight Loss', 'Muscle Gain', 'Heart Healthy', 'High Protein', 'Low Carb', 'High Fiber'
+// ];
 
-const POPULAR_MEAL_TYPES = [
-  'Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts', 'Brunch'
-];
+// const POPULAR_MEAL_TYPES = [
+//   'Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts', 'Brunch'
+// ];
 
-const POPULAR_EQUIPMENT = [
-  'Oven', 'Stovetop', 'Microwave', 'Air Fryer', 'Blender', 'Food Processor'
-];
+// const POPULAR_EQUIPMENT = [
+//   'Oven', 'Stovetop', 'Microwave', 'Air Fryer', 'Blender', 'Food Processor'
+// ];
 
 const POPULAR_CHEFS = [
-  'Thomas Keller', 'Julia Child', 'Anthony Bourdain', 'Daniel Boulud', 'Alice Waters', 'Wolfgang Puck'
+  'Joël Robuchon', 'Alain Ducasse', 'Thomas Keller', 'René Redzepi', 'Massimo Bottura'
 ];
 
 const POPULAR_RESTAURANTS = [
-  'The French Laundry', 'Eleven Madison Park', 'Le Bernardin', 'Alinea', 'Per Se', 'Daniel'
+  'Noma', 'Central', 'Osteria Francescana', 'Eleven Madison Park', 'The French Laundry'
 ];
 
 // Convert enum values to human-readable format
 const convertEnumToReadable = (enumValue: string): string => {
   return enumValue
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map(word => word.toLowerCase())
     .join(' ');
 };
 
@@ -286,6 +287,10 @@ const Preferences: React.FC = () => {
 
   const renderDietaryTab = () => (
     <div className="space-y-8">
+      <div className="mb-8">
+        <h2 className="flambé-heading text-2xl mb-2">dietary & health</h2>
+        <p className="flambé-body" style={{ color: 'var(--flambé-ash)' }}>essential dietary restrictions and health considerations</p>
+      </div>
       <div className="preference-section">
         <div className="section-header">
           <h3 className="section-title">Dietary Requirements</h3>
@@ -294,26 +299,28 @@ const Preferences: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
             <label className="preference-label">Dietary Restrictions</label>
-            <TagSelector
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.dietaryRestrictions}
               onSelectionChange={(items: string[]) => handleInputChange('dietaryRestrictions', items)}
               placeholder="Add dietary restrictions..."
-              popularOptions={options?.dietaryRestrictions || POPULAR_DIETARY_RESTRICTIONS}
-              allOptions={options?.dietaryRestrictions || POPULAR_DIETARY_RESTRICTIONS}
-              componentId="dietary-restrictions"
+              suggestionType="static"
+              staticSuggestions={options?.dietaryRestrictions || POPULAR_DIETARY_RESTRICTIONS}
+              popularSuggestions={POPULAR_DIETARY_RESTRICTIONS}
+              tagColor="blue"
             />
           </div>
           <div className="preference-card">
             <label className="preference-label">Allergies</label>
-            <TagSelector
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.allergies}
               onSelectionChange={(items: string[]) => handleInputChange('allergies', items)}
               placeholder="Add allergies..."
-              popularOptions={options?.allergies || POPULAR_ALLERGIES}
-              allOptions={options?.allergies || POPULAR_ALLERGIES}
-              componentId="allergies"
+              suggestionType="static"
+              staticSuggestions={options?.allergies || POPULAR_ALLERGIES}
+              popularSuggestions={POPULAR_ALLERGIES}
+              tagColor="blue"
             />
           </div>
         </div>
@@ -325,15 +332,15 @@ const Preferences: React.FC = () => {
           <p className="section-description">Your health and wellness objectives</p>
         </div>
         <div className="preference-card">
-          <TagSelector
-            label=""
-            selectedItems={formData.nutritionalGoals}
-            onSelectionChange={(items: string[]) => handleInputChange('nutritionalGoals', items)}
-            placeholder="Select nutritional goals..."
-            popularOptions={convertEnumArrayToReadable(options?.nutritionalGoals || [])}
-            allOptions={convertEnumArrayToReadable(options?.nutritionalGoals || [])}
-            componentId="nutritional-goals"
-          />
+                      <DynamicSuggestionInput
+              label=""
+              selectedItems={formData.nutritionalGoals}
+              onSelectionChange={(items: string[]) => handleInputChange('nutritionalGoals', items)}
+              placeholder="Select nutritional goals..."
+              suggestionType="static"
+              staticSuggestions={convertEnumArrayToReadable(options?.nutritionalGoals || [])}
+              tagColor="blue"
+            />
         </div>
       </div>
     </div>
@@ -341,6 +348,10 @@ const Preferences: React.FC = () => {
 
   const renderTasteTab = () => (
     <div className="space-y-8">
+      <div className="mb-8">
+        <h2 className="flambé-heading text-2xl mb-2">taste & cuisine</h2>
+        <p className="flambé-body" style={{ color: 'var(--flambé-ash)' }}>your taste preferences and culinary inspirations</p>
+      </div>
       <div className="preference-section">
         <div className="section-header">
           <h3 className="section-title">Flavor Profile</h3>
@@ -349,26 +360,28 @@ const Preferences: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
             <label className="preference-label">Favorite Ingredients</label>
-            <TagSelector
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.favoriteIngredients}
               onSelectionChange={(items: string[]) => handleInputChange('favoriteIngredients', items)}
               placeholder="Add favorite ingredients..."
-              popularOptions={options?.ingredients || POPULAR_INGREDIENTS}
-              allOptions={options?.ingredients || POPULAR_INGREDIENTS}
-              componentId="favorite-ingredients"
+              suggestionType="ingredients"
+              staticSuggestions={options?.ingredients || POPULAR_INGREDIENTS}
+              popularSuggestions={POPULAR_INGREDIENTS}
+              tagColor="blue"
             />
           </div>
           <div className="preference-card">
             <label className="preference-label">Disliked Foods</label>
-            <TagSelector
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.dislikedFoods}
               onSelectionChange={(items: string[]) => handleInputChange('dislikedFoods', items)}
               placeholder="Add foods you dislike..."
-              popularOptions={COMMON_DISLIKED_FOODS}
-              allOptions={options?.dislikedFoods || COMMON_DISLIKED_FOODS}
-              componentId="disliked-foods"
+              suggestionType="ingredients"
+              staticSuggestions={options?.dislikedFoods || COMMON_DISLIKED_FOODS}
+              popularSuggestions={COMMON_DISLIKED_FOODS}
+              tagColor="blue"
             />
           </div>
         </div>
@@ -382,26 +395,28 @@ const Preferences: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
             <label className="preference-label">Favorite Cuisines</label>
-            <TagSelector
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.favoriteCuisines}
               onSelectionChange={(items: string[]) => handleInputChange('favoriteCuisines', items)}
-              placeholder="Add favorite cuisines..."
-              popularOptions={options?.cuisines || POPULAR_CUISINES}
-              allOptions={options?.cuisines || POPULAR_CUISINES}
-              componentId="favorite-cuisines"
+              placeholder="Search for cuisines..."
+              suggestionType="static"
+              staticSuggestions={options?.cuisines || POPULAR_CUISINES}
+              popularSuggestions={POPULAR_CUISINES}
+              tagColor="blue"
             />
           </div>
           <div className="preference-card">
             <label className="preference-label">Favorite Dishes</label>
-            <TagSelector
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.favoriteDishes}
               onSelectionChange={(items: string[]) => handleInputChange('favoriteDishes', items)}
-              placeholder="Add favorite dishes..."
-              popularOptions={options?.dishes || POPULAR_DISHES}
-              allOptions={options?.dishes || POPULAR_DISHES}
-              componentId="favorite-dishes"
+              placeholder="Search for dishes..."
+              suggestionType="dishes"
+              staticSuggestions={options?.dishes || POPULAR_DISHES}
+              popularSuggestions={POPULAR_DISHES}
+              tagColor="blue"
             />
           </div>
         </div>
@@ -438,6 +453,10 @@ const Preferences: React.FC = () => {
 
   const renderCookingTab = () => (
     <div className="space-y-8">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Cooking & Kitchen</h2>
+        <p className="text-gray-600">Your cooking experience and kitchen setup</p>
+      </div>
       <div className="preference-section">
         <div className="section-header">
           <h3 className="section-title">Cooking Experience</h3>
@@ -493,14 +512,14 @@ const Preferences: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
             <label className="preference-label">Available Equipment</label>
-            <TagSelector
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.availableEquipment}
               onSelectionChange={(items: string[]) => handleInputChange('availableEquipment', items)}
               placeholder="Select available equipment..."
-              popularOptions={convertEnumArrayToReadable(options?.cookingEquipment || [])}
-              allOptions={convertEnumArrayToReadable(options?.cookingEquipment || [])}
-              componentId="available-equipment"
+              suggestionType="static"
+              staticSuggestions={convertEnumArrayToReadable(options?.cookingEquipment || [])}
+              tagColor="blue"
             />
           </div>
           <div className="preference-card">
@@ -525,6 +544,10 @@ const Preferences: React.FC = () => {
 
   const renderPreferencesTab = () => (
     <div className="space-y-8">
+      <div className="mb-8">
+        <h2 className="flambé-heading text-2xl mb-2">lifestyle & budget</h2>
+        <p className="flambé-body" style={{ color: 'var(--flambé-ash)' }}>budget preferences and meal planning style</p>
+      </div>
       <div className="preference-section">
         <div className="section-header">
           <h3 className="section-title">Lifestyle Preferences</h3>
@@ -547,15 +570,16 @@ const Preferences: React.FC = () => {
             </select>
           </div>
           <div className="preference-card">
-            <label className="preference-label">Meal Types</label>
-            <TagSelector
+            <label className="preference-label">Preferred Meal Categories</label>
+            <DynamicSuggestionInput
               label=""
               selectedItems={formData.preferredMealTypes}
               onSelectionChange={(items: string[]) => handleInputChange('preferredMealTypes', items)}
-              placeholder="Select meal types..."
-              popularOptions={convertEnumArrayToReadable(options?.mealTypes || [])}
-              allOptions={convertEnumArrayToReadable(options?.mealTypes || [])}
-              componentId="preferred-meal-types"
+              placeholder="Select meal categories..."
+              suggestionType="static"
+              staticSuggestions={convertEnumArrayToReadable(options?.mealTypes || [])}
+              popularSuggestions={convertEnumArrayToReadable(options?.popularMealTypes || [])}
+              tagColor="blue"
             />
           </div>
         </div>
@@ -565,6 +589,10 @@ const Preferences: React.FC = () => {
 
   const renderSocialTab = () => (
     <div className="space-y-8">
+      <div className="mb-8">
+        <h2 className="flambé-heading text-2xl mb-2">culinary inspirations</h2>
+        <p className="flambé-body" style={{ color: 'var(--flambé-ash)' }}>chefs and restaurants that inspire your cooking</p>
+      </div>
       <div className="preference-section">
         <div className="section-header">
           <h3 className="section-title">Culinary Inspirations</h3>
@@ -579,7 +607,9 @@ const Preferences: React.FC = () => {
               onSelectionChange={(items: string[]) => handleInputChange('favoriteChefs', items)}
               placeholder="Search for chefs..."
               suggestionType="chefs"
-              staticSuggestions={POPULAR_CHEFS}
+              staticSuggestions={options?.chefs || POPULAR_CHEFS}
+              popularSuggestions={POPULAR_CHEFS}
+              tagColor="blue"
             />
           </div>
           <div className="preference-card">
@@ -591,6 +621,8 @@ const Preferences: React.FC = () => {
               placeholder="Search for restaurants..."
               suggestionType="restaurants"
               staticSuggestions={POPULAR_RESTAURANTS}
+              popularSuggestions={POPULAR_RESTAURANTS}
+              tagColor="blue"
             />
           </div>
         </div>
@@ -619,9 +651,9 @@ const Preferences: React.FC = () => {
     <div className="preferences-container">
       <div className="preferences-header">
         <div className="header-content">
-          <h1 className="page-title">Culinary Preferences</h1>
+          <h1 className="page-title">preferences</h1>
           <p className="page-subtitle">
-            Personalize your cooking experience with detailed preferences
+            tailor your culinary journey to your unique taste
           </p>
         </div>
       </div>
@@ -651,14 +683,14 @@ const Preferences: React.FC = () => {
               onClick={() => navigate('/dashboard')}
               className="btn-secondary"
             >
-              Cancel
+              cancel
             </button>
             <button
               type="submit"
               disabled={loading}
               className="btn-primary"
             >
-              {loading ? 'Saving...' : 'Save Preferences'}
+              {loading ? 'saving...' : 'save preferences'}
             </button>
           </div>
         </form>

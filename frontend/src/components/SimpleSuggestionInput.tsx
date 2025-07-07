@@ -12,7 +12,7 @@ interface SimpleSuggestionInputProps {
 const SimpleSuggestionInput: React.FC<SimpleSuggestionInputProps> = ({
   value,
   onChange,
-  placeholder = "Type to search...",
+  placeholder = "type to search...",
   suggestions = [],
   getSuggestions,
   className = ""
@@ -89,7 +89,7 @@ const SimpleSuggestionInput: React.FC<SimpleSuggestionInputProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (dynamicSuggestions.length > 0) {
+      if (dynamicSuggestions.length > 0 && dynamicSuggestions[0]) {
         selectSuggestion(dynamicSuggestions[0]);
       }
     } else if (e.key === 'Escape') {
@@ -139,25 +139,38 @@ const SimpleSuggestionInput: React.FC<SimpleSuggestionInputProps> = ({
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         placeholder={placeholder}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className}`}
+        className={`input-field ${className}`}
       />
       
       {/* Loading indicator */}
       {isLoading && (
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: 'var(--flambé-sage)' }}></div>
         </div>
       )}
 
       {/* Suggestions dropdown */}
       {isDropdownOpen && filteredSuggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 border rounded-md shadow-lg max-h-60 overflow-y-auto" style={{ backgroundColor: 'var(--flambé-cream)', borderColor: 'var(--flambé-ash)' }}>
           {filteredSuggestions.map((suggestion, index) => (
             <button
               key={index}
               type="button"
               onClick={() => selectSuggestion(suggestion)}
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none first:rounded-t-md last:rounded-b-md"
+              className="w-full text-left px-3 py-2 focus:outline-none first:rounded-t-md last:rounded-b-md transition-colors flambé-body"
+              style={{ color: 'var(--flambé-charcoal)' }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.backgroundColor = 'transparent';
+              }}
+              onFocus={(e) => {
+                (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
+              }}
+              onBlur={(e) => {
+                (e.target as HTMLElement).style.backgroundColor = 'transparent';
+              }}
             >
               {suggestion}
             </button>
