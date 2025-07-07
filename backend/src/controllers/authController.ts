@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { generateToken } from '../utils/jwt';
-import { createUser, authenticateUser, getUserById, isEmailAvailable } from '../services/userService';
-import { registerSchema, loginSchema, RegisterInput, LoginInput } from '../utils/validation';
+import { createUser, authenticateUser, getUserById, isEmailAvailable, updateUserPassword } from '../services/userService';
+import { registerSchema, loginSchema, RegisterInput, LoginInput, updatePasswordSchema, UpdatePasswordInput } from '../utils/validation';
 import { AuthenticatedRequest } from '../utils/jwt';
 
 /**
@@ -207,6 +207,68 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response): 
     });
   } catch (error) {
     console.error('Get current user error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+    });
+  }
+};
+
+/**
+ * Update user password
+ */
+export const updatePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: 'User not authenticated',
+      });
+      return;
+    }
+
+    // Validate input
+    const validatedData: UpdatePasswordInput = updatePasswordSchema.parse(req.body);
+
+    // Update password
+    await updateUserPassword(
+      req.user.userId,
+      validatedData.currentPassword,
+      validatedData.newPassword
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully',
+    });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(400).json({
+        success: false,
+        error: 'Validation error',
+        details: error.errors,
+      });
+      return;
+    }
+
+    if (error instanceof Error) {
+      if (error.message === 'Current password is incorrect') {
+        res.status(400).json({
+          success: false,
+          error: error.message,
+        });
+        return;
+      }
+      if (error.message === 'User not found') {
+        res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+        return;
+      }
+    }
+
+    console.error('Update password error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error',

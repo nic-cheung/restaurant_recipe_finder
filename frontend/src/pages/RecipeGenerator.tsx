@@ -477,7 +477,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
     if (!value) return '';
     return value
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map(word => word.toLowerCase())
       .join(' ');
   };
 
@@ -819,7 +819,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
               {userPreferences && !isLoadingPreferences && (
                 <div className="flex items-center text-sm text-green-600">
                   <span className="mr-2">✓</span>
-                  Preferences applied
+                  preferences applied
                 </div>
               )}
             </div>
@@ -836,13 +836,13 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                     onChange={(e) => setContextualData(prev => ({ ...prev, styleMood: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">Any style</option>
-                    <option value="comfort food">Comfort Food</option>
-                    <option value="fresh and light">Fresh & Light</option>
-                    <option value="rich and indulgent">Rich & Indulgent</option>
-                    <option value="adventurous">Adventurous</option>
-                    <option value="date night">Date Night</option>
-                    <option value="family gathering">Family Gathering</option>
+                    <option value="">any style</option>
+                    <option value="comfort food">comfort food</option>
+                    <option value="fresh and light">fresh & light</option>
+                    <option value="rich and indulgent">rich & indulgent</option>
+                    <option value="adventurous">adventurous</option>
+                    <option value="date night">date night</option>
+                    <option value="family gathering">family gathering</option>
                   </select>
                 </div>
                 
@@ -855,10 +855,10 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                     onChange={(e) => setContextualData(prev => ({ ...prev, timeAvailable: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="">No time preference</option>
-                    <option value="quick">Quick (15-30 min)</option>
-                    <option value="normal">Normal (30-60 min)</option>
-                    <option value="slow cooking">Slow Cooking (60+ min)</option>
+                    <option value="">no time preference</option>
+                    <option value="quick">quick (15-30 min)</option>
+                    <option value="normal">normal (30-60 min)</option>
+                    <option value="slow cooking">slow cooking (60+ min)</option>
                   </select>
                 </div>
               </div>
@@ -902,7 +902,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   onChange={(e) => handleInputChange('additionalRequests', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Any specific requests for this recipe..."
+                  placeholder="any specific requests for this recipe..."
                 />
               </div>
 
@@ -912,9 +912,9 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                   <button
                     onClick={handleGeneratePrompt}
                     disabled={state.isGeneratingPrompt || !userPreferences}
-                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {state.isGeneratingPrompt ? 'Generating...' : 'Generate AI Prompt'}
+                    {state.isGeneratingPrompt ? 'generating...' : 'generate AI prompt'}
                   </button>
                 </div>
               ) : (
@@ -976,7 +976,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                       <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
-                      use external ai
+                      use external AI
                     </button>
                     <button
                       onClick={handleUseBuiltInAI}
@@ -988,7 +988,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                           <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                           </svg>
-                          use built-in ai
+                          use built-in AI
                         </>
                       )}
                     </button>
@@ -1017,15 +1017,15 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                         <button
                           onClick={handleParseManualResponse}
                           disabled={state.isParsingManualResponse || !state.manualResponse.trim()}
-                          className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {state.isParsingManualResponse ? 'Parsing...' : 'Parse Recipe'}
+                          {state.isParsingManualResponse ? 'parsing...' : 'parse recipe'}
                         </button>
                         <button
                           onClick={() => setState(prev => ({ ...prev, showManualInput: false, manualResponse: '' }))}
-                          className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 font-medium"
+                          className="btn-secondary"
                         >
-                          Cancel
+                          cancel
                         </button>
                       </div>
                     </div>
@@ -1054,9 +1054,9 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
               {/* Reset Button */}
               <button
                 onClick={resetForm}
-                className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 font-medium"
+                className="w-full btn-secondary"
               >
-                Reset Form
+                reset form
               </button>
             </div>
 
@@ -1064,12 +1064,12 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
             {userPreferences && (
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-medium text-gray-900">Your Preferences Applied</h3>
+                  <h3 className="text-lg font-medium text-gray-900">your preferences applied</h3>
                   <button
                     onClick={() => navigate('/preferences')}
-                    className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-md hover:bg-blue-200 font-medium"
+                    className="text-sm btn-secondary"
                   >
-                    Modify
+                    modify
                   </button>
                 </div>
                 
@@ -1319,7 +1319,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                 </svg>
                 <h3 className="mt-2 text-sm font-medium text-gray-900">no recipe generated yet</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Fill out the form and click "Generate Recipe" to create your personalized recipe.
+                  Fill out the form and click "generate AI prompt" to create your personalized recipe.
                 </p>
               </div>
             )}

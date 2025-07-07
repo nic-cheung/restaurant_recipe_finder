@@ -150,4 +150,39 @@ export const updateUser = async (
   // Return user without password
   const { passwordHash: _, ...userWithoutPassword } = user;
   return userWithoutPassword;
+};
+
+/**
+ * Update user password
+ */
+export const updateUserPassword = async (
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<void> => {
+  // Find user by ID
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Verify current password
+  const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+  
+  if (!isCurrentPasswordValid) {
+    throw new Error('Current password is incorrect');
+  }
+
+  // Hash new password
+  const saltRounds = 12;
+  const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+  // Update password in database
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: newPasswordHash },
+  });
 }; 

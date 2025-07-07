@@ -25,45 +25,55 @@ const convertEnumArrayToReadable = (enumArray: string[]): string[] => {
 
 // Popular options for each category - Updated based on 2024-2025 research data
 const POPULAR_DIETARY_RESTRICTIONS = [
-  'gluten-free', 'vegetarian', 'Keto', 'dairy-free', 'vegan'
+  'gluten-free', 'vegetarian', 'Keto', 'dairy-free', 'vegan',
+  'Paleo', 'low-carb', 'pescatarian', 'Kosher', 'Halal'
 ];
 
 const POPULAR_ALLERGIES = [
-  'nuts', 'shellfish', 'dairy', 'eggs', 'soy'
+  'nuts', 'shellfish', 'dairy', 'eggs', 'soy',
+  'gluten', 'sesame', 'fish', 'sulfites', 'wheat'
 ];
 
 const POPULAR_CUISINES = [
-  'Italian', 'Mexican', 'Chinese', 'Japanese', 'Indian'
+  'Italian', 'Mexican', 'Chinese', 'Japanese', 'Indian',
+  'Thai', 'French', 'Greek', 'Korean', 'Mediterranean'
 ];
 
 const COMMON_INGREDIENTS = [
-  'garlic', 'onions', 'tomatoes', 'olive oil', 'ginger'
+  'garlic', 'onions', 'tomatoes', 'olive oil', 'ginger',
+  'basil', 'lemon', 'parsley', 'bell peppers', 'mushrooms'
 ];
 
 const COMMON_DISLIKED_FOODS = [
-  'cilantro', 'mushrooms', 'anchovies', 'blue cheese', 'liver'
+  'cilantro', 'mushrooms', 'anchovies', 'blue cheese', 'liver',
+  'olives', 'brussels sprouts', 'beets', 'organ meats', 'raw fish'
 ];
 
 const POPULAR_DISHES = [
-  'pizza', 'pasta', 'tacos', 'sushi', 'curry'
+  'pizza', 'pasta', 'tacos', 'sushi', 'curry',
+  'stir-fry', 'risotto', 'soup', 'salad', 'grilled chicken'
 ];
 
 const POPULAR_CHEFS = [
-  'Joël Robuchon', 'Alain Ducasse', 'Thomas Keller', 'René Redzepi', 'Massimo Bottura'
+  'Joël Robuchon', 'Alain Ducasse', 'Thomas Keller', 'René Redzepi', 'Massimo Bottura',
+  'Gordon Ramsay', 'Julia Child', 'Anthony Bourdain', 'Emeril Lagasse', 'Wolfgang Puck'
 ];
 
 const POPULAR_RESTAURANTS = [
-  'Noma', 'Central', 'Osteria Francescana', 'Eleven Madison Park', 'The French Laundry'
+  'Noma', 'Central', 'Osteria Francescana', 'Eleven Madison Park', 'The French Laundry',
+  'Le Bernardin', 'Alinea', 'Per Se', 'Daniel', 'Momofuku'
 ];
 
 // Popular nutritional goals based on 2024-2025 health trends
 const POPULAR_NUTRITIONAL_GOALS = [
-  'weight loss', 'muscle gain', 'heart healthy', 'high protein', 'anti inflammatory'
+  'weight loss', 'muscle gain', 'heart healthy', 'high protein', 'anti inflammatory',
+  'gut health', 'energy boost', 'immune support', 'brain health', 'metabolism boost'
 ];
 
 // Popular cooking equipment for home kitchens
 const POPULAR_COOKING_EQUIPMENT = [
-  'oven', 'stovetop', 'air fryer', 'blender', 'instant pot'
+  'oven', 'stovetop', 'air fryer', 'blender', 'instant pot',
+  'slow cooker', 'food processor', 'grill', 'stand mixer', 'rice cooker'
 ];
 
 interface AccountFormData {
@@ -220,9 +230,8 @@ const MultiStepRegistration: React.FC = () => {
   };
 
   const handleStepClick = async (stepId: number) => {
-    // Don't allow navigation to a step beyond the current progress
-    // unless the user has already completed step 1 (account creation)
-    if (stepId > currentStep && currentStep === 1) {
+    // Step 1 (account setup) must be completed before accessing other steps
+    if (stepId > 1 && currentStep === 1) {
       // If trying to skip ahead from step 1, validate account first
       if (!validateAccountStep()) {
         return;
@@ -246,8 +255,8 @@ const MultiStepRegistration: React.FC = () => {
       setIsLoading(false);
     }
     
-    // Allow navigation to any step that's been reached or is the next step
-    if (stepId <= Math.max(currentStep + 1, 1)) {
+    // Once account setup is complete, allow free navigation between all steps
+    if (currentStep >= 1) {
       setCurrentStep(stepId);
     }
   };
@@ -380,11 +389,46 @@ const MultiStepRegistration: React.FC = () => {
   };
 
   const steps = [
-    { id: 1, title: 'account setup', description: 'create your account' },
-    { id: 2, title: 'dietary & health', description: 'dietary restrictions & health goals' },
-    { id: 3, title: 'taste & cuisine', description: 'flavor preferences & cuisines' },
-    { id: 4, title: 'cooking style', description: 'kitchen setup & cooking preferences' },
-    { id: 5, title: 'lifestyle & inspirations', description: 'budget, meal categories & inspirations' },
+    { 
+      id: 1, 
+      title: 'account setup', 
+      description: 'Create your account',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      )
+    },
+    { 
+      id: 2, 
+      title: 'dietary & health', 
+      description: 'Dietary restrictions & health goals',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      )
+    },
+    { 
+      id: 3, 
+      title: 'cooking preferences', 
+      description: 'Kitchen setup & cooking style',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
+        </svg>
+      )
+    },
+    { 
+      id: 4, 
+      title: 'culinary inspirations', 
+      description: 'Flavors, cuisines & inspirations',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        </svg>
+      )
+    }
   ];
 
   const renderStepIndicator = () => (
@@ -432,7 +476,8 @@ const MultiStepRegistration: React.FC = () => {
         {steps.map((step) => {
           const isCompleted = currentStep > step.id;
           const isCurrent = currentStep === step.id;
-          const isAccessible = step.id <= Math.max(currentStep + 1, 1);
+          // Allow access to step 1 always, and all other steps once step 1 is passed
+          const isAccessible = step.id === 1 || currentStep > 1;
           
           return (
             <div key={step.id} className="flex flex-col items-center">
@@ -466,7 +511,7 @@ const MultiStepRegistration: React.FC = () => {
                     (e.currentTarget as HTMLElement).style.boxShadow = 'none';
                   }
                 }}
-                title={isAccessible ? `Go to ${step.title}` : `Complete previous steps to access ${step.title}`}
+                title={isAccessible ? `Go to ${step.title}` : `Complete account setup to access ${step.title}`}
               >
                 {isCompleted ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -563,13 +608,25 @@ const MultiStepRegistration: React.FC = () => {
         <div className="mt-4">
           <button
             type="button"
-            onClick={() => {
-              setAccountData({
-                name: 'Test User',
-                email: 'test@test.dev',
-                password: 'Test123!',
-                confirmPassword: 'Test123!'
-              });
+            onClick={async () => {
+              try {
+                const credentials = await apiService.getTestCredentials();
+                setAccountData({
+                  name: credentials.name,
+                  email: credentials.email,
+                  password: credentials.password,
+                  confirmPassword: credentials.password
+                });
+              } catch (error) {
+                console.error('Failed to get test credentials:', error);
+                // Fallback to hardcoded credentials if API fails
+                setAccountData({
+                  name: 'Test User',
+                  email: 'test@test.dev',
+                  password: 'Test123!',
+                  confirmPassword: 'Test123!'
+                });
+              }
             }}
             className="w-full flex justify-center py-2 px-4 border border-dashed text-sm font-medium rounded-md transition-colors"
             style={{ 
@@ -587,10 +644,10 @@ const MultiStepRegistration: React.FC = () => {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
             </svg>
-            fill test data (dev only)
+            generate test credentials (dev only)
           </button>
           <p className="mt-1 text-xs text-center flambé-body" style={{ color: 'var(--flambé-smoke)' }}>
-            auto-fills form with test credentials for development
+            generates unique test credentials from backend
           </p>
         </div>
       )}
@@ -753,7 +810,192 @@ const MultiStepRegistration: React.FC = () => {
   const renderStep3 = () => (
     <div className="space-y-8">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold flambé-heading mb-2">taste & cuisine</h2>
+        <h2 className="text-2xl font-bold flambé-heading mb-2">cooking preferences</h2>
+        <p className="flambé-body">help us understand your cooking preferences and setup</p>
+      </div>
+      
+      <div className="space-y-6">
+        <div>
+          <label className="preference-label">
+            cooking skill level
+          </label>
+          <select
+            value={preferencesData.cookingSkillLevel}
+            onChange={(e) => handlePreferencesInputChange('cookingSkillLevel', e.target.value)}
+            className="input-field"
+          >
+            <option value="">select skill level</option>
+            {SKILL_LEVELS.map((skill) => (
+              <option key={skill.value} value={skill.value}>
+                {skill.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="preference-label">
+            preferred cooking time (minutes)
+          </label>
+          <input
+            type="number"
+            value={preferencesData.preferredCookingTime}
+            onChange={(e) => handlePreferencesInputChange('preferredCookingTime', e.target.value)}
+            className="input-field"
+            placeholder="e.g., 30"
+            min="5"
+            max="240"
+          />
+        </div>
+        
+        <div>
+          <label className="preference-label">
+            typical serving size
+          </label>
+          <input
+            type="number"
+            value={preferencesData.servingSize}
+            onChange={(e) => handlePreferencesInputChange('servingSize', e.target.value)}
+            className="input-field"
+            placeholder="e.g., 4"
+            min="1"
+            max="12"
+          />
+        </div>
+        
+        <div>
+          <label className="preference-label">
+            meal complexity preference
+          </label>
+          <select
+            value={preferencesData.mealComplexity}
+            onChange={(e) => handlePreferencesInputChange('mealComplexity', e.target.value)}
+            className="input-field"
+          >
+            <option value="">select complexity</option>
+            {(options?.mealComplexities || ['SIMPLE', 'MODERATE', 'COMPLEX']).map((complexity: string) => (
+              <option key={complexity} value={complexity}>
+                {convertEnumToReadable(complexity)}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="preference-label">
+            available equipment
+          </label>
+          <DynamicSuggestionInput
+            label=""
+            selectedItems={preferencesData.availableEquipment}
+            onSelectionChange={(items: string[]) => handleTagSelectionChange('availableEquipment', items)}
+            placeholder="select your kitchen equipment..."
+            suggestionType="static"
+            staticSuggestions={convertEnumArrayToReadable(options?.equipment || [])}
+            popularSuggestions={POPULAR_COOKING_EQUIPMENT}
+            tagColor="orange"
+          />
+        </div>
+        
+        <div>
+          <label className="preference-label">
+            budget preference
+          </label>
+          <select
+            value={preferencesData.budgetPreference}
+            onChange={(e) => handlePreferencesInputChange('budgetPreference', e.target.value)}
+            className="input-field"
+          >
+            <option value="">select budget preference</option>
+            {(options?.budgetPreferences || ['BUDGET', 'MODERATE', 'PREMIUM']).map((budget: string) => (
+              <option key={budget} value={budget}>
+                {convertEnumToReadable(budget)}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="preference-label">
+            preferred meal categories
+          </label>
+          <DynamicSuggestionInput
+            label=""
+            selectedItems={preferencesData.preferredMealTypes}
+            onSelectionChange={(items: string[]) => handleTagSelectionChange('preferredMealTypes', items)}
+            placeholder="select meal categories you enjoy..."
+            suggestionType="static"
+            staticSuggestions={convertEnumArrayToReadable(options?.mealTypes || [])}
+            popularSuggestions={convertEnumArrayToReadable(options?.popularMealTypes || [])}
+            tagColor="orange"
+          />
+        </div>
+      </div>
+      
+      {/* Development-only test data button for step 3 */}
+      {window.location.hostname === 'localhost' && (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => {
+              setPreferencesData(prev => ({
+                ...prev,
+                cookingSkillLevel: 'INTERMEDIATE',
+                preferredCookingTime: '30',
+                servingSize: '4',
+                mealComplexity: 'MODERATE',
+                availableEquipment: ['oven', 'stovetop', 'air fryer', 'blender', 'instant pot'],
+                budgetPreference: 'MODERATE',
+                preferredMealTypes: ['breakfast', 'dinner', 'snacks']
+              }));
+            }}
+            className="w-full flex justify-center py-2 px-4 border border-dashed text-sm font-medium rounded-md transition-colors"
+            style={{ 
+              borderColor: 'var(--flambé-ember)', 
+              color: 'var(--flambé-rust)', 
+              backgroundColor: 'var(--flambé-fog)' 
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-fog)';
+            }}
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
+            </svg>
+            fill test cooking preferences data (dev only)
+          </button>
+          <p className="mt-1 text-xs text-center flambé-body" style={{ color: 'var(--flambé-smoke)' }}>
+            auto-fills cooking preferences, budget, and meal categories
+          </p>
+        </div>
+      )}
+      
+      <div className="flex justify-between">
+        <button
+          type="button"
+          onClick={handlePreviousStep}
+          className="btn-secondary"
+        >
+          previous
+        </button>
+        <button
+          type="button"
+          onClick={handleNextStep}
+          className="btn-primary"
+        >
+          next step
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderStep4 = () => (
+    <div className="space-y-8">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold flambé-heading mb-2">culinary inspirations</h2>
         <p className="flambé-body">tell us about your favorite flavors and cuisines</p>
       </div>
       
@@ -821,259 +1063,6 @@ const MultiStepRegistration: React.FC = () => {
             tagColor="red"
           />
         </div>
-      </div>
-      
-      {/* Development-only test data button for step 3 */}
-      {window.location.hostname === 'localhost' && (
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={() => {
-              setPreferencesData(prev => ({
-                ...prev,
-                favoriteCuisines: ['Italian', 'Mexican', 'Japanese'],
-                favoriteDishes: ['pizza', 'pasta', 'tacos', 'sushi'],
-                favoriteIngredients: ['garlic', 'basil', 'tomatoes', 'olive oil'],
-                dislikedFoods: ['cilantro', 'mushrooms', 'blue cheese']
-              }));
-            }}
-            className="w-full flex justify-center py-2 px-4 border border-dashed text-sm font-medium rounded-md transition-colors"
-            style={{ 
-              borderColor: 'var(--flambé-ember)', 
-              color: 'var(--flambé-rust)', 
-              backgroundColor: 'var(--flambé-fog)' 
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-fog)';
-            }}
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
-            </svg>
-            fill test taste & cuisine data (dev only)
-          </button>
-          <p className="mt-1 text-xs text-center flambé-body" style={{ color: 'var(--flambé-smoke)' }}>
-            auto-fills cuisines, dishes, ingredients, and disliked foods
-          </p>
-        </div>
-      )}
-      
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={handlePreviousStep}
-          className="btn-secondary"
-        >
-          previous
-        </button>
-        <button
-          type="button"
-          onClick={handleNextStep}
-          className="btn-primary"
-        >
-          next step
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div className="space-y-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold flambé-heading mb-2">cooking style</h2>
-        <p className="flambé-body">help us understand your cooking preferences and setup</p>
-      </div>
-      
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="preference-label">
-              cooking skill level
-            </label>
-            <select
-              value={preferencesData.cookingSkillLevel}
-              onChange={(e) => handlePreferencesInputChange('cookingSkillLevel', e.target.value)}
-              className="input-field"
-            >
-              <option value="">select skill level</option>
-              {SKILL_LEVELS.map((skill) => (
-                <option key={skill.value} value={skill.value}>
-                  {skill.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label className="preference-label">
-              preferred cooking time (minutes)
-            </label>
-            <input
-              type="number"
-              value={preferencesData.preferredCookingTime}
-              onChange={(e) => handlePreferencesInputChange('preferredCookingTime', e.target.value)}
-              className="input-field"
-              placeholder="e.g., 30"
-              min="1"
-              max="300"
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="preference-label">
-              typical serving size
-            </label>
-            <input
-              type="number"
-              value={preferencesData.servingSize}
-              onChange={(e) => handlePreferencesInputChange('servingSize', e.target.value)}
-              className="input-field"
-              placeholder="number of people"
-              min="1"
-              max="20"
-            />
-          </div>
-          
-          <div>
-            <label className="preference-label">
-              meal complexity preference
-            </label>
-            <select
-              value={preferencesData.mealComplexity}
-              onChange={(e) => handlePreferencesInputChange('mealComplexity', e.target.value)}
-              className="input-field"
-            >
-              <option value="">select complexity</option>
-              {(options?.mealComplexities || ['SIMPLE', 'MODERATE', 'COMPLEX']).map((complexity: string) => (
-                <option key={complexity} value={complexity}>
-                  {convertEnumToReadable(complexity)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        <div>
-          <label className="preference-label">
-            available kitchen equipment
-          </label>
-          <DynamicSuggestionInput
-            label=""
-            selectedItems={preferencesData.availableEquipment}
-            onSelectionChange={(items: string[]) => handleTagSelectionChange('availableEquipment', items)}
-            placeholder="select your kitchen equipment..."
-            suggestionType="static"
-            staticSuggestions={convertEnumArrayToReadable(options?.cookingEquipment || [])}
-            popularSuggestions={POPULAR_COOKING_EQUIPMENT}
-            tagColor="orange"
-          />
-        </div>
-      </div>
-      
-      {/* Development-only test data button for step 4 */}
-      {window.location.hostname === 'localhost' && (
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={() => {
-              setPreferencesData(prev => ({
-                ...prev,
-                cookingSkillLevel: 'INTERMEDIATE',
-                preferredCookingTime: '30',
-                servingSize: '4',
-                mealComplexity: 'MODERATE',
-                availableEquipment: ['oven', 'stovetop', 'air fryer', 'blender', 'instant pot']
-              }));
-            }}
-            className="w-full flex justify-center py-2 px-4 border border-dashed text-sm font-medium rounded-md transition-colors"
-            style={{ 
-              borderColor: 'var(--flambé-ember)', 
-              color: 'var(--flambé-rust)', 
-              backgroundColor: 'var(--flambé-fog)' 
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-fog)';
-            }}
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
-            </svg>
-            fill test cooking style data (dev only)
-          </button>
-          <p className="mt-1 text-xs text-center flambé-body" style={{ color: 'var(--flambé-smoke)' }}>
-            auto-fills skill level, cooking time, serving size, complexity, and equipment
-          </p>
-        </div>
-      )}
-      
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={handlePreviousStep}
-          className="btn-secondary"
-        >
-          previous
-        </button>
-        <button
-          type="button"
-          onClick={handleNextStep}
-          className="btn-primary"
-        >
-          next step
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderStep5 = () => (
-    <div className="space-y-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold flambé-heading mb-2">lifestyle & inspirations</h2>
-        <p className="flambé-body">final touches: budget preferences and culinary inspirations</p>
-      </div>
-      
-      <div className="space-y-6">
-        <div>
-          <label className="preference-label">
-            budget preference
-          </label>
-          <select
-            value={preferencesData.budgetPreference}
-            onChange={(e) => handlePreferencesInputChange('budgetPreference', e.target.value)}
-            className="input-field"
-          >
-            <option value="">select budget preference</option>
-            {(options?.budgetPreferences || []).map((budget: string) => (
-              <option key={budget} value={convertEnumToReadable(budget)}>
-                {convertEnumToReadable(budget)}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div>
-          <label className="preference-label">
-            preferred meal categories
-          </label>
-          <DynamicSuggestionInput
-            label=""
-            selectedItems={preferencesData.preferredMealTypes}
-            onSelectionChange={(items: string[]) => handleTagSelectionChange('preferredMealTypes', items)}
-            placeholder="select meal categories you enjoy..."
-            suggestionType="static"
-            staticSuggestions={convertEnumArrayToReadable(options?.mealTypes || [])}
-            popularSuggestions={convertEnumArrayToReadable(options?.popularMealTypes || [])}
-            tagColor="orange"
-          />
-        </div>
         
         <div>
           <label className="preference-label">
@@ -1108,7 +1097,7 @@ const MultiStepRegistration: React.FC = () => {
         </div>
       </div>
       
-      {/* Development-only test data button for step 5 */}
+      {/* Development-only test data button for step 4 */}
       {window.location.hostname === 'localhost' && (
         <div className="mt-4">
           <button
@@ -1116,8 +1105,10 @@ const MultiStepRegistration: React.FC = () => {
             onClick={() => {
               setPreferencesData(prev => ({
                 ...prev,
-                budgetPreference: 'MODERATE',
-                preferredMealTypes: ['breakfast', 'dinner', 'snacks'],
+                favoriteCuisines: ['Italian', 'Mexican', 'Japanese'],
+                favoriteDishes: ['pizza', 'pasta', 'tacos', 'sushi'],
+                favoriteIngredients: ['garlic', 'basil', 'tomatoes', 'olive oil'],
+                dislikedFoods: ['cilantro', 'mushrooms', 'blue cheese'],
                 favoriteChefs: ['Thomas Keller', 'René Redzepi', 'Massimo Bottura'],
                 favoriteRestaurants: ['The French Laundry', 'Noma', 'Osteria Francescana']
               }));
@@ -1138,65 +1129,10 @@ const MultiStepRegistration: React.FC = () => {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
             </svg>
-            fill test lifestyle & inspirations data (dev only)
+            fill test culinary inspirations data (dev only)
           </button>
           <p className="mt-1 text-xs text-center flambé-body" style={{ color: 'var(--flambé-smoke)' }}>
-            auto-fills budget preference, meal types, favorite chefs, and restaurants
-          </p>
-        </div>
-      )}
-      
-      {/* Development-only comprehensive test data button */}
-      {window.location.hostname === 'localhost' && (
-        <div className="mt-2">
-          <button
-            type="button"
-            onClick={() => {
-              setPreferencesData({
-                ...preferencesData,
-                // Step 2: Dietary & Health
-                dietaryRestrictions: ['vegetarian', 'gluten-free'],
-                allergies: ['nuts', 'shellfish'],
-                nutritionalGoals: ['weight loss', 'heart healthy', 'high protein'],
-                spiceTolerance: 'MEDIUM',
-                // Step 3: Taste & Cuisine
-                favoriteCuisines: ['Italian', 'Mexican', 'Japanese'],
-                favoriteDishes: ['pizza', 'pasta', 'tacos', 'sushi'],
-                favoriteIngredients: ['garlic', 'basil', 'tomatoes', 'olive oil'],
-                dislikedFoods: ['cilantro', 'mushrooms', 'blue cheese'],
-                // Step 4: Cooking Style
-                cookingSkillLevel: 'INTERMEDIATE',
-                preferredCookingTime: '30',
-                servingSize: '4',
-                mealComplexity: 'MODERATE',
-                availableEquipment: ['oven', 'stovetop', 'air fryer', 'blender', 'instant pot'],
-                // Step 5: Lifestyle & Inspirations
-                budgetPreference: 'MODERATE',
-                preferredMealTypes: ['breakfast', 'dinner', 'snacks'],
-                favoriteChefs: ['Thomas Keller', 'René Redzepi', 'Massimo Bottura'],
-                favoriteRestaurants: ['The French Laundry', 'Noma', 'Osteria Francescana']
-              });
-            }}
-            className="w-full flex justify-center py-2 px-4 border border-dashed text-sm font-medium rounded-md transition-colors"
-            style={{ 
-              borderColor: 'var(--flambé-sage)', 
-              color: 'var(--flambé-charcoal)', 
-              backgroundColor: 'var(--flambé-cream)' 
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-stone)';
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = 'var(--flambé-cream)';
-            }}
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            fill ALL test data (dev only)
-          </button>
-          <p className="mt-1 text-xs text-center flambé-body" style={{ color: 'var(--flambé-smoke)' }}>
-            auto-fills all preferences across all steps for comprehensive testing
+            auto-fills cuisines, dishes, ingredients, chefs, and restaurants
           </p>
         </div>
       )}
@@ -1235,7 +1171,6 @@ const MultiStepRegistration: React.FC = () => {
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}
           {currentStep === 4 && renderStep4()}
-          {currentStep === 5 && renderStep5()}
         </div>
       </div>
     </div>

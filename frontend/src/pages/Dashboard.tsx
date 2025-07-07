@@ -1,22 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { apiService } from '../services/api';
+import { toast } from 'react-hot-toast';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdatingPassword(true);
+
+    try {
+      await apiService.updatePassword(passwordData);
+      toast.success('Password updated successfully!');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+      setShowPasswordForm(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold flambé-heading mb-2">
-          welcome back, {user?.name}! 👋
+          welcome back, {user?.name}!
         </h1>
         <p className="flambé-body text-lg" style={{ color: 'var(--flambé-ash)' }}>
-          ready to create something delicious?
+          manage your account and start cooking
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="preference-card">
           <div className="flex items-center mb-4">
             <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: 'rgba(212, 165, 116, 0.1)' }}>
@@ -27,12 +62,12 @@ const Dashboard: React.FC = () => {
             <div>
               <h3 className="flambé-heading text-lg mb-1">AI recipe generator</h3>
               <p className="flambé-body text-sm">
-                create personalized recipes based on your preferences and available ingredients
+                create personalized recipes based on your preferences
               </p>
             </div>
           </div>
           <Link to="/generate" className="btn-primary w-full text-center">
-            Start Cooking
+            start cooking
           </Link>
         </div>
 
@@ -69,24 +104,25 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
           </div>
-          <Link to="/profile" className="btn-secondary w-full text-center">
-            your profile
+          <Link to="/preferences" className="btn-secondary w-full text-center">
+            manage preferences
           </Link>
         </div>
       </div>
 
-      <div className="mt-8 preference-card">
+      {/* Account Information */}
+      <div className="preference-card mb-6">
         <h2 className="text-xl font-semibold flambé-heading mb-4">
-          your profile
+          account information
         </h2>
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="flambé-body">email:</span>
-            <span className="font-medium flambé-body">{user?.email}</span>
-          </div>
-          <div className="flex justify-between">
             <span className="flambé-body">name:</span>
             <span className="font-medium flambé-body">{user?.name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="flambé-body">email:</span>
+            <span className="font-medium flambé-body">{user?.email}</span>
           </div>
           {user?.location && (
             <div className="flex justify-between">
@@ -101,6 +137,105 @@ const Dashboard: React.FC = () => {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Security Settings */}
+      <div className="preference-card">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold flambé-heading">
+            security settings
+          </h2>
+          {!showPasswordForm && (
+            <button
+              onClick={() => setShowPasswordForm(true)}
+              className="btn-secondary text-sm px-4 py-2"
+            >
+              change password
+            </button>
+          )}
+        </div>
+
+        {showPasswordForm && (
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div>
+              <label className="preference-label">
+                current password
+              </label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                className="input-field"
+                placeholder="enter your current password"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="preference-label">
+                new password
+              </label>
+              <input
+                type="password"
+                name="newPassword"
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange}
+                className="input-field"
+                placeholder="enter your new password"
+                required
+              />
+              <p className="mt-1 text-xs flambé-body" style={{ color: 'var(--flambé-smoke)' }}>
+                minimum 8 characters with uppercase, lowercase, and numbers
+              </p>
+            </div>
+            
+            <div>
+              <label className="preference-label">
+                confirm new password
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={passwordData.confirmPassword}
+                onChange={handlePasswordChange}
+                className="input-field"
+                placeholder="confirm your new password"
+                required
+              />
+            </div>
+
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPasswordForm(false);
+                  setPasswordData({
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: '',
+                  });
+                }}
+                className="btn-secondary"
+              >
+                cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdatingPassword}
+                className="btn-primary disabled:opacity-50"
+              >
+                {isUpdatingPassword ? 'updating...' : 'update password'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {!showPasswordForm && (
+          <div className="flambé-body text-sm" style={{ color: 'var(--flambé-ash)' }}>
+            <p>keep your account secure by using a strong password and updating it regularly.</p>
+          </div>
+        )}
       </div>
     </div>
   );

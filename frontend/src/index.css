@@ -297,6 +297,7 @@ body {
 /* Tab Navigation - Minimalist */
 .tab-navigation {
   display: flex;
+  justify-content: center;
   border-bottom: 1px solid var(--flambé-stone);
   margin-bottom: 2rem;
   overflow-x: auto;

@@ -16,7 +16,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "test:credentials": "node generate-test-credentials.js"
   },
   "keywords": [
     "recipe",

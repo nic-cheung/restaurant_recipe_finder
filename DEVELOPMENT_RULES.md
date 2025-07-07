@@ -1053,3 +1053,60 @@ Ensures all fixes and process improvements are immediately committed
 - **User Satisfaction**: Positive user feedback
 
 Remember: These rules are guidelines to help you build a better application. They should be followed but can be adapted as the project evolves and you learn more about best practices. 
+
+## 🎨 Design Philosophy
+flambé follows a minimalist Nordic/Scandinavian aesthetic with clean lines, muted colors, and thoughtful typography.
+
+## Capitalization System
+
+### Always Capitalize
+- **Proper nouns**: Thomas Keller, Italian cuisine, Google Places API
+- **Technical acronyms**: AI, API, URL, JSON
+- **Company/brand names**: Google, OpenAI, Wikipedia
+- **Geographic locations**: San Francisco, Italy, Thailand
+- **First word of sentences**: "Fill out the form..."
+
+### Keep Lowercase
+- **Interface elements**: buttons, navigation links, form labels, page titles
+- **Section headers**: "dietary requirements", "taste preferences"
+- **Form placeholders**: "add dietary restrictions..."
+- **Status messages**: "preferences saved successfully"
+- **Tab labels**: "dietary & health", "cooking style"
+
+### Context-Dependent
+- **Buttons**: Capitalize action buttons (Save Changes, Generate Recipe) but keep interface buttons lowercase (modify, reset form)
+- **First word of sentences**: Always capitalize regardless of other rules
+
+## Visual Elements
+
+### No Emojis
+- **Never use emojis** in the application interface
+- Use SVG icons or text-based symbols instead
+- Maintain clean, professional aesthetic
+- Emojis break the minimalist Nordic design philosophy
+
+### Icons
+- Use consistent SVG icons throughout the application
+- Prefer simple, clean line-based icons
+- Maintain consistent sizing and styling
+
+## Typography
+- Use the flambé font system (Nordic-inspired typography)
+- Maintain consistent font weights and sizes
+- Prioritize readability and clean presentation
+
+## Color Palette
+- Stick to the defined flambé color variables
+- Use muted, Nordic-inspired colors
+- Maintain high contrast for accessibility
+
+## Component Consistency
+- Follow established patterns for buttons, forms, and navigation
+- Use consistent spacing and layout principles
+- Maintain the minimalist aesthetic across all components
+
+## Code Style
+- Follow TypeScript best practices
+- Use descriptive variable and function names
+- Maintain consistent code formatting
+- Document complex logic clearly 

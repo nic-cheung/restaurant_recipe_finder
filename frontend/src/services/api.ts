@@ -141,6 +141,17 @@ class ApiService {
     return response;
   }
 
+  async getTestCredentials(): Promise<{ email: string; password: string; name: string }> {
+    const response = await this.request<any>('/auth/test-credentials');
+    
+    // Handle backend response format
+    if (response.success && response.data) {
+      return response.data;
+    }
+    
+    return response;
+  }
+
   // Preferences methods
   async getPreferences(): Promise<UserPreferences> {
     const response = await this.request<PreferencesResponse>('/preferences');
@@ -369,6 +380,29 @@ class ApiService {
     }
     
     return this.request<T>(endpoint, options);
+  }
+
+  // Update user password
+  async updatePassword(passwordData: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/auth/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+      body: JSON.stringify(passwordData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to update password');
+    }
+
+    return response.json();
   }
 }
 

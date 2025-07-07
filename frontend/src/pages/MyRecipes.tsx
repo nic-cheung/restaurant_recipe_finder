@@ -140,10 +140,11 @@ const MyRecipes: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="search your recipes..."
-                  className="input-field pl-10"
+                  className="input-field pr-4 pl-12"
+                  style={{ paddingLeft: '3rem' }}
                 />
                 <svg 
-                  className="absolute left-3 top-3.5 h-5 w-5" 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 pointer-events-none" 
                   style={{ color: 'var(--flambé-smoke)' }}
                   fill="none" 
                   stroke="currentColor" 

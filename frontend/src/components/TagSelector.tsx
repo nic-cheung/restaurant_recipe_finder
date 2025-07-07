@@ -20,7 +20,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   selectedItems = [],
   onSelectionChange,
   placeholder = "Type to search or add...",
-  maxPopularTags = 6,
+  maxPopularTags = 5,
   allowCustom = false,
   className = "",
   componentId = "default",
@@ -99,21 +99,21 @@ const TagSelector: React.FC<TagSelectorProps> = ({
     setIsDropdownOpen(false);
   };
 
-  const displayedPopularOptions = useMemo(() => 
-    safePopularOptions.slice(0, maxPopularTags), 
-    [safePopularOptions, maxPopularTags]
-  );
+  // Get unselected popular options, limited to maxPopularTags
+  const displayedPopularOptions = useMemo(() => {
+    return safePopularOptions
+      .filter(tag => !safeSelectedItems.includes(tag))
+      .slice(0, maxPopularTags);
+  }, [safePopularOptions, safeSelectedItems, maxPopularTags]);
 
   return (
     <div className={`space-y-3 ${className}`}>
       {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
       
-      {/* Popular Tags - Only show unselected ones */}
-      {displayedPopularOptions.filter(tag => !safeSelectedItems.includes(tag)).length > 0 && (
+      {/* Popular Tags - Show up to maxPopularTags unselected ones */}
+      {displayedPopularOptions.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {displayedPopularOptions
-            .filter(tag => !safeSelectedItems.includes(tag))
-            .map((tag) => (
+          {displayedPopularOptions.map((tag) => (
             <button
               key={`${componentId}-popular-${tag}`}
               type="button"

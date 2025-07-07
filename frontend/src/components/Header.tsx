@@ -33,15 +33,6 @@ const Header: React.FC = () => {
             {user ? (
               <>
                 <Link
-                  to="/dashboard"
-                  className="flambé-body transition-colors duration-200"
-                  style={{ color: 'var(--flambé-ember)' }}
-                  onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-charcoal)'}
-                  onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-ember)'}
-                >
-                  dashboard
-                </Link>
-                <Link
                   to="/generate"
                   className="flambé-body transition-colors duration-200"
                   style={{ color: 'var(--flambé-ember)' }}
@@ -69,9 +60,15 @@ const Header: React.FC = () => {
                   preferences
                 </Link>
                 <div className="flex items-center space-x-4">
-                  <span className="flambé-body text-sm" style={{ color: 'var(--flambé-smoke)' }}>
-                    {user.email}
-                  </span>
+                  <Link
+                    to="/dashboard"
+                    className="flambé-body text-sm transition-colors duration-200 hover:underline cursor-pointer font-medium"
+                    style={{ color: 'var(--flambé-smoke)' }}
+                    onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-charcoal)'}
+                    onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-smoke)'}
+                  >
+                    {user.name}
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="btn-secondary text-sm px-4 py-2"

@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import { register, login, logout, getCurrentUser, checkEmailAvailability } from '../controllers/authController';
+import { Router, Request, Response } from 'express';
+import { register, login, logout, getCurrentUser, checkEmailAvailability, updatePassword } from '../controllers/authController';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
@@ -28,5 +28,38 @@ router.post('/logout', authenticateToken, logout);
 // @desc    Get current user
 // @access  Private
 router.get('/me', authenticateToken, getCurrentUser);
+
+// @route   GET /api/auth/test-credentials
+// @desc    Generate test credentials for development
+// @access  Public (only in development)
+router.get('/test-credentials', (_req: Request, res: Response) => {
+  // Only allow in development environment
+  if (process.env['NODE_ENV'] !== 'development') {
+    return res.status(404).json({
+      success: false,
+      error: 'Not found'
+    });
+  }
+
+  // Generate unique test credentials
+  const timestamp = Date.now();
+  const randomNum = Math.floor(Math.random() * 1000);
+  
+  const testCredentials = {
+    email: `test.${timestamp}.${randomNum}@test.local`,
+    password: 'TestPass123!',
+    name: `Test User ${timestamp.toString().slice(-4)}`
+  };
+
+  return res.json({
+    success: true,
+    data: testCredentials
+  });
+});
+
+// @route   PUT /api/auth/password
+// @desc    Update user password
+// @access  Private
+router.put('/password', authenticateToken, updatePassword);
 
 export default router; 
