@@ -216,7 +216,40 @@ const MultiStepRegistration: React.FC = () => {
   };
 
   const handlePreviousStep = () => {
-    setCurrentStep(prev => prev - 1);
+    setCurrentStep(prev => Math.max(1, prev - 1));
+  };
+
+  const handleStepClick = async (stepId: number) => {
+    // Don't allow navigation to a step beyond the current progress
+    // unless the user has already completed step 1 (account creation)
+    if (stepId > currentStep && currentStep === 1) {
+      // If trying to skip ahead from step 1, validate account first
+      if (!validateAccountStep()) {
+        return;
+      }
+      
+      // Check email availability before allowing navigation
+      setIsLoading(true);
+      try {
+        const result = await apiService.checkEmailAvailability(accountData.email);
+        if (!result.available) {
+          toast.error('This email is already registered. Please use a different email or sign in.');
+          setIsLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking email availability:', error);
+        toast.error('Unable to verify email. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(false);
+    }
+    
+    // Allow navigation to any step that's been reached or is the next step
+    if (stepId <= Math.max(currentStep + 1, 1)) {
+      setCurrentStep(stepId);
+    }
   };
 
   const handleSkipPreferences = async () => {
@@ -347,56 +380,11 @@ const MultiStepRegistration: React.FC = () => {
   };
 
   const steps = [
-    {
-      id: 1,
-      title: 'account',
-      subtitle: 'create your account',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
-    },
-    {
-      id: 2,
-      title: 'dietary & health',
-      subtitle: 'your dietary needs',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-      ),
-    },
-    {
-      id: 3,
-      title: 'taste & cuisine',
-      subtitle: 'your flavor preferences',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      ),
-    },
-    {
-      id: 4,
-      title: 'cooking style',
-      subtitle: 'your cooking experience',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
-        </svg>
-      ),
-    },
-    {
-      id: 5,
-      title: 'lifestyle & inspirations',
-      subtitle: 'budget & culinary inspirations',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-        </svg>
-      ),
-    },
+    { id: 1, title: 'account setup', description: 'create your account' },
+    { id: 2, title: 'dietary & health', description: 'dietary restrictions & health goals' },
+    { id: 3, title: 'taste & cuisine', description: 'flavor preferences & cuisines' },
+    { id: 4, title: 'cooking style', description: 'kitchen setup & cooking preferences' },
+    { id: 5, title: 'lifestyle & inspirations', description: 'budget, meal categories & inspirations' },
   ];
 
   const renderStepIndicator = () => (
@@ -441,33 +429,66 @@ const MultiStepRegistration: React.FC = () => {
       
       {/* Step Indicators */}
       <div className="flex justify-between">
-        {steps.map((step) => (
-          <div key={step.id} className="flex flex-col items-center">
-            <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300"
-              style={{
-                backgroundColor: currentStep >= step.id 
-                  ? 'var(--flambé-cream)' 
-                  : 'rgba(44, 62, 45, 0.3)',
-                color: currentStep >= step.id 
-                  ? 'var(--flambé-ember)' 
-                  : 'rgba(250, 248, 245, 0.6)'
-              }}
-            >
-              {step.icon}
+        {steps.map((step) => {
+          const isCompleted = currentStep > step.id;
+          const isCurrent = currentStep === step.id;
+          const isAccessible = step.id <= Math.max(currentStep + 1, 1);
+          
+          return (
+            <div key={step.id} className="flex flex-col items-center">
+              <button
+                onClick={() => handleStepClick(step.id)}
+                disabled={!isAccessible || isLoading}
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
+                  isAccessible && !isLoading 
+                    ? 'cursor-pointer hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2' 
+                    : 'cursor-not-allowed'
+                }`}
+                                 style={{
+                   backgroundColor: currentStep >= step.id 
+                     ? 'var(--flambé-cream)' 
+                     : 'rgba(44, 62, 45, 0.3)',
+                   color: currentStep >= step.id 
+                     ? 'var(--flambé-ember)' 
+                     : 'rgba(250, 248, 245, 0.6)',
+                   transform: isAccessible && !isLoading && !isCurrent ? 'scale(1)' : undefined,
+                   boxShadow: isCurrent ? '0 0 0 2px rgba(250, 248, 245, 0.5)' : undefined
+                 }}
+                onMouseEnter={(e) => {
+                  if (isAccessible && !isLoading && !isCurrent) {
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1.05)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (isAccessible && !isLoading && !isCurrent) {
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                  }
+                }}
+                title={isAccessible ? `Go to ${step.title}` : `Complete previous steps to access ${step.title}`}
+              >
+                {isCompleted ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  step.icon
+                )}
+              </button>
+              <span 
+                className="text-xs text-center max-w-20 leading-tight flambé-body"
+                style={{
+                  color: currentStep >= step.id 
+                    ? 'var(--flambé-cream)' 
+                    : 'rgba(250, 248, 245, 0.6)'
+                }}
+              >
+                {step.title}
+              </span>
             </div>
-            <span 
-              className="text-xs text-center max-w-20 leading-tight flambé-body"
-              style={{
-                color: currentStep >= step.id 
-                  ? 'var(--flambé-cream)' 
-                  : 'rgba(250, 248, 245, 0.6)'
-              }}
-            >
-              {step.title}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -1205,11 +1226,11 @@ const MultiStepRegistration: React.FC = () => {
       className="min-h-screen flex items-center justify-center p-4"
       style={{ backgroundColor: 'var(--flambé-cream)' }}
     >
-      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl">
         {renderStepIndicator()}
         
         {/* Form Content */}
-        <div className="p-8">
+        <div className="p-8 pb-20">
           {currentStep === 1 && renderAccountStep()}
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}

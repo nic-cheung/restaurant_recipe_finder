@@ -762,8 +762,8 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
     <div className="min-h-screen py-8" style={{ backgroundColor: 'var(--flambé-cream)' }}>
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold flambé-heading mb-2">ai recipe generator</h1>
-          <p className="text-xl flambé-body">create personalized recipes with ai magic</p>
+          <h1 className="text-4xl font-bold flambé-heading mb-2">AI recipe generator</h1>
+          <p className="text-xl flambé-body">create personalized recipes with AI magic</p>
         </div>
 
         {/* Success Message */}
@@ -829,7 +829,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Style/Mood
+                    style/mood
                   </label>
                   <select
                     value={contextualData.styleMood}
@@ -848,7 +848,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Time Available
+                    time available
                   </label>
                   <select
                     value={contextualData.timeAvailable}
@@ -866,7 +866,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
               {/* Inspiration */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Inspiration (Optional)
+                  inspiration (optional)
                 </label>
                 <input
                   type="text"
@@ -895,7 +895,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
               {/* Additional Requests */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Additional Requests
+                  additional requests
                 </label>
                 <textarea
                   value={formData.additionalRequests}
@@ -1300,7 +1300,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
 
           {/* Recipe Display */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Generated Recipe</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">generated recipe</h2>
             
             {state.generatedRecipe ? (
               <div className="space-y-6">
@@ -1317,7 +1317,7 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No recipe generated yet</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">no recipe generated yet</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Fill out the form and click "Generate Recipe" to create your personalized recipe.
                 </p>

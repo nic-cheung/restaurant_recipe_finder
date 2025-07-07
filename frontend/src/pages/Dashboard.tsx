@@ -25,14 +25,14 @@ const Dashboard: React.FC = () => {
               </svg>
             </div>
             <div>
-              <h3 className="flambé-heading text-lg mb-1">recipe generator</h3>
+              <h3 className="flambé-heading text-lg mb-1">AI recipe generator</h3>
               <p className="flambé-body text-sm">
                 create personalized recipes based on your preferences and available ingredients
               </p>
             </div>
           </div>
           <Link to="/generate" className="btn-primary w-full text-center">
-            start cooking
+            Start Cooking
           </Link>
         </div>
 

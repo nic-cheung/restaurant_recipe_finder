@@ -39,7 +39,7 @@ const Header: React.FC = () => {
                   onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-charcoal)'}
                   onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-ember)'}
                 >
-                  Dashboard
+                  dashboard
                 </Link>
                 <Link
                   to="/generate"
@@ -48,7 +48,7 @@ const Header: React.FC = () => {
                   onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-charcoal)'}
                   onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-ember)'}
                 >
-                  Generate Recipe
+                  generate recipe
                 </Link>
                 <Link
                   to="/my-recipes"
@@ -57,7 +57,7 @@ const Header: React.FC = () => {
                   onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-charcoal)'}
                   onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-ember)'}
                 >
-                  My Recipes
+                  my recipes
                 </Link>
                 <Link
                   to="/preferences"
@@ -66,7 +66,7 @@ const Header: React.FC = () => {
                   onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-charcoal)'}
                   onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--flambé-ember)'}
                 >
-                  Preferences
+                  preferences
                 </Link>
                 <div className="flex items-center space-x-4">
                   <span className="flambé-body text-sm" style={{ color: 'var(--flambé-smoke)' }}>
@@ -76,7 +76,7 @@ const Header: React.FC = () => {
                     onClick={handleLogout}
                     className="btn-secondary text-sm px-4 py-2"
                   >
-                    logout
+                    Logout
                   </button>
                 </div>
               </>
@@ -95,7 +95,7 @@ const Header: React.FC = () => {
                   to="/register"
                   className="btn-primary text-sm px-4 py-2"
                 >
-                  get started
+                  Get Started
                 </Link>
               </div>
             )}

@@ -415,7 +415,7 @@ const DynamicSuggestionInput: React.FC<DynamicSuggestionInputProps> = ({
 
         {/* Suggestions dropdown */}
         {isDropdownOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {/* Static suggestions */}
             {suggestions.map((suggestion, index) => (
               <button

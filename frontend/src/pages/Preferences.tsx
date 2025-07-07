@@ -240,7 +240,7 @@ const Preferences: React.FC = () => {
   const tabs = [
     { 
       id: 'dietary', 
-      label: 'Dietary & Health',
+      label: 'dietary & health',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -249,7 +249,7 @@ const Preferences: React.FC = () => {
     },
     { 
       id: 'taste', 
-      label: 'Taste & Cuisine',
+      label: 'taste & cuisine',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -258,7 +258,7 @@ const Preferences: React.FC = () => {
     },
     { 
       id: 'cooking', 
-      label: 'Cooking Style',
+      label: 'cooking style',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
@@ -267,7 +267,7 @@ const Preferences: React.FC = () => {
     },
     { 
       id: 'preferences', 
-      label: 'Lifestyle',
+      label: 'lifestyle',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -276,7 +276,7 @@ const Preferences: React.FC = () => {
     },
     { 
       id: 'social', 
-      label: 'Inspirations',
+      label: 'inspirations',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -293,12 +293,12 @@ const Preferences: React.FC = () => {
       </div>
       <div className="preference-section">
         <div className="section-header">
-          <h3 className="section-title">Dietary Requirements</h3>
-          <p className="section-description">Essential dietary restrictions and health considerations</p>
+          <h3 className="section-title">dietary requirements</h3>
+          <p className="section-description">essential dietary restrictions and health considerations</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
-            <label className="preference-label">Dietary Restrictions</label>
+            <label className="preference-label">dietary restrictions</label>
             <DynamicSuggestionInput
               label=""
               selectedItems={formData.dietaryRestrictions}
@@ -311,7 +311,7 @@ const Preferences: React.FC = () => {
             />
           </div>
           <div className="preference-card">
-            <label className="preference-label">Allergies</label>
+            <label className="preference-label">allergies</label>
             <DynamicSuggestionInput
               label=""
               selectedItems={formData.allergies}
@@ -328,8 +328,8 @@ const Preferences: React.FC = () => {
 
       <div className="preference-section">
         <div className="section-header">
-          <h3 className="section-title">Nutritional Goals</h3>
-          <p className="section-description">Your health and wellness objectives</p>
+          <h3 className="section-title">nutritional goals</h3>
+          <p className="section-description">your health and wellness objectives</p>
         </div>
         <div className="preference-card">
                       <DynamicSuggestionInput
@@ -354,12 +354,12 @@ const Preferences: React.FC = () => {
       </div>
       <div className="preference-section">
         <div className="section-header">
-          <h3 className="section-title">Flavor Profile</h3>
-          <p className="section-description">Your taste preferences and ingredient choices</p>
+          <h3 className="section-title">flavor profile</h3>
+          <p className="section-description">your taste preferences and ingredient choices</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
-            <label className="preference-label">Favorite Ingredients</label>
+            <label className="preference-label">favorite ingredients</label>
             <DynamicSuggestionInput
               label=""
               selectedItems={formData.favoriteIngredients}
@@ -372,7 +372,7 @@ const Preferences: React.FC = () => {
             />
           </div>
           <div className="preference-card">
-            <label className="preference-label">Disliked Foods</label>
+            <label className="preference-label">disliked foods</label>
             <DynamicSuggestionInput
               label=""
               selectedItems={formData.dislikedFoods}
@@ -389,12 +389,12 @@ const Preferences: React.FC = () => {
 
       <div className="preference-section">
         <div className="section-header">
-          <h3 className="section-title">Cuisine Preferences</h3>
-          <p className="section-description">Your favorite cuisines and signature dishes</p>
+          <h3 className="section-title">cuisine preferences</h3>
+          <p className="section-description">your favorite cuisines and signature dishes</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
-            <label className="preference-label">Favorite Cuisines</label>
+            <label className="preference-label">favorite cuisines</label>
             <DynamicSuggestionInput
               label=""
               selectedItems={formData.favoriteCuisines}
@@ -407,7 +407,7 @@ const Preferences: React.FC = () => {
             />
           </div>
           <div className="preference-card">
-            <label className="preference-label">Favorite Dishes</label>
+            <label className="preference-label">favorite dishes</label>
             <DynamicSuggestionInput
               label=""
               selectedItems={formData.favoriteDishes}
@@ -424,8 +424,8 @@ const Preferences: React.FC = () => {
 
       <div className="preference-section">
         <div className="section-header">
-          <h3 className="section-title">Spice Preference</h3>
-          <p className="section-description">How much heat do you enjoy in your food?</p>
+          <h3 className="section-title">spice preference</h3>
+          <p className="section-description">how much heat do you enjoy in your food?</p>
         </div>
         <div className="preference-card">
           <div className="spice-selector">
@@ -490,7 +490,7 @@ const Preferences: React.FC = () => {
             />
           </div>
           <div className="preference-card">
-            <label className="preference-label">Typical Serving Size</label>
+            <label className="preference-label">typical serving size</label>
             <input
               type="number"
               value={formData.servingSize}
@@ -506,12 +506,12 @@ const Preferences: React.FC = () => {
 
       <div className="preference-section">
         <div className="section-header">
-          <h3 className="section-title">Kitchen Setup</h3>
-          <p className="section-description">Available equipment and preferred complexity</p>
+          <h3 className="section-title">kitchen setup</h3>
+          <p className="section-description">available equipment and preferred complexity</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="preference-card">
-            <label className="preference-label">Available Equipment</label>
+            <label className="preference-label">available equipment</label>
             <DynamicSuggestionInput
               label=""
               selectedItems={formData.availableEquipment}
@@ -683,14 +683,14 @@ const Preferences: React.FC = () => {
               onClick={() => navigate('/dashboard')}
               className="btn-secondary"
             >
-              cancel
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
               className="btn-primary"
             >
-              {loading ? 'saving...' : 'save preferences'}
+              {loading ? 'Saving...' : 'Save Preferences'}
             </button>
           </div>
         </form>

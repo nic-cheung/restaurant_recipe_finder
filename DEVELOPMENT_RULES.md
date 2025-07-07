@@ -1,4 +1,170 @@
-# Development Rules & Guidelines
+# Development Rules - Restaurant Recipe Finder
+
+## 🎯 **Core Development Principles**
+
+### 1. **User Experience First**
+- Every feature must enhance the user's culinary journey
+- Prioritize simplicity and elegance over complexity
+- Test all features from a user's perspective before marking complete
+
+### 2. **Data Quality & Accuracy**
+- All recipe data must be accurate and tested
+- Nutritional information should be realistic and helpful
+- API integrations must handle errors gracefully
+
+### 3. **Performance & Scalability**
+- Keep API calls efficient and cached when possible
+- Optimize database queries for user preferences
+- Design for growth from day one
+
+---
+
+## 📝 **Text Style & Capitalization Rules**
+
+### **Core Philosophy**: Lowercase Aesthetic with Strategic Exceptions
+
+**General Rule**: Use lowercase for all text except specific exceptions listed below.
+
+### **✅ Always Capitalize**:
+
+1. **Proper Nouns & Names**:
+   - Brand name: `flambé` (always lowercase, even at sentence start)
+   - People names: `Thomas Keller`, `René Redzepi`, `Gordon Ramsay`
+   - Restaurant names: `The French Laundry`, `Noma`, `Osteria Francescana`
+   - Place names: `New York`, `San Francisco`, `Italy`, `Japan`
+   - Company names: `Google Places API`, `OpenAI`, `Wikidata`
+
+2. **Technical Terms & Acronyms**:
+   - `AI` (never "ai")
+   - `API` (never "api") 
+   - `JSON`, `HTTP`, `CSS`, `HTML`, `TypeScript`
+   - `PostgreSQL`, `Prisma ORM`
+
+3. **Food & Cuisine Proper Nouns**:
+   - Cuisine types: `Italian`, `Mexican`, `Chinese`, `Japanese`, `French`
+   - Specific dishes with proper names: `Coq au Vin`, `Pad Thai`, `Beef Wellington`
+   - Wine regions: `Bordeaux`, `Tuscany`, `Napa Valley`
+
+4. **First Word of Sentences**:
+   - Always capitalize the first word of any sentence, even if it would normally be lowercase
+
+### **❌ Keep Lowercase**:
+
+1. **Interface Elements**:
+   - Navigation: `dashboard`, `generate recipe`, `my recipes`, `preferences`
+   - Buttons: `get started`, `create account`, `save preferences`, `logout`
+   - Form labels: `email address`, `dietary restrictions`, `cooking skill level`
+   - Page titles: `ai recipe generator`, `preferences`, `welcome back`
+   - Section headers: `dietary & health`, `taste & cuisine`, `cooking style`
+
+2. **Generic Food Terms**:
+   - Common ingredients: `garlic`, `tomatoes`, `olive oil`, `basil`
+   - Generic dishes: `pizza`, `pasta`, `salad`, `soup` (unless part of proper name)
+   - Cooking methods: `grilling`, `roasting`, `sautéing`, `steaming`
+
+3. **Descriptive Text**:
+   - All body text, descriptions, and explanations
+   - Placeholder text in forms
+   - Help text and instructions
+   - Error messages and notifications
+
+### **🔄 Context-Dependent**:
+
+1. **Titles & Headings**:
+   - Page titles: lowercase (`ai recipe generator`, `my preferences`)
+   - Section headings: lowercase (`what are you in the mood for?`)
+   - Card titles: lowercase (`recipe generator`, `quick actions`)
+
+2. **Menu Items**:
+   - Navigation links: lowercase (`dashboard`, `generate recipe`)
+   - Dropdown options: lowercase except proper nouns
+
+### **📋 Examples**:
+
+**✅ Correct**:
+```
+- "ai recipe generator"
+- "Generate Recipe" (button)
+- "dietary restrictions"
+- "Italian cuisine" 
+- "Thomas Keller recipes"
+- "Google Places API integration"
+- "create personalized recipes with AI magic"
+```
+
+**❌ Incorrect**:
+```
+- "AI Recipe Generator" (should be lowercase)
+- "Generate recipe" (button should be capitalized)
+- "Dietary Restrictions" (should be lowercase)
+- "italian cuisine" (cuisine should be capitalized)
+- "thomas keller recipes" (name should be capitalized)
+- "google places api integration" (proper nouns should be capitalized)
+```
+
+---
+
+## 🛠 **Technical Guidelines**
+
+### 4. **API Integration Standards**
+- Always handle rate limits gracefully
+- Implement proper error handling for all external APIs
+- Cache responses when appropriate to reduce API calls
+- Use environment variables for all API keys
+
+### 5. **Database Best Practices**
+- Use descriptive field names that match user mental models
+- Implement proper indexing for performance
+- Always validate data before database operations
+- Use transactions for multi-step operations
+
+### 6. **Frontend Development**
+- Follow the flambé design system consistently
+- Use TypeScript for all new code
+- Implement proper loading states for all async operations
+- Ensure all forms have proper validation and error handling
+
+### 7. **Testing Requirements**
+- Test all user flows manually before deployment
+- Validate API integrations with real data
+- Test edge cases and error scenarios
+- Verify responsive design on multiple screen sizes
+
+---
+
+## 🚨 **Critical Rules**
+
+### 8. **Never Break These**
+- Never commit API keys or sensitive data
+- Always test user registration and login flows
+- Verify all database migrations work correctly
+- Test all preference changes are saved properly
+
+### 9. **Code Quality**
+- Write clear, descriptive commit messages
+- Comment complex business logic
+- Use consistent naming conventions
+- Keep functions focused and single-purpose
+
+### 10. **User Data Protection**
+- Hash all passwords properly
+- Validate all user inputs
+- Sanitize data before database storage
+- Respect user privacy in all features
+
+---
+
+## 📊 **Performance Targets**
+- Page load times under 2 seconds
+- API response times under 500ms
+- Database queries optimized for sub-100ms response
+- Recipe generation under 10 seconds
+
+## 🎨 **Design Consistency**
+- Follow the Nordic/Scandinavian aesthetic
+- Use the flambé color palette consistently
+- Maintain the minimalist, elegant feel
+- Ensure all interactions feel smooth and natural
 
 ## 🎭 Communication & Role-Playing Guidelines
 

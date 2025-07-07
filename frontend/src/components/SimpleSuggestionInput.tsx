@@ -151,7 +151,7 @@ const SimpleSuggestionInput: React.FC<SimpleSuggestionInputProps> = ({
 
       {/* Suggestions dropdown */}
       {isDropdownOpen && filteredSuggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 border rounded-md shadow-lg max-h-60 overflow-y-auto" style={{ backgroundColor: 'var(--flambé-cream)', borderColor: 'var(--flambé-ash)' }}>
+        <div className="absolute z-50 w-full mt-1 border rounded-md shadow-lg max-h-60 overflow-y-auto" style={{ backgroundColor: 'var(--flambé-cream)', borderColor: 'var(--flambé-ash)' }}>
           {filteredSuggestions.map((suggestion, index) => (
             <button
               key={index}
