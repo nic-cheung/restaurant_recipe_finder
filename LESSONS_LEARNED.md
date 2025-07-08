@@ -5,6 +5,101 @@ This file documents errors, issues, and learnings encountered during development
 
 ---
 
+## UI/UX Enhancement: Styling Consistency & Capitalization Standards
+**Date**: 2025-01-28
+**Context**: Preferences page header appeared darker and larger than other pages, blue instruction box didn't match app color scheme, and inconsistent capitalization patterns across the interface
+**Challenge**: Maintaining consistent visual design language while respecting proper noun capitalization rules
+**Solution**: Standardized header styling across all pages, integrated flambé color scheme throughout, and established clear capitalization guidelines
+
+**Implementation Process**:
+
+1. **Header Styling Standardization**:
+   - Identified preferences page using custom CSS classes (`page-title`, `page-subtitle`) 
+   - Updated to match RecipeGenerator/MyRecipes pattern: `text-4xl font-bold flambé-heading`
+   - Applied consistent container structure: `min-h-screen py-8` with `max-w-6xl mx-auto px-4`
+   - Centered text alignment with proper spacing: `text-center mb-8`
+
+2. **Color Scheme Integration**:
+   - Replaced blue instruction box (`bg-blue-50`, `text-blue-700`) with flambé colors
+   - Used `var(--flambé-fog)` background with `var(--flambé-stone)` border
+   - Applied `flambé-body` text styling for consistent typography
+   - Updated textarea to use existing `input-field` class with sage focus rings
+
+3. **Capitalization Standards Establishment**:
+   - **Proper Nouns**: "ChatGPT", "Claude", "AI" always capitalized as brand names/acronyms
+   - **App Style**: General interface text follows lowercase pattern ("copy", "paste", "generate")
+   - **Consistency**: Applied standards across instruction text and placeholder text
+   - **Grammar Rules**: Maintained proper capitalization for actual names while keeping interface casual
+
+**Key Insights**:
+- **Visual Consistency**: Different styling patterns across pages create jarring user experience
+- **Color Scheme Importance**: Off-brand colors (blue) break the carefully crafted Nordic aesthetic
+- **Capitalization Balance**: Must balance brand consistency with app's casual lowercase style
+- **User Experience**: Consistent styling reduces cognitive load and improves perceived quality
+- **Design Systems**: Standardized patterns prevent future inconsistencies
+- **Brand Identity**: Color scheme and typography are core to app's Scandinavian design language
+
+**Technical Challenges Resolved**:
+- **CSS Class Conflicts**: Removed custom classes in favor of consistent utility classes
+- **Container Structure**: Fixed div nesting to match other pages' layout patterns
+- **Color Variables**: Proper use of CSS custom properties for flambé color scheme
+- **Typography Classes**: Consistent use of `flambé-heading` and `flambé-body` throughout
+- **Responsive Design**: Maintained responsive behavior while updating styling
+
+**Best Practices Discovered**:
+- **Style Audits**: Regular visual consistency checks across all pages
+- **Color Scheme Documentation**: Clear documentation of when to use flambé colors vs standard colors
+- **Typography Standards**: Established hierarchy with consistent font classes
+- **Capitalization Guidelines**: Written standards for proper nouns vs interface text
+- **Component Reuse**: Prefer existing styled components over custom CSS
+- **Visual Testing**: Check styling changes across different screen sizes
+
+**Prevention/Improvement Strategies**:
+- **Style Guide**: Create comprehensive style guide with examples
+- **Design System**: Build reusable components with consistent styling
+- **Regular Reviews**: Periodic UI/UX reviews to catch inconsistencies early
+- **Documentation**: Document capitalization and color usage standards
+- **Testing**: Include visual regression testing in development workflow
+- **Code Standards**: Use consistent CSS patterns across components
+
+**Metrics/Results**:
+- **Visual Consistency**: All page headers now use identical styling patterns
+- **Brand Cohesion**: Removed off-brand blue colors throughout interface
+- **User Experience**: Improved professional appearance and reduced visual friction
+- **Development Speed**: Standardized patterns speed up future development
+- **Maintenance**: Easier to maintain consistent styling across growing app
+
+**Technical Implementation Details**:
+```tsx
+// Standardized header pattern across all pages
+<div className="text-center mb-8">
+  <h1 className="text-4xl font-bold flambé-heading mb-2">page title</h1>
+  <p className="text-xl flambé-body">page description</p>
+</div>
+
+// Flambé color scheme for instruction boxes
+<div className="rounded-lg p-4 space-y-3" style={{ 
+  backgroundColor: 'var(--flambé-fog)', 
+  border: '1px solid var(--flambé-stone)' 
+}}>
+  <p className="text-sm flambé-body">
+    copy the prompt above, use it in ChatGPT/Claude, then paste the response below:
+  </p>
+</div>
+
+// Capitalization standards
+- Proper nouns: "ChatGPT", "Claude", "AI"
+- Interface text: "copy", "paste", "generate", "preferences"
+- Placeholder text: "paste your AI response here..."
+```
+
+**Related**: 
+- [Design System Guidelines](https://design-system.service.gov.uk/)
+- [Brand Consistency Best Practices](https://www.smashingmagazine.com/2010/07/design-consistency-guidelines/)
+- [Typography in UI Design](https://material.io/design/typography/)
+
+---
+
 ## Enhancement: Streamlined Navigation & Account Security - Header UX & Password Management
 **Date**: 2025-01-28
 **Context**: Dashboard button in header navigation created redundant access paths, and users lacked essential password management capabilities for account security
