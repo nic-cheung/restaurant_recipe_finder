@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUser = exports.isEmailAvailable = exports.getUserByEmail = exports.getUserById = exports.authenticateUser = exports.createUser = void 0;
+exports.updateUserPassword = exports.updateUser = exports.isEmailAvailable = exports.getUserByEmail = exports.getUserById = exports.authenticateUser = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const prisma = new client_1.PrismaClient();
@@ -84,4 +84,23 @@ const updateUser = async (userId, updateData) => {
     return userWithoutPassword;
 };
 exports.updateUser = updateUser;
+const updateUserPassword = async (userId, currentPassword, newPassword) => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const isCurrentPasswordValid = await bcryptjs_1.default.compare(currentPassword, user.passwordHash);
+    if (!isCurrentPasswordValid) {
+        throw new Error('Current password is incorrect');
+    }
+    const saltRounds = 12;
+    const newPasswordHash = await bcryptjs_1.default.hash(newPassword, saltRounds);
+    await prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: newPasswordHash },
+    });
+};
+exports.updateUserPassword = updateUserPassword;
 //# sourceMappingURL=userService.js.map

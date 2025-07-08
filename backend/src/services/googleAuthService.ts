@@ -12,12 +12,18 @@ export class GoogleAuthService {
 
   private initializeAuth() {
     try {
+      // Scopes for Google Places API and Gemini API
+      const scopes = [
+        'https://www.googleapis.com/auth/cloud-platform',
+        'https://www.googleapis.com/auth/generative-language.retriever'
+      ];
+
       // Option 1: Use service account key file
       if (process.env['GOOGLE_SERVICE_ACCOUNT_KEY_PATH']) {
         const keyFile = path.resolve(process.env['GOOGLE_SERVICE_ACCOUNT_KEY_PATH']);
         this.auth = new google.auth.GoogleAuth({
           keyFile,
-          scopes: ['https://www.googleapis.com/auth/cloud-platform']
+          scopes
         });
       }
       // Option 2: Use service account key as environment variable
@@ -25,7 +31,7 @@ export class GoogleAuthService {
         const serviceAccountKey = JSON.parse(process.env['GOOGLE_SERVICE_ACCOUNT_KEY']);
         this.auth = new google.auth.GoogleAuth({
           credentials: serviceAccountKey,
-          scopes: ['https://www.googleapis.com/auth/cloud-platform']
+          scopes
         });
       }
       // Option 3: Use OAuth client credentials
@@ -42,7 +48,7 @@ export class GoogleAuthService {
   }
 
   /**
-   * Get a valid access token for Google Places API
+   * Get a valid access token for Google APIs (Places API and Gemini API)
    */
   async getAccessToken(): Promise<string> {
     try {
@@ -83,7 +89,7 @@ export class GoogleAuthService {
   }
 
   /**
-   * Make an authenticated request to Google Places API
+   * Make an authenticated request to Google APIs (Places API, Gemini API, etc.)
    */
   async makeAuthenticatedRequest(url: string, options: any = {}): Promise<Response> {
     const accessToken = await this.getAccessToken();

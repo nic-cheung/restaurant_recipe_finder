@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.recipeRatingSchema = exports.recipeGenerationSchema = exports.SPICE_TOLERANCE = exports.MEAL_COMPLEXITY = exports.COOKING_EQUIPMENT = exports.POPULAR_MEAL_TYPES = exports.MEAL_TYPES = exports.BUDGET_PREFERENCES = exports.NUTRITIONAL_GOALS = exports.COMMON_DISLIKED_FOODS = exports.COMMON_INGREDIENTS = exports.COMMON_DISHES = exports.COMMON_RESTAURANTS = exports.COMMON_CHEFS = exports.COMMON_CUISINES = exports.COMMON_ALLERGIES = exports.COMMON_DIETARY_RESTRICTIONS = exports.updateUserPreferencesSchema = exports.userPreferencesSchema = exports.loginSchema = exports.registerSchema = void 0;
+exports.updatePasswordSchema = exports.recipeRatingSchema = exports.recipeGenerationSchema = exports.SPICE_TOLERANCE = exports.MEAL_COMPLEXITY = exports.COOKING_EQUIPMENT = exports.POPULAR_MEAL_TYPES = exports.MEAL_TYPES = exports.BUDGET_PREFERENCES = exports.NUTRITIONAL_GOALS = exports.COMMON_DISLIKED_FOODS = exports.COMMON_INGREDIENTS = exports.COMMON_DISHES = exports.COMMON_RESTAURANTS = exports.COMMON_CHEFS = exports.COMMON_CUISINES = exports.COMMON_ALLERGIES = exports.COMMON_DIETARY_RESTRICTIONS = exports.updateUserPreferencesSchema = exports.userPreferencesSchema = exports.loginSchema = exports.registerSchema = void 0;
 exports.validateRecipeGeneration = validateRecipeGeneration;
 exports.validateRecipeRating = validateRecipeRating;
 const zod_1 = require("zod");
@@ -2043,4 +2043,21 @@ function validateRecipeRating(data) {
         return { success: false, errors: ['Invalid data format'] };
     }
 }
+exports.updatePasswordSchema = zod_1.z.object({
+    currentPassword: zod_1.z
+        .string()
+        .min(1, 'Current password is required'),
+    newPassword: zod_1.z
+        .string()
+        .min(8, 'Password must be at least 8 characters long')
+        .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+        .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+        .regex(/[0-9]/, 'Password must contain at least one number'),
+    confirmPassword: zod_1.z
+        .string()
+        .min(1, 'Password confirmation is required'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+});
 //# sourceMappingURL=validation.js.map

@@ -1,20 +1,63 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { googleAuthService } from './googleAuthService';
 
 export class GeminiService {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private genAI!: GoogleGenerativeAI;
+  private model!: any;
+  private isUsingOAuth: boolean = false;
 
   constructor() {
-    const apiKey = process.env['GEMINI_API_KEY'] || '';
-    if (!apiKey) {
-      console.warn('⚠️  GEMINI_API_KEY not found, AI suggestions will use fallbacks');
+    this.initializeClient();
+  }
+
+  private async initializeClient() {
+    try {
+      // Try OAuth first if configured
+      if (googleAuthService.isConfigured()) {
+        console.log('🔐 Using OAuth authentication for Gemini API');
+        const accessToken = await googleAuthService.getAccessToken();
+        this.genAI = new GoogleGenerativeAI(accessToken);
+        this.isUsingOAuth = true;
+      } else {
+        // Fallback to API key
+        console.log('🔑 Using API key authentication for Gemini API');
+        const apiKey = process.env['GEMINI_API_KEY'] || '';
+        if (!apiKey) {
+          console.warn('⚠️  Neither OAuth nor GEMINI_API_KEY configured, AI suggestions will use fallbacks');
+        }
+        this.genAI = new GoogleGenerativeAI(apiKey);
+        this.isUsingOAuth = false;
+      }
+      
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    } catch (error) {
+      console.error('Failed to initialize Gemini client with OAuth, falling back to API key:', error);
+      
+      // Fallback to API key on OAuth failure
+      const apiKey = process.env['GEMINI_API_KEY'] || '';
+      this.genAI = new GoogleGenerativeAI(apiKey);
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      this.isUsingOAuth = false;
     }
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  }
+
+  private async ensureValidClient() {
+    if (this.isUsingOAuth) {
+      try {
+        // Refresh token if needed
+        const accessToken = await googleAuthService.getAccessToken();
+        this.genAI = new GoogleGenerativeAI(accessToken);
+        this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      } catch (error) {
+        console.error('OAuth token refresh failed:', error);
+        throw error;
+      }
+    }
   }
 
   private async generateText(prompt: string): Promise<string> {
     try {
+      await this.ensureValidClient();
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       return response.text();

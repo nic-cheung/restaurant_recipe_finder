@@ -28,4 +28,5 @@ export declare const getUserById: (userId: string) => Promise<UserWithoutPasswor
 export declare const getUserByEmail: (email: string) => Promise<UserWithoutPassword | null>;
 export declare const isEmailAvailable: (email: string) => Promise<boolean>;
 export declare const updateUser: (userId: string, updateData: Partial<Omit<CreateUserData, "password">>) => Promise<UserWithoutPassword>;
+export declare const updateUserPassword: (userId: string, currentPassword: string, newPassword: string) => Promise<void>;
 //# sourceMappingURL=userService.d.ts.map

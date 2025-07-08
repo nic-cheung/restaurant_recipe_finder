@@ -2,17 +2,55 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.geminiService = exports.GeminiService = void 0;
 const generative_ai_1 = require("@google/generative-ai");
+const googleAuthService_1 = require("./googleAuthService");
 class GeminiService {
     constructor() {
-        const apiKey = process.env['GEMINI_API_KEY'] || '';
-        if (!apiKey) {
-            console.warn('⚠️  GEMINI_API_KEY not found, AI suggestions will use fallbacks');
+        this.isUsingOAuth = false;
+        this.initializeClient();
+    }
+    async initializeClient() {
+        try {
+            if (googleAuthService_1.googleAuthService.isConfigured()) {
+                console.log('🔐 Using OAuth authentication for Gemini API');
+                const accessToken = await googleAuthService_1.googleAuthService.getAccessToken();
+                this.genAI = new generative_ai_1.GoogleGenerativeAI(accessToken);
+                this.isUsingOAuth = true;
+            }
+            else {
+                console.log('🔑 Using API key authentication for Gemini API');
+                const apiKey = process.env['GEMINI_API_KEY'] || '';
+                if (!apiKey) {
+                    console.warn('⚠️  Neither OAuth nor GEMINI_API_KEY configured, AI suggestions will use fallbacks');
+                }
+                this.genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
+                this.isUsingOAuth = false;
+            }
+            this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
         }
-        this.genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
-        this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        catch (error) {
+            console.error('Failed to initialize Gemini client with OAuth, falling back to API key:', error);
+            const apiKey = process.env['GEMINI_API_KEY'] || '';
+            this.genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
+            this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            this.isUsingOAuth = false;
+        }
+    }
+    async ensureValidClient() {
+        if (this.isUsingOAuth) {
+            try {
+                const accessToken = await googleAuthService_1.googleAuthService.getAccessToken();
+                this.genAI = new generative_ai_1.GoogleGenerativeAI(accessToken);
+                this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            }
+            catch (error) {
+                console.error('OAuth token refresh failed:', error);
+                throw error;
+            }
+        }
     }
     async generateText(prompt) {
         try {
+            await this.ensureValidClient();
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
             return response.text();

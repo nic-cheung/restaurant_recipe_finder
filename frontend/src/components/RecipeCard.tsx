@@ -282,7 +282,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
-                ai prompt used
+                AI prompt used
               </h4>
               <div className="p-4 rounded-lg space-y-4" style={{ backgroundColor: 'var(--flambé-stone)' }}>
                 
@@ -305,7 +305,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                     </button>
                   </div>
                   <p className="text-sm flambé-body mb-2">
-                    perfect for chatgpt, claude, or any ai assistant:
+                    perfect for ChatGPT, Claude, or any AI assistant:
                   </p>
                   <div className="p-3 rounded border max-h-96 overflow-y-auto" style={{ backgroundColor: 'var(--flambé-cream)', borderColor: 'var(--flambé-ash)' }}>
                     <pre className="text-sm flambé-body whitespace-pre-wrap font-mono">
@@ -335,7 +335,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                       </button>
                     </div>
                     <p className="text-sm flambé-body mb-2">
-                      includes json formatting instructions:
+                      includes JSON formatting instructions:
                     </p>
                     <details className="rounded border" style={{ backgroundColor: 'var(--flambé-cream)', borderColor: 'var(--flambé-ash)' }}>
                       <summary className="p-3 cursor-pointer text-sm font-medium flambé-body hover:opacity-80">
@@ -356,7 +356,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                     <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
-                    <strong>tip:</strong> most ai assistants work great with the clean version. use the technical version if you need specific json formatting.
+                    <strong>tip:</strong> most AI assistants work great with the clean version. use the technical version if you need specific JSON formatting.
                   </p>
                 </div>
               </div>

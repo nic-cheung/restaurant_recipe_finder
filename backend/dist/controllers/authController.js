@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCurrentUser = exports.checkEmailAvailability = exports.logout = exports.login = exports.register = void 0;
+exports.updatePassword = exports.getCurrentUser = exports.checkEmailAvailability = exports.logout = exports.login = exports.register = void 0;
 const zod_1 = require("zod");
 const jwt_1 = require("../utils/jwt");
 const userService_1 = require("../services/userService");
@@ -176,4 +176,53 @@ const getCurrentUser = async (req, res) => {
     }
 };
 exports.getCurrentUser = getCurrentUser;
+const updatePassword = async (req, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({
+                success: false,
+                error: 'User not authenticated',
+            });
+            return;
+        }
+        const validatedData = validation_1.updatePasswordSchema.parse(req.body);
+        await (0, userService_1.updateUserPassword)(req.user.userId, validatedData.currentPassword, validatedData.newPassword);
+        res.status(200).json({
+            success: true,
+            message: 'Password updated successfully',
+        });
+    }
+    catch (error) {
+        if (error instanceof zod_1.ZodError) {
+            res.status(400).json({
+                success: false,
+                error: 'Validation error',
+                details: error.errors,
+            });
+            return;
+        }
+        if (error instanceof Error) {
+            if (error.message === 'Current password is incorrect') {
+                res.status(400).json({
+                    success: false,
+                    error: error.message,
+                });
+                return;
+            }
+            if (error.message === 'User not found') {
+                res.status(404).json({
+                    success: false,
+                    error: error.message,
+                });
+                return;
+            }
+        }
+        console.error('Update password error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error',
+        });
+    }
+};
+exports.updatePassword = updatePassword;
 //# sourceMappingURL=authController.js.map

@@ -14,18 +14,22 @@ class GoogleAuthService {
     }
     initializeAuth() {
         try {
+            const scopes = [
+                'https://www.googleapis.com/auth/cloud-platform',
+                'https://www.googleapis.com/auth/generative-language.retriever'
+            ];
             if (process.env['GOOGLE_SERVICE_ACCOUNT_KEY_PATH']) {
                 const keyFile = path_1.default.resolve(process.env['GOOGLE_SERVICE_ACCOUNT_KEY_PATH']);
                 this.auth = new googleapis_1.google.auth.GoogleAuth({
                     keyFile,
-                    scopes: ['https://www.googleapis.com/auth/cloud-platform']
+                    scopes
                 });
             }
             else if (process.env['GOOGLE_SERVICE_ACCOUNT_KEY']) {
                 const serviceAccountKey = JSON.parse(process.env['GOOGLE_SERVICE_ACCOUNT_KEY']);
                 this.auth = new googleapis_1.google.auth.GoogleAuth({
                     credentials: serviceAccountKey,
-                    scopes: ['https://www.googleapis.com/auth/cloud-platform']
+                    scopes
                 });
             }
             else if (process.env['GOOGLE_CLIENT_ID'] && process.env['GOOGLE_CLIENT_SECRET']) {

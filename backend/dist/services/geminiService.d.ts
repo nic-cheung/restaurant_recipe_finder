@@ -1,7 +1,10 @@
 export declare class GeminiService {
     private genAI;
     private model;
+    private isUsingOAuth;
     constructor();
+    private initializeClient;
+    private ensureValidClient;
     private generateText;
     suggestChefs(query: string, context?: any): Promise<string[]>;
     suggestRestaurants(query: string, context?: any): Promise<string[]>;

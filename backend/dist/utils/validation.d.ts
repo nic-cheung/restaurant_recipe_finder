@@ -202,4 +202,26 @@ export declare function validateRecipeRating(data: any): {
     success: boolean;
     errors?: string[];
 };
+export declare const updatePasswordSchema: z.ZodEffects<z.ZodObject<{
+    currentPassword: z.ZodString;
+    newPassword: z.ZodString;
+    confirmPassword: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}, {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}>, {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}, {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}>;
+export type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
 //# sourceMappingURL=validation.d.ts.map
