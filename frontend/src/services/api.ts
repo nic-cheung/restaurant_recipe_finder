@@ -404,6 +404,73 @@ class ApiService {
 
     return response.json();
   }
+
+  // Password reset methods
+  async forgotPassword(email: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/password-reset/forgot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send password reset email');
+    }
+
+    return response.json();
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/password-reset/reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, newPassword }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to reset password');
+    }
+
+    return response.json();
+  }
+
+  async validateResetToken(token: string): Promise<{ valid: boolean; email?: string; error?: string; expired?: boolean }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/password-reset/validate?token=${encodeURIComponent(token)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return {
+          valid: true,
+          email: data.data?.email,
+        };
+      } else {
+        return {
+          valid: false,
+          error: data.error || 'Invalid token',
+          expired: data.expired || false,
+        };
+      }
+    } catch (error) {
+      return {
+        valid: false,
+        error: 'Network error',
+        expired: false,
+      };
+    }
+  }
 }
 
 export const apiService = new ApiService();

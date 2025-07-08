@@ -13,6 +13,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import recipeRoutes from './routes/recipes';
 import preferenceRoutes from './routes/preferences';
+import passwordResetRoutes from './routes/passwordReset';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -84,6 +85,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/recipes', recipeRoutes);
 app.use('/api/preferences', preferencesLimiter, preferenceRoutes);
+app.use('/api/password-reset', passwordResetRoutes);
 
 // 404 handler
 app.use(notFound);

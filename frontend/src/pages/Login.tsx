@@ -154,6 +154,18 @@ const Login: React.FC = () => {
               )}
             </button>
           </div>
+          
+          <div className="text-center">
+            <Link
+              to="/forgot-password"
+              className="text-sm font-medium transition-colors duration-200"
+              style={{ color: 'var(--flambé-ember)' }}
+              onMouseEnter={(e) => (e.target as HTMLElement).style.color = 'var(--flambé-rust)'}
+              onMouseLeave={(e) => (e.target as HTMLElement).style.color = 'var(--flambé-ember)'}
+            >
+              forgot your password?
+            </Link>
+          </div>
         </form>
 
         {/* Development-only test data button */}
