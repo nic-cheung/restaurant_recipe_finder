@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
+import path from 'path';
+import fs from 'fs';
 
 export interface EmailConfig {
   service: string;
@@ -9,11 +11,19 @@ export interface EmailConfig {
   };
 }
 
+export interface EmailAttachment {
+  filename: string;
+  path?: string;
+  content?: Buffer;
+  cid?: string;
+}
+
 export interface EmailOptions {
   to: string;
   subject: string;
   html: string;
   text?: string;
+  attachments?: EmailAttachment[];
 }
 
 /**
@@ -144,6 +154,7 @@ export class EmailService {
         subject: options.subject,
         html: options.html,
         text: options.text,
+        attachments: options.attachments,
       });
 
       console.log('✅ Email sent successfully:', info.messageId);
@@ -163,6 +174,9 @@ export class EmailService {
   async sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
     const resetUrl = `${process.env['FRONTEND_URL'] || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
     
+    // Get the PNG logo path
+    const logoPath = path.join(__dirname, '../../..', 'frontend/public/logo.png');
+    
     const html = `
       <!DOCTYPE html>
       <html>
@@ -170,9 +184,9 @@ export class EmailService {
         <meta charset="utf-8">
         <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Source+Serif+Pro:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
         <style>
-          /* Flambé Brand Variables */
+          /* flambé Brand Variables */
           :root {
-            --flambé-cream: #F7F5F3;
+            --flambé-cream: #F4F2E8;
             --flambé-stone: #E8E4E0;
             --flambé-sage: #A8B5A0;
             --flambé-charcoal: #2C2C2C;
@@ -188,7 +202,7 @@ export class EmailService {
             font-family: 'Source Serif Pro', serif; 
             line-height: 1.6; 
             color: #2C2C2C; 
-            background-color: #F7F5F3;
+            background-color: #F4F2E8;
             margin: 0;
             padding: 0;
             letter-spacing: 0.01em;
@@ -198,7 +212,7 @@ export class EmailService {
             max-width: 600px; 
             margin: 0 auto; 
             padding: 20px; 
-            background-color: #F7F5F3;
+            background-color: #F4F2E8;
           }
           
           .header { 
@@ -207,24 +221,22 @@ export class EmailService {
             border-bottom: 1px solid #E8E4E0;
           }
           
-          .logo {
-            font-family: 'Crimson Text', serif;
-            font-size: 2.2rem;
-            font-weight: 400;
-            color: #2C2C2C;
+          .logo-container {
+            text-align: center;
             margin: 0;
-            letter-spacing: 0.02em;
           }
           
-          .flame-emoji {
-            font-size: 2.5rem;
-            vertical-align: middle;
-            margin-right: 8px;
+          .logo-icon {
+            display: block;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            border-radius: 8px;
           }
           
           .content { 
             padding: 40px 0; 
-            background-color: #F7F5F3;
+            background-color: #F4F2E8;
           }
           
           .content h2 {
@@ -247,9 +259,9 @@ export class EmailService {
           .button { 
             display: inline-block; 
             padding: 16px 40px; 
-            background: #2C2C2C; 
-            color: #F7F5F3; 
-            text-decoration: none; 
+            background: #2C2C2C !important; 
+            color: #F4F2E8 !important; 
+            text-decoration: none !important; 
             border-radius: 2px; 
             font-family: 'Source Serif Pro', serif;
             font-weight: 400;
@@ -259,10 +271,15 @@ export class EmailService {
           }
           
           .button:hover {
-            background-color: #4A5D3A;
+            background-color: #4A5D3A !important;
+            color: #F4F2E8 !important;
             border-color: #4A5D3A;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(44, 44, 44, 0.15);
+          }
+          
+          .button:visited {
+            color: #F4F2E8 !important;
           }
           
           .button-container {
@@ -333,37 +350,37 @@ export class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1 class="logo">
-              <span class="flame-emoji">🔥</span>Restaurant Recipe Finder
-            </h1>
+            <div class="logo-container">
+              <img src="cid:logo" alt="flambé logo" class="logo-icon" />
+            </div>
           </div>
           
           <div class="content">
-            <h2>Reset Your Password</h2>
-            <p>You requested to reset your password. Click the button below to set a new password:</p>
+            <h2>reset your password</h2>
+            <p>you requested to reset your password. click the button below to set a new password:</p>
             
             <div class="button-container">
-              <a href="${resetUrl}" class="button">Reset Password</a>
+              <a href="${resetUrl}" class="button">reset password</a>
             </div>
             
-            <p>Or copy and paste this link into your browser:</p>
+            <p>or copy and paste this link into your browser:</p>
             <div class="url-container">
               <p>${resetUrl}</p>
             </div>
             
             <div class="warning">
-              <strong>⚠️ Important Security Information:</strong>
+              <strong>important security information:</strong>
               <ul>
-                <li>This link will expire in 1 hour for your security</li>
-                <li>If you didn't request this password reset, please ignore this email</li>
-                <li>Never share this link with anyone</li>
+                <li>this link will expire in 1 hour for your security</li>
+                <li>if you didn't request this password reset, please ignore this email</li>
+                <li>never share this link with anyone</li>
               </ul>
             </div>
           </div>
           
           <div class="footer">
-            <p>This email was sent from Restaurant Recipe Finder</p>
-            <p>If you have any questions, contact our support team</p>
+            <p>this email was sent from flambé</p>
+            <p>if you have any questions, contact our support team</p>
           </div>
         </div>
       </body>
@@ -371,21 +388,38 @@ export class EmailService {
     `;
 
     const text = `
-      Reset Your Password - Restaurant Recipe Finder
+      reset your password - flambé
       
-      You requested to reset your password. Visit this link to set a new password:
+      you requested to reset your password. visit this link to set a new password:
       ${resetUrl}
       
-      This link will expire in 1 hour for security.
-      If you didn't request this, please ignore this email.
-      Never share this link with anyone.
+      this link will expire in 1 hour for security.
+      if you didn't request this, please ignore this email.
+      never share this link with anyone.
     `;
+
+    // Check if PNG logo exists
+    let attachments: EmailAttachment[] = [];
+    try {
+      if (fs.existsSync(logoPath)) {
+        attachments = [
+          {
+            filename: 'logo.png',
+            path: logoPath,
+            cid: 'logo'
+          }
+        ];
+      }
+    } catch (error) {
+      console.warn('⚠️  PNG logo not found, email will be sent without logo attachment');
+    }
 
     return this.sendEmail({
       to: email,
-      subject: '🔥 Reset Your Password - Restaurant Recipe Finder',
+      subject: 'reset your password - flambé',
       html,
       text,
+      attachments,
     });
   }
 
