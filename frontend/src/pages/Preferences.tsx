@@ -592,15 +592,12 @@ const Preferences: React.FC = () => {
   ];
 
   return (
-    <div className="preferences-container">
-      <div className="preferences-header">
-        <div className="header-content">
-          <h1 className="page-title">preferences</h1>
-          <p className="page-subtitle">
-            tailor your culinary journey to your unique taste
-          </p>
+    <div className="min-h-screen py-8" style={{ backgroundColor: 'var(--flambé-cream)' }}>
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold flambé-heading mb-2">preferences</h1>
+          <p className="text-xl flambé-body">tailor your culinary journey to your unique taste</p>
         </div>
-      </div>
 
       <div className="preferences-body">
         <div className="tab-navigation">
@@ -638,6 +635,7 @@ const Preferences: React.FC = () => {
             </button>
           </div>
         </form>
+      </div>
       </div>
     </div>
   );

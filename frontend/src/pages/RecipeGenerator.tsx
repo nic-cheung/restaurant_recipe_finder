@@ -1115,22 +1115,22 @@ Make sure the recipe is restaurant-quality but achievable at home, with ingredie
 
                   {/* Manual Input Section */}
                   {state.showManualInput && (
-                    <div className="bg-blue-50 rounded-lg p-4 space-y-3">
+                    <div className="rounded-lg p-4 space-y-3" style={{ backgroundColor: 'var(--flambé-fog)', border: '1px solid var(--flambé-stone)' }}>
                       <h4 className="font-medium flambé-heading">
                         <svg className="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                         paste your AI response
                       </h4>
-                      <p className="text-sm text-blue-700">
-                        Copy the prompt above, use it in ChatGPT/Claude, then paste the response below:
+                      <p className="text-sm flambé-body">
+                        copy the prompt above, use it in ChatGPT/Claude, then paste the response below:
                       </p>
                       <textarea
                         value={state.manualResponse}
                         onChange={(e) => setState(prev => ({ ...prev, manualResponse: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="input-field"
                         rows={8}
-                        placeholder="Paste your AI response here..."
+                        placeholder="paste your AI response here..."
                       />
                       <div className="flex space-x-2">
                         <button
