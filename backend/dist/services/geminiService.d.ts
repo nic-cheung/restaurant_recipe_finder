@@ -6,6 +6,7 @@ export declare class GeminiService {
     private initializeClient;
     private ensureValidClient;
     private generateText;
+    private generateTextWithOAuth;
     suggestChefs(query: string, context?: any): Promise<string[]>;
     suggestRestaurants(query: string, context?: any): Promise<string[]>;
     suggestIngredients(query: string, context?: any): Promise<string[]>;

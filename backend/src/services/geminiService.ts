@@ -57,12 +57,59 @@ export class GeminiService {
 
   private async generateText(prompt: string): Promise<string> {
     try {
-      await this.ensureValidClient();
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
+      if (this.isUsingOAuth) {
+        // Use REST API with OAuth token
+        return await this.generateTextWithOAuth(prompt);
+      } else {
+        // Use GoogleGenerativeAI package with API key
+        await this.ensureValidClient();
+        const result = await this.model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+      }
     } catch (error) {
       console.error('Gemini API Error:', error);
+      throw error;
+    }
+  }
+
+  private async generateTextWithOAuth(prompt: string): Promise<string> {
+    try {
+      const accessToken = await googleAuthService.getAccessToken();
+      
+      const response = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
+            }]
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`OAuth API call failed: ${response.status} ${response.statusText} - ${errorData}`);
+      }
+
+      const data: any = await response.json();
+      
+      // Extract text from Gemini response format
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+        return data.candidates[0].content.parts[0].text;
+      }
+      
+      throw new Error('Unexpected response format from Gemini API');
+    } catch (error) {
+      console.error('OAuth API call failed:', error);
       throw error;
     }
   }
