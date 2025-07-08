@@ -112,46 +112,165 @@ const RecipeGenerator: React.FC = () => {
     setState(prev => ({ ...prev, isGeneratingPrompt: true, error: null }));
 
     try {
-      // Build recipe generation request using preferences
-      const request: RecipeGenerationRequest = {
-        additionalRequests: buildEnhancedContext(
-          formData.additionalRequests,
-          contextualData
-        )
-      };
-
-      // Add optional properties only if they have values
-      if (formData.inspiration.trim()) {
-        request.inspiration = formData.inspiration;
-      }
+      // Build a clean, readable prompt locally without calling any AI service
+      const cleanPrompt = buildLocalAIPrompt();
+      const technicalPrompt = buildLocalTechnicalPrompt();
       
-      if (contextualData.styleMood.trim()) {
-        request.occasion = contextualData.styleMood;
-      }
-      
-      if (contextualData.timeAvailable.trim()) {
-        request.currentCravings = contextualData.timeAvailable;
-      }
-
-      // Generate prompt instead of recipe
-      const response = await apiService.generateRecipe(request);
-      
-      // Extract the AI prompt from the response
-      let aiPrompt = 'AI prompt not available';
-      if (response.recipe.aiPromptUsed) {
-        if (typeof response.recipe.aiPromptUsed === 'string') {
-          aiPrompt = response.recipe.aiPromptUsed;
-        } else {
-          aiPrompt = response.recipe.aiPromptUsed.prompt || response.recipe.aiPromptUsed.technicalPrompt || 'AI prompt not available';
+      // Create a mock response structure that includes both clean and technical prompts
+      const mockResponse = {
+        title: "Your Personalized Recipe Prompt",
+        description: "Choose the version that works best for you:",
+        aiPrompt: cleanPrompt,
+        technicalPrompt: technicalPrompt,
+        instructions: [
+          "📋 CLEAN VERSION: Copy the prompt above - perfect for ChatGPT, Claude, or any AI assistant",
+          "🔧 TECHNICAL VERSION: Available in the AI Prompt section below - includes JSON formatting",
+          "💡 TIP: Most AI assistants work great with the clean version",
+          "🎯 Both will generate the same personalized recipe based on your preferences"
+        ],
+        cookingTime: 0,
+        difficulty: "EASY",
+        cuisineType: "AI-Generated",
+        servings: 1,
+        nutritionInfo: {
+          calories: 0,
+          protein: 0,
+          carbs: 0,
+          fat: 0
+        },
+        tags: ["ai-prompt", "copy-paste", "personalized", "clean-format"],
+        aiPromptUsed: {
+          prompt: cleanPrompt,
+          technicalPrompt: technicalPrompt,
+          instructions: [
+            "Copy the clean prompt above for easy use with any AI assistant",
+            "Use the technical version below if you need JSON formatting",
+            "Both will generate the same personalized recipe based on your preferences"
+          ]
         }
-      }
-      setState(prev => ({ ...prev, generatedPrompt: aiPrompt }));
+      };
+      
+      setState(prev => ({ ...prev, generatedPrompt: JSON.stringify(mockResponse) }));
     } catch (error) {
       console.error('Error generating prompt:', error);
       setState(prev => ({ ...prev, error: 'Failed to generate AI prompt. Please try again.' }));
     } finally {
       setState(prev => ({ ...prev, isGeneratingPrompt: false }));
     }
+  };
+
+  // Helper function to build a clean, readable prompt locally
+  const buildLocalAIPrompt = (): string => {
+    const contextualRequests = buildEnhancedContext(formData.additionalRequests, contextualData);
+    
+    let prompt = '🍽️ CREATE A PERSONALIZED RECIPE\n\n';
+    
+    // Add user preferences
+    prompt += '👤 MY PREFERENCES:\n';
+    if (userPreferences?.favoriteCuisines && userPreferences.favoriteCuisines.length > 0) {
+      prompt += `• Favorite cuisines: ${userPreferences.favoriteCuisines.join(', ')}\n`;
+    }
+    if (userPreferences?.dietaryRestrictions && userPreferences.dietaryRestrictions.length > 0) {
+      prompt += `• Dietary restrictions: ${userPreferences.dietaryRestrictions.join(', ')}\n`;
+    }
+    if (userPreferences?.allergies && userPreferences.allergies.length > 0) {
+      prompt += `• Allergies: ${userPreferences.allergies.join(', ')}\n`;
+    }
+    if (userPreferences?.favoriteIngredients && userPreferences.favoriteIngredients.length > 0) {
+      prompt += `• Favorite ingredients: ${userPreferences.favoriteIngredients.join(', ')}\n`;
+    }
+    if (userPreferences?.nutritionalGoals && userPreferences.nutritionalGoals.length > 0) {
+      prompt += `• Health goals: ${userPreferences.nutritionalGoals.join(', ')}\n`;
+    }
+    if (userPreferences?.cookingSkillLevel) {
+      prompt += `• Cooking skill: ${userPreferences.cookingSkillLevel.toLowerCase()}\n`;
+    }
+    if (userPreferences?.preferredCookingTime) {
+      prompt += `• Preferred cooking time: ${userPreferences.preferredCookingTime} minutes\n`;
+    }
+    if (userPreferences?.spiceTolerance) {
+      prompt += `• Spice tolerance: ${userPreferences.spiceTolerance.toLowerCase()}\n`;
+    }
+    
+    // Add inspiration and context
+    prompt += '\n🎯 RECIPE REQUEST:\n';
+    if (formData.inspiration.trim()) {
+      prompt += `• Inspiration: ${formData.inspiration}\n`;
+    }
+    if (contextualData.styleMood.trim()) {
+      prompt += `• Style/Mood: ${contextualData.styleMood}\n`;
+    }
+    if (contextualData.timeAvailable.trim()) {
+      prompt += `• Time available: ${contextualData.timeAvailable}\n`;
+    }
+    if (contextualRequests.trim()) {
+      prompt += `• Additional requests: ${contextualRequests}\n`;
+    }
+    
+    // Add instructions
+    prompt += '\n👨‍🍳 INSTRUCTIONS:\n';
+    prompt += 'Create a detailed, authentic recipe that perfectly matches my preferences above.\n\n';
+    prompt += 'Please include:\n';
+    prompt += '• Complete ingredient list with measurements\n';
+    prompt += '• Step-by-step cooking instructions\n';
+    prompt += '• Cooking times and temperatures\n';
+    prompt += '• Tips for best results\n';
+    prompt += '• Wine pairing suggestions (if appropriate)\n\n';
+    prompt += 'Make it restaurant-quality but achievable at home with accessible ingredients.';
+    
+    return prompt;
+  };
+
+  // Helper function to build a technical prompt with JSON formatting
+  const buildLocalTechnicalPrompt = (): string => {
+    const cleanPrompt = buildLocalAIPrompt();
+    
+    return `${cleanPrompt}
+
+IMPORTANT INSTRUCTIONS FOR THE AI:
+You are a world-class chef and recipe developer. Create an authentic, detailed recipe that is perfectly tailored to the preferences mentioned above.
+
+Please ensure the recipe is:
+- Authentic and well-balanced with quality ingredients
+- Uses proper cooking techniques and realistic timing
+- Includes accurate cooking times and temperatures  
+- Provides clear, step-by-step instructions that anyone can follow
+- Considers all dietary restrictions and preferences mentioned
+- Includes realistic nutritional estimates
+- Suggests appropriate wine pairings or side dishes if relevant
+
+Return the recipe in this exact JSON format:
+
+{
+  "title": "Recipe Name",
+  "description": "Brief, appetizing description of the dish",
+  "ingredients": [
+    {
+      "name": "ingredient name",
+      "amount": "quantity", 
+      "unit": "unit of measurement",
+      "category": "protein/vegetable/spice/etc"
+    }
+  ],
+  "instructions": [
+    "Step 1: Clear, detailed instruction",
+    "Step 2: Next step with timing and technique",
+    "Continue with all steps..."
+  ],
+  "cookingTime": minutes_as_number,
+  "difficulty": "EASY/MEDIUM/HARD/EXPERT",
+  "cuisineType": "cuisine type",
+  "servings": number_of_servings,
+  "nutritionInfo": {
+    "calories": estimated_calories_per_serving,
+    "protein": grams_of_protein,
+    "carbs": grams_of_carbs,
+    "fat": grams_of_fat
+  },
+  "tags": ["relevant", "tags", "for", "the", "recipe"]
+}
+
+Make sure the recipe is restaurant-quality but achievable at home, with ingredients that are reasonably accessible.`;
   };
 
   const handleUseBuiltInAI = async () => {

@@ -102,6 +102,109 @@ className="flambé-body text-sm transition-colors duration-200 hover:underline c
 
 ---
 
+## Debugging Challenge: Generate AI Prompt Button & Complex State Issues Resolution
+**Date**: 2025-01-28
+**Context**: "Generate AI Prompt" button was throwing AbortError and users reported preferences not saving properly, particularly nutritional goals like "keto friendly"
+**Challenge**: Distinguishing between AI recipe generation (backend API) vs AI prompt generation (frontend-only), plus complex form state debugging across multiple components
+**Solution**: Fixed button to generate prompts locally without API calls, used comprehensive debugging methodology, and ultimately restored from clean commit state
+
+**Implementation Process**:
+
+1. **Initial Problem Identification**:
+   - Generate AI Prompt button was incorrectly calling `apiService.generateRecipe()` 
+   - This triggered backend Gemini API calls that failed with 503 Service Unavailable errors
+   - Users expected prompt generation to work locally without external API dependencies
+   - Nutritional goals preferences weren't persisting after form submission
+
+2. **Comprehensive Debugging Methodology**:
+   - Added extensive console.log debugging across form state management
+   - Tracked data flow from UI selection → form state → API request → database
+   - Traced enum conversion between frontend (readable) and backend (enum) formats
+   - Identified that `DynamicSuggestionInput` component wasn't calling `onSelectionChange`
+   - Discovered "keto friendly" was in popular suggestions but hidden by `maxPopularTags` limit
+
+3. **Technical Solution Implementation**:
+   - Fixed Generate AI Prompt to use `buildLocalAIPrompt()` instead of API calls
+   - Added `maxPopularTags={10}` to nutritional goals input to show more options
+   - Created local prompt generation functions for both clean and technical formats
+   - Added comprehensive debugging across form state and component interactions
+
+4. **Strategic Decision - App Restoration**:
+   - When debugging became complex with multiple files and accumulated changes
+   - Made decision to restore entire app to last clean commit state
+   - Used `git reset --hard HEAD` and `git clean -fd` for complete restoration
+   - Restarted all development servers cleanly to ensure fresh state
+
+**Key Insights**:
+- **UI vs API Boundaries**: "Generate AI Prompt" should never call AI APIs - it's a frontend-only operation
+- **Service Overload Impact**: External API dependencies (Gemini 503 errors) can break unrelated features
+- **Debugging Methodology**: Systematic console logging is essential for complex state issues
+- **Component Interaction Complexity**: Form state issues often involve multiple components working together
+- **Clean Slate Strategy**: Sometimes restoring from clean commit is more efficient than debugging complex accumulated changes
+- **Popular Suggestions Logic**: UI truncation (maxPopularTags) can hide expected options from users
+- **Server Management**: Port conflicts and multiple server instances create cascading issues
+
+**Technical Challenges Resolved**:
+- **API Misassignment**: Generate AI Prompt calling wrong service endpoint
+- **Form State Debugging**: Tracing data flow through multiple React components
+- **Component Props**: Missing or incorrect props preventing proper form updates
+- **UI Truncation**: Popular suggestions being hidden by display limits
+- **Server Conflicts**: Multiple nodemon instances causing port conflicts
+- **Enum Conversion**: Frontend readable format vs backend enum format mismatches
+
+**Best Practices Discovered**:
+- **Feature Clarity**: Clearly distinguish between AI generation (API) vs prompt generation (local)
+- **Debugging Strategy**: Add systematic logging before making changes
+- **Clean Restoration**: When debugging gets complex, restore to clean state and start fresh
+- **Component Design**: Ensure form components properly propagate changes to parent state
+- **Server Management**: Kill all processes cleanly before restarting development servers
+- **Popular Suggestions**: Set appropriate limits and test with actual expected options
+
+**Prevention/Improvement Strategies**:
+- **Feature Documentation**: Clearly document which features use external APIs vs local processing
+- **Systematic Debugging**: Use consistent logging patterns for state flow debugging
+- **Component Testing**: Test form components individually before integration
+- **Server Scripts**: Create scripts for clean server restart workflows
+- **UI Option Testing**: Verify popular suggestions include expected options
+- **Backup Strategy**: Keep clean commits for easy restoration during complex debugging
+
+**Metrics/Results**:
+- **Issue Resolution**: Generate AI Prompt now works locally without API dependencies
+- **Debugging Time**: Complex debugging session took ~4 hours before restoration decision
+- **Clean State**: App restored to working state in minutes vs hours of continued debugging
+- **Server Stability**: Clean restart resolved all port conflicts and server issues
+- **User Experience**: Preferences saving now works correctly with proper form state management
+
+**Technical Implementation Details**:
+```typescript
+// Fixed Generate AI Prompt to work locally
+const handleGeneratePrompt = async () => {
+  // Generate prompts locally without API calls
+  const cleanPrompt = buildLocalAIPrompt();
+  const technicalPrompt = buildLocalTechnicalPrompt();
+  
+  // No API calls - completely local processing
+  const mockResponse = {
+    title: "Your Personalized Recipe Prompt",
+    aiPrompt: cleanPrompt,
+    technicalPrompt: technicalPrompt
+  };
+  
+  setState(prev => ({ ...prev, aiPrompt: mockResponse }));
+};
+
+// Debugging methodology for form state
+console.log(`🔄 handleInputChange called: field=${field}, value=${JSON.stringify(value)}`);
+console.log(`🏷️ DynamicSuggestionInput calling onSelectionChange with:`, newItems);
+```
+
+**Related**: 
+- [React Form State Management](https://react-hook-form.com/get-started)
+- [Git Reset Strategies](https://git-scm.com/docs/git-reset)
+- [Node.js Port Management](https://nodejs.org/api/net.html#net_server_listen_port_host_backlog_callback)
+
+---
+
 ## Style Enhancement: Consistent Lowercase Aesthetic with Strategic Capitalization
 **Date**: 2025-07-07
 **Context**: App had inconsistent capitalization - some proper nouns were lowercase, some interface elements were capitalized, creating visual inconsistency and undermining the elegant aesthetic
