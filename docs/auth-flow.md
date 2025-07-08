@@ -92,6 +92,94 @@
 └─────────────────┘      └─────────────────┘
 ```
 
+## Password Reset Flow
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  User Clicks    │    │  Enter Email    │    │  Backend API    │
+│  "Forgot        │    │  Address        │    │  POST /password-│
+│  Password?"     │    │                 │    │  reset/forgot   │
+└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
+          │                      │                      │
+          ▼                      ▼                      ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Navigate to    │    │  Form           │    │  Validate Email │
+│  ForgotPassword │    │  Validation     │    │  & Check User   │
+│  Page           │    │                 │    │  Exists         │
+└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
+          │                      │                      │
+          ▼                      ▼                      ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  User Fills     │    │  Submit Form    │    │  Generate JWT   │
+│  Email Field    │    │  to Backend     │    │  Reset Token    │
+└─────────────────┘    └─────────────────┘    │  (1hr expiry)   │
+                                              └─────────┬───────┘
+                                                        │
+                                                        ▼
+                                              ┌─────────────────┐
+                                              │  Send Email     │
+                                              │  with Reset     │
+                                              │  Link + Token   │
+                                              └─────────┬───────┘
+                                                        │
+                                                        ▼
+                                              ┌─────────────────┐
+                                              │  Show Success   │
+                                              │  Message        │
+                                              └─────────────────┘
+```
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  User Clicks    │    │  Token Valid?   │    │  Show Error     │
+│  Email Reset    │    │                 │    │  Page - Invalid │
+│  Link           │    │  [Yes] [No]     │    │  or Expired     │
+└─────────┬───────┘    └─────────┬───────┘    └─────────────────┘
+          │                      │
+          ▼                      ▼
+┌─────────────────┐    ┌─────────────────┐
+│  Navigate to    │    │  Show Reset     │
+│  ResetPassword  │    │  Password Form  │
+│  Page with      │    │                 │
+│  Token          │    └─────────┬───────┘
+└─────────┬───────┘              │
+          │                      ▼
+          ▼              ┌─────────────────┐
+┌─────────────────┐      │  User Enters    │
+│  Validate Token │      │  New Password   │
+│  with Backend   │      │  (with          │
+│  API            │      │  confirmation)  │
+└─────────────────┘      └─────────┬───────┘
+                                   │
+                                   ▼
+                         ┌─────────────────┐
+                         │  Form           │
+                         │  Validation     │
+                         │  & Submission   │
+                         └─────────┬───────┘
+                                   │
+                                   ▼
+                         ┌─────────────────┐
+                         │  Backend API    │
+                         │  POST /password-│
+                         │  reset/reset    │
+                         └─────────┬───────┘
+                                   │
+                                   ▼
+                         ┌─────────────────┐
+                         │  Update User    │
+                         │  Password in    │
+                         │  Database       │
+                         └─────────┬───────┘
+                                   │
+                                   ▼
+                         ┌─────────────────┐
+                         │  Redirect to    │
+                         │  Login Page     │
+                         │  with Success   │
+                         └─────────────────┘
+```
+
 ## Error Handling Flow
 
 ```
@@ -156,17 +244,23 @@
 - **Auth Context**: Manages user state globally
 - **Protected Routes**: Router guards for authenticated pages
 - **Login/Register Forms**: User input and validation
+- **Password Reset Pages**: ForgotPassword and ResetPassword components
+- **Nordic Design System**: Consistent styling with app's design language
 - **Token Storage**: localStorage for JWT persistence
 
 ### Backend
 - **Auth Routes**: `/auth/register`, `/auth/login`, `/auth/logout`
+- **Password Reset Routes**: `/password-reset/forgot`, `/password-reset/reset`, `/password-reset/validate`
 - **JWT Middleware**: Verifies tokens on protected routes
 - **Password Hashing**: bcrypt for secure password storage
+- **Email Service**: Nodemailer with Gmail SMTP support
 - **User Model**: Prisma schema for user data
 
 ### Security Features
-- **JWT Tokens**: Stateless authentication
+- **JWT Tokens**: Stateless authentication (auth + password reset)
 - **Password Hashing**: bcrypt with salt rounds
+- **Reset Token Security**: 1-hour expiry, unique per request
+- **Email Verification**: Secure token delivery via email
 - **Input Validation**: Server-side validation
 - **CORS**: Cross-origin request handling
 - **Rate Limiting**: Prevent brute force attacks 

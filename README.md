@@ -15,6 +15,12 @@ An intelligent web application that generates personalized recipes inspired by y
 - **Cooking Profile**: Skill level, preferred cooking time, serving sizes
 - **Location-Based**: Ingredient sourcing based on your area
 
+### 🔐 Authentication & Security
+- **Secure Registration**: Multi-step onboarding with comprehensive preference collection
+- **Password Reset**: Elegant email-based password reset with Nordic design
+- **JWT Authentication**: Stateless, secure token-based authentication
+- **Email Integration**: Gmail SMTP support with development fallback
+
 ### 📅 Smart Scheduling
 - **Calendar Integration**: Considers your schedule when suggesting recipes
 - **Dinner Timing**: Respects your preferred dinner time
@@ -68,6 +74,10 @@ An intelligent web application that generates personalized recipes inspired by y
    - `GOOGLE_PLACES_API_KEY`: For enhanced restaurant suggestions ([Setup Guide](docs/google-places-api-setup.md))
    - `OPENAI_API_KEY`: For AI recipe generation
    - `GEMINI_API_KEY`: Alternative AI service
+   
+   **Email Configuration** (for password reset):
+   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`: For Gmail SMTP email sending
+   - See [Email Setup Guide](backend/PASSWORD_RESET_EMAIL_SETUP.md) for detailed configuration
 
 4. **Set up the database**
    ```bash
@@ -108,9 +118,10 @@ restaurant_recipe_finder/
 │   │   ├── models/         # Database models
 │   │   ├── routes/         # API routes
 │   │   ├── middleware/     # Custom middleware
-│   │   ├── services/       # Business logic
-│   │   └── utils/          # Utility functions
-│   └── prisma/             # Database schema and migrations
+│   │   ├── services/       # Business logic (includes email service)
+│   │   └── utils/          # Utility functions (includes JWT utilities)
+│   ├── prisma/             # Database schema and migrations
+│   └── PASSWORD_RESET_EMAIL_SETUP.md  # Email configuration guide
 ├── docs/                   # Documentation
 ├── PROJECT_PLAN.md         # Detailed project plan
 ├── DEVELOPMENT_RULES.md    # Development guidelines
@@ -154,6 +165,8 @@ restaurant_recipe_finder/
 - **Prisma** ORM
 - **JWT** authentication
 - **OpenAI API** for recipe generation
+- **Nodemailer** for email services (Gmail SMTP)
+- **Google APIs** for OAuth email authentication
 
 ### External APIs & Data Sources
 - **OpenAI GPT** for AI recipe generation
@@ -167,8 +180,8 @@ restaurant_recipe_finder/
 
 ### Phase 1: Foundation (Weeks 1-2)
 - [x] Project setup and architecture
-- [ ] User authentication system
-- [ ] Basic user profile management
+- [x] User authentication system (with password reset)
+- [x] Basic user profile management
 - [ ] Simple recipe display interface
 
 ### Phase 2: Personalization (Weeks 3-4)
